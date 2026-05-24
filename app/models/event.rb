@@ -57,7 +57,6 @@ class Event < ApplicationRecord
   # =========================
   # DEFAULTS
   # =========================
-  attribute :status, :integer, default: 0
   attribute :price, :decimal, default: 0
   attribute :average_rating, :decimal, default: 0
 
