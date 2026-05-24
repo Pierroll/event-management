@@ -1,0 +1,83 @@
+<%# Admin Dashboard %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Panel de Administración</h1>
+    <p class="mt-1 text-gray-500">Resumen general del sistema</p>
+  </div>
+
+  <%# Metrics Cards %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xl">👥</div>
+        <div>
+          <p class="text-sm text-gray-500">Usuarios</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @total_users %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 text-xl">📅</div>
+        <div>
+          <p class="text-sm text-gray-500">Eventos totales</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @total_events %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center text-teal-600 text-xl">✅</div>
+        <div>
+          <p class="text-sm text-gray-500">Publicados</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @published_events %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-xl">💬</div>
+        <div>
+          <p class="text-sm text-gray-500">Comentarios</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @total_comments %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Quick Actions %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <%= link_to admin_users_path, class: "bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-blue-200 transition-all" do %>
+      <div class="flex items-center gap-3">
+        <div class="text-2xl">👥</div>
+        <div>
+          <h3 class="font-semibold text-gray-900">Gestionar usuarios</h3>
+          <p class="text-sm text-gray-500">Ver, editar y asignar roles</p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= link_to admin_events_path, class: "bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-blue-200 transition-all" do %>
+      <div class="flex items-center gap-3">
+        <div class="text-2xl">📅</div>
+        <div>
+          <h3 class="font-semibold text-gray-900">Gestionar eventos</h3>
+          <p class="text-sm text-gray-500">Moderar y cambiar estados</p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= link_to admin_categories_path, class: "bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-blue-200 transition-all" do %>
+      <div class="flex items-center gap-3">
+        <div class="text-2xl">🏷️</div>
+        <div>
+          <h3 class="font-semibold text-gray-900">Gestionar categorías</h3>
+          <p class="text-sm text-gray-500">Crear y editar categorías</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

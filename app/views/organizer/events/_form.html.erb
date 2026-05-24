@@ -1,0 +1,148 @@
+<%# Organizer Event Form Partial %>
+<%= form_with model: [:organizer, event], local: true, html: { multipart: true },
+    data: { controller: "event-form", action: "submit->event-form#validate" }, class: "space-y-6" do |f| %>
+  <%# Validation Errors Container %>
+  <div data-event-form-target="errorContainer"></div>
+
+  <%# Rails Validation Errors %>
+  <% if event.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800">
+        <%= pluralize(event.errors.count, "error") %> impidieron guardar:
+      </h3>
+      <ul class="mt-2 list-disc list-inside text-sm text-red-600">
+        <% event.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%# Name %>
+    <div class="md:col-span-2">
+      <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :name, id: "event_name",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Ej: Conferencia de Tecnología 2025" %>
+    </div>
+
+    <%# Description %>
+    <div class="md:col-span-2">
+      <%= f.label :description, "Descripción", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_area :description, rows: 5, id: "event_description",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Describe los detalles del evento..." %>
+    </div>
+
+    <%# Category %>
+    <div>
+      <%= f.label :category_id, "Categoría", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.collection_select :category_id, Category.active, :id, :name,
+          { prompt: "Seleccionar categoría" }, id: "event_category_id",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <%# Status %>
+    <div>
+      <%= f.label :status, "Estado", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.select :status, Event.statuses.keys.map { |s| [s.humanize, s] },
+          {}, class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <%# City %>
+    <div>
+      <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :city, id: "event_city",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Ej: Lima" %>
+    </div>
+
+    <%# Address %>
+    <div>
+      <%= f.label :address, "Dirección", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :address, id: "event_address",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Ej: Av. Principal 123" %>
+    </div>
+
+    <%# Start Date %>
+    <div>
+      <%= f.label :start_date, "Fecha de inicio", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.datetime_field :start_date, id: "event_start_date",
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <%# End Date %>
+    <div>
+      <%= f.label :end_date, "Fecha de fin (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.datetime_field :end_date,
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <%# Price %>
+    <div>
+      <%= f.label :price, "Precio", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">S/</span>
+        <%= f.number_field :price, id: "event_price", step: 0.01, min: 0,
+            class: "w-full pl-8 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            placeholder: "0.00" %>
+      </div>
+    </div>
+
+    <%# Currency %>
+    <div>
+      <%= f.label :currency, "Moneda", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.select :currency, [["PEN (Soles)", "PEN"], ["USD (Dólares)", "USD"]],
+          {}, class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <%# Max Capacity %>
+    <div>
+      <%= f.label :max_capacity, "Capacidad máxima (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.number_field :max_capacity, min: 1,
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "Ej: 500" %>
+    </div>
+
+    <%# Latitude/Longitude (hidden, optional) %>
+    <div>
+      <%= f.label :latitude, "Latitud (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :latitude, step: 0.00000001,
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "-12.046374" %>
+    </div>
+    <div>
+      <%= f.label :longitude, "Longitud (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :longitude, step: 0.00000001,
+          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          placeholder: "-77.042793" %>
+    </div>
+  </div>
+
+  <%# Image Upload - Drag & Drop %>
+  <div class="md:col-span-2">
+    <%= f.label :images, "Imágenes del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <div data-event-form-target="dropzone"
+         data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop"
+         class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-pointer">
+      <div class="text-4xl mb-2">📁</div>
+      <p class="text-sm text-gray-600">Arrastra y suelta imágenes aquí</p>
+      <p class="text-xs text-gray-400 mt-1">o haz clic para seleccionar archivos</p>
+      <%= f.file_field :images, multiple: true, accept: "image/*", data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
+          class: "hidden" %>
+    </div>
+
+    <%# Preview Container %>
+    <div data-event-form-target="previewContainer" class="mt-4 flex flex-wrap gap-2"></div>
+  </div>
+
+  <%# Submit Button %>
+  <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+    <%= f.submit event.new_record? ? "Crear evento" : "Guardar cambios",
+        class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+    <%= link_to "Cancelar", organizer_events_path,
+        class: "px-6 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors" %>
+  </div>
+<% end %>

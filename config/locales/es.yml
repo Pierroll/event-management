@@ -1,0 +1,65 @@
+es:
+  hello: "Hola mundo"
+
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d de %b"
+      long: "%d de %B de %Y"
+    day_names: [domingo, lunes, martes, miércoles, jueves, viernes, sábado]
+    abbr_day_names: [dom, lun, mar, mié, jue, vie, sáb]
+    month_names: [~, enero, febrero, marzo, abril, mayo, junio, julio, agosto, septiembre, octubre, noviembre, diciembre]
+    abbr_month_names: [~, ene, feb, mar, abr, may, jun, jul, ago, sep, oct, nov, dic]
+
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d de %b %H:%M"
+      long: "%d de %B de %Y %H:%M"
+    am: "a. m."
+    pm: "p. m."
+
+  number:
+    currency:
+      format:
+        unit: "S/"
+        precision: 2
+        separator: "."
+        delimiter: ","
+        format: "%u%n"
+
+  errors:
+    messages:
+      not_saved: "No se pudo guardar el registro"
+
+  activerecord:
+    errors:
+      messages:
+        record_invalid: "La validación falló: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "No se puede eliminar el registro porque existe un %{record} dependiente"
+          has_many: "No se puede eliminar el registro porque existen %{record} dependientes"
+
+  devise:
+    sessions:
+      signed_in: "Sesión iniciada correctamente."
+      signed_out: "Sesión cerrada correctamente."
+      already_signed_out: "Sesión cerrada correctamente."
+    registrations:
+      signed_up: "Registro completado exitosamente."
+      updated: "Perfil actualizado exitosamente."
+      destroyed: "Cuenta eliminada."
+    passwords:
+      updated: "Contraseña actualizada correctamente."
+      send_instructions: "Recibirás instrucciones para restablecer tu contraseña en tu correo."
+    confirmations:
+      confirmed: "Correo confirmado exitosamente."
+    unlocks:
+      unlocked: "Cuenta desbloqueada exitosamente."
+    mailer:
+      confirmation_instructions:
+        subject: "Instrucciones de confirmación"
+      reset_password_instructions:
+        subject: "Instrucciones para restablecer contraseña"
+      unlock_instructions:
+        subject: "Instrucciones para desbloquear cuenta"

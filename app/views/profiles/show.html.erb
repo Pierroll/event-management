@@ -1,0 +1,35 @@
+<%# Profile Show %>
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+        <span class="text-2xl font-bold text-blue-700"><%= @user.name.first.upcase %></span>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900"><%= @user.name %></h1>
+        <p class="text-gray-500"><%= @user.email %></p>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-200 pt-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-500">Miembro desde</span>
+        <span class="text-sm font-medium text-gray-900"><%= l(@user.created_at, format: :long) %></span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-gray-500">Roles</span>
+        <div class="flex gap-1">
+          <% @user.roles.each do |role| %>
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= role.name == "admin" ? "bg-purple-100 text-purple-800" : role.name == "organizer" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800" %>">
+              <%= role.name.humanize %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <%= link_to "Editar perfil", edit_profile_path, class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+    </div>
+  </div>
+</div>

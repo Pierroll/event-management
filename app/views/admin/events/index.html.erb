@@ -1,0 +1,72 @@
+<%# Admin Events List %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Eventos</h1>
+      <p class="mt-1 text-gray-500">Gestión absoluta de todos los eventos del sistema</p>
+    </div>
+    <%= link_to "← Dashboard", admin_dashboard_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Organizador</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @events.each do |event| %>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                  <% if event.event_images.any? %>
+                    <%= image_tag event.event_images.first.image_url, class: "w-full h-full object-cover" %>
+                  <% else %>
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">📷</div>
+                  <% end %>
+                </div>
+                <span class="text-sm font-medium text-gray-900"><%= event.name %></span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600">
+              <div class="flex items-center gap-2">
+                <span class="text-xs"><%= event.organizer.name %></span>
+                <span class="text-xs text-gray-400">(<%= event.organizer.email %>)</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600"><%= event.category&.name || "—" %></td>
+            <td class="px-6 py-4 text-sm text-gray-600"><%= l(event.start_date, format: :short) if event.start_date %></td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                <%= event.published? ? "bg-green-100 text-green-800" : "" %>
+                <%= event.draft? ? "bg-yellow-100 text-yellow-800" : "" %>
+                <%= event.canceled? ? "bg-red-100 text-red-800" : "" %>
+                <%= event.finished? ? "bg-gray-100 text-gray-800" : "" %>">
+                <%= event.status.humanize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <%= link_to "Ver", admin_event_path(event), class: "px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors" %>
+                <%= link_to "Editar", edit_admin_event_path(event), class: "px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition-colors" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @events.total_pages > 1 %>
+    <div class="mt-6">
+      <%= paginate @events %>
+    </div>
+  <% end %>
+</div>

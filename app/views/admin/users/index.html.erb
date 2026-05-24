@@ -1,0 +1,70 @@
+<%# Admin Users List %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Usuarios</h1>
+      <p class="mt-1 text-gray-500">Gestiona los usuarios del sistema</p>
+    </div>
+    <%= link_to "← Dashboard", admin_dashboard_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Registro</th>
+          <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @users.each do |user| %>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-medium text-blue-700"><%= user.name.first.upcase %></span>
+                </div>
+                <span class="text-sm font-medium text-gray-900"><%= user.name %></span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-600"><%= user.email %></td>
+            <td class="px-6 py-4">
+              <div class="flex gap-1 flex-wrap">
+                <% user.roles.each do |role| %>
+                  <span class="px-2 py-0.5 text-xs font-medium rounded-full
+                    <%= role.name == "admin" ? "bg-purple-100 text-purple-800" : "" %>
+                    <%= role.name == "organizer" ? "bg-green-100 text-green-800" : "" %>
+                    <%= role.name == "registered_user" ? "bg-blue-100 text-blue-800" : "" %>">
+                    <%= role.name.humanize %>
+                  </span>
+                <% end %>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= user.active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %>">
+                <%= user.active ? "Activo" : "Inactivo" %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-500"><%= l(user.created_at, format: :short) %></td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <%= link_to "Ver", admin_user_path(user), class: "px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors" %>
+                <%= link_to "Editar", edit_admin_user_path(user), class: "px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @users.total_pages > 1 %>
+    <div class="mt-6">
+      <%= paginate @users %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,92 @@
+<%# Organizer Event Detail %>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <%= link_to "← Mis eventos", organizer_events_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+    <div class="flex items-center gap-2">
+      <%= link_to "Editar", edit_organizer_event_path(@event), class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+      <%= button_to "Eliminar", organizer_event_path(@event), method: :delete,
+          class: "px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors",
+          data: { turbo_confirm: "¿Eliminar este evento? Esta acción no se puede deshacer." } %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+    <%# Title and Status %>
+    <div class="flex items-start justify-between gap-4">
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900"><%= @event.name %></h1>
+      <span class="shrink-0 px-3 py-1 rounded-full text-sm font-medium
+        <%= @event.published? ? "bg-green-100 text-green-800" : "" %>
+        <%= @event.draft? ? "bg-yellow-100 text-yellow-800" : "" %>
+        <%= @event.canceled? ? "bg-red-100 text-red-800" : "" %>
+        <%= @event.finished? ? "bg-gray-100 text-gray-800" : "" %>">
+        <%= @event.status.humanize %>
+      </span>
+    </div>
+
+    <%# Details Grid %>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-4">
+        <div>
+          <p class="text-sm text-gray-500">Categoría</p>
+          <p class="font-medium text-gray-900"><%= @event.category&.name || "—" %></p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Fecha de inicio</p>
+          <p class="font-medium text-gray-900"><%= l(@event.start_date, format: :long) if @event.start_date %></p>
+        </div>
+        <% if @event.end_date %>
+          <div>
+            <p class="text-sm text-gray-500">Fecha de fin</p>
+            <p class="font-medium text-gray-900"><%= l(@event.end_date, format: :long) %></p>
+          </div>
+        <% end %>
+        <div>
+          <p class="text-sm text-gray-500">Ciudad</p>
+          <p class="font-medium text-gray-900"><%= @event.city %></p>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <p class="text-sm text-gray-500">Dirección</p>
+          <p class="font-medium text-gray-900"><%= @event.address %></p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Precio</p>
+          <p class="font-bold text-xl"><%= @event.price > 0 ? number_to_currency(@event.price, unit: "S/ ") : "Gratis" %></p>
+        </div>
+        <% if @event.max_capacity %>
+          <div>
+            <p class="text-sm text-gray-500">Capacidad máxima</p>
+            <p class="font-medium text-gray-900"><%= @event.max_capacity %> personas</p>
+          </div>
+        <% end %>
+        <div>
+          <p class="text-sm text-gray-500">Valoración promedio</p>
+          <p class="font-medium text-gray-900"><%= @event.average_rating > 0 ? "#{@event.average_rating} ★" : "Sin valoraciones" %></p>
+        </div>
+      </div>
+    </div>
+
+    <%# Description %>
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
+      <div class="prose prose-gray max-w-none">
+        <%= simple_format @event.description %>
+      </div>
+    </div>
+
+    <%# Images %>
+    <% if @event.event_images.any? %>
+      <div class="mt-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">Imágenes</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <% @event.event_images.each do |img| %>
+            <div class="aspect-video rounded-lg overflow-hidden border border-gray-200">
+              <%= image_tag img.image_url, class: "w-full h-full object-cover" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

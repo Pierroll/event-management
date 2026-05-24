@@ -8,19 +8,30 @@ module Admin
       @event = Event.find(params[:id])
     end
 
+    def edit
+      @event = Event.find(params[:id])
+      @categories = Category.active
+    end
+
     def update
       @event = Event.find(params[:id])
-      if @event.update(event_status_params)
-        redirect_to admin_event_path(@event), notice: "Estado del evento actualizado exitosamente."
+
+      if @event.update(event_params)
+        redirect_to admin_event_path(@event), notice: "Evento actualizado exitosamente."
       else
-        redirect_to admin_event_path(@event), alert: @event.errors.full_messages.to_sentence
+        @categories = Category.active
+        render :edit, status: :unprocessable_entity
       end
     end
 
     private
 
-    def event_status_params
-      params.require(:event).permit(:status)
+    def event_params
+      params.require(:event).permit(
+        :name, :description, :city, :address, :start_date, :end_date,
+        :price, :currency, :max_capacity, :status, :category_id,
+        :latitude, :longitude
+      )
     end
   end
 end
