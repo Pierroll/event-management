@@ -1,7 +1,21 @@
-# Semillas para el Sistema de Gestión de Eventos
+# Este archivo de semillas ha sido refactorizado para ser completamente idempotente.
+# Esto significa que puede ejecutarse múltiples veces sin duplicar datos existentes.
+#
+# ¿Por qué es importante la idempotencia?
+# En entornos de producción como Render, los deploys pueden ejecutar las tareas de `db:seed`
+# de forma automática. Si las semillas no son idempotentes, cada deploy podría:
+# 1. Crear roles, categorías, usuarios o eventos duplicados.
+# 2. Romper validaciones de unicidad en la base de datos.
+# 3. Consumir espacio innecesariamente con datos redundantes.
+#
+# Al usar `find_or_create_by!`, `find_or_initialize_by` y verificaciones de existencia,
+# garantizamos que los registros solo se creen si no existen, y sus atributos se actualicen
+# o se dejen intactos según la lógica definida, sin causar duplicaciones.
 
 puts "Cargando roles por defecto..."
 roles = %w[admin organizer registered_user].map do |role_name|
+  # Usamos find_or_create_by! para asegurar que los roles solo se creen si no existen.
+  # Si existen, se recuperan; si no, se crean con la descripción.
   Role.find_or_create_by!(name: role_name) do |r|
     r.description = "Rol de #{role_name.humanize}"
   end
@@ -17,6 +31,8 @@ categories_data = [
 ]
 
 categories = categories_data.map do |cat_data|
+  # Usamos find_or_create_by! para asegurar que las categorías solo se creen si no existen
+  # (basado en el slug único). Si existen, se recuperan; si no, se crean con los datos.
   Category.find_or_create_by!(slug: cat_data[:slug]) do |c|
     c.name = cat_data[:name]
     c.description = cat_data[:description]
@@ -24,7 +40,16 @@ categories = categories_data.map do |cat_data|
   end
 end
 
-puts "Creando usuarios iniciales..."
+puts "Creando/Actualizando usuarios iniciales..."
+
+# Helper para asignar roles de forma idempotente a un usuario
+def assign_role_idempotently(user, role_name)
+  role = Role.find_by(name: role_name)
+  if role && !user.roles.include?(role)
+    user.roles << role
+    puts "  - Asignado rol '#{role_name}' a #{user.email}"
+  end
+end
 
 # Admin
 admin_user = User.find_or_initialize_by(email: "admin@eventos.com")
@@ -34,9 +59,19 @@ if admin_user.new_record?
   admin_user.password_confirmation = "admin123"
   admin_user.active = true
   admin_user.save!
-  admin_user.roles << Role.find_by(name: "admin")
   puts "Admin creado (admin@eventos.com / admin123)"
+else
+  # Si el usuario ya existe, solo actualizamos el nombre y el estado si han cambiado.
+  # NO modificamos la contraseña para evitar re-hasheos innecesarios.
+  if admin_user.name != "Admin Principal" || !admin_user.active
+    admin_user.update!(name: "Admin Principal", active: true)
+    puts "Admin actualizado (admin@eventos.com)"
+  else
+    puts "Admin ya existe y está actualizado (admin@eventos.com)"
+  end
 end
+assign_role_idempotently(admin_user, "admin")
+
 
 # Organizer
 organizer_user = User.find_or_initialize_by(email: "organizer@eventos.com")
@@ -46,9 +81,16 @@ if organizer_user.new_record?
   organizer_user.password_confirmation = "organizer123"
   organizer_user.active = true
   organizer_user.save!
-  organizer_user.roles << Role.find_by(name: "organizer")
   puts "Organizador creado (organizer@eventos.com / organizer123)"
+else
+  if organizer_user.name != "Organizador Oficial" || !organizer_user.active
+    organizer_user.update!(name: "Organizador Oficial", active: true)
+    puts "Organizador actualizado (organizer@eventos.com)"
+  else
+    puts "Organizador ya existe y está actualizado (organizer@eventos.com)"
+  end
 end
+assign_role_idempotently(organizer_user, "organizer")
 
 # Registered User
 registered_user = User.find_or_initialize_by(email: "user@eventos.com")
@@ -58,11 +100,19 @@ if registered_user.new_record?
   registered_user.password_confirmation = "user123"
   registered_user.active = true
   registered_user.save!
-  registered_user.roles << Role.find_by(name: "registered_user")
   puts "Usuario común creado (user@eventos.com / user123)"
+else
+  if registered_user.name != "Juan Pérez" || !registered_user.active
+    registered_user.update!(name: "Juan Pérez", active: true)
+    puts "Usuario común actualizado (user@eventos.com)"
+  else
+    puts "Usuario común ya existe y está actualizado (user@eventos.com)"
+  end
 end
+assign_role_idempotently(registered_user, "registered_user")
 
 # Extra users for commenting
+# Mantenemos una lista de usuarios (incluyendo el registered_user principal) para los comentarios
 users = [registered_user]
 5.times do |i|
   u = User.find_or_initialize_by(email: "user#{i}@eventos.com")
@@ -72,12 +122,22 @@ users = [registered_user]
     u.password_confirmation = "password123"
     u.active = true
     u.save!
-    u.roles << Role.find_by(name: "registered_user")
-    users << u
+    puts "Usuario extra creado: #{u.email}"
+  else
+    # Opcional: Actualizar atributos para usuarios extra si cambian en el seed
+    if u.name != "Usuario Falso #{i}" || !u.active
+      u.update!(name: "Usuario Falso #{i}", active: true)
+      puts "Usuario extra actualizado: #{u.email}"
+    else
+      puts "Usuario extra ya existe y está actualizado: #{u.email}"
+    end
   end
+  assign_role_idempotently(u, "registered_user")
+  users << u unless users.include?(u) # Asegura que no se dupliquen en la lista si ya existían
 end
 
-puts "Creando eventos y fotos de prueba..."
+
+puts "Creando eventos y fotos de prueba (si no existen)..."
 event_data = [
   {
     name: "Rails World 2026",
@@ -143,37 +203,73 @@ event_data = [
 
 event_data.each do |e_data|
   event = Event.find_or_initialize_by(name: e_data[:name])
-  if event.new_record?
-    event.description = e_data[:description]
-    event.city = e_data[:city]
-    event.address = e_data[:address]
-    event.start_date = e_data[:start_date]
-    event.end_date = e_data[:end_date]
-    event.price = e_data[:price]
-    event.currency = e_data[:currency]
-    event.max_capacity = e_data[:max_capacity]
-    event.status = e_data[:status]
-    event.category = e_data[:category]
-    event.organizer = e_data[:organizer]
-    event.save!
 
-    e_data[:images].each_with_index do |img_url, idx|
+  # Asignamos los atributos al evento. Si es un nuevo registro, los establecerá.
+  # Si ya existe, los comparará y marcará 'changed?' si hay diferencias.
+  event.assign_attributes(
+    description: e_data[:description],
+    city: e_data[:city],
+    address: e_data[:address],
+    start_date: e_data[:start_date],
+    end_date: e_data[:end_date],
+    price: e_data[:price],
+    currency: e_data[:currency],
+    max_capacity: e_data[:max_capacity],
+    status: e_data[:status],
+    category: e_data[:category],
+    organizer: e_data[:organizer]
+  )
+
+  # Solo guardamos si es un nuevo registro o si algún atributo ha cambiado.
+  # Esto asegura que los datos del evento estén siempre actualizados si se modifican las semillas,
+  # y evita guardar innecesariamente si no hay cambios.
+  if event.new_record? || event.changed?
+    event.save!
+    puts "Evento creado/actualizado: #{event.name}"
+  else
+    puts "Evento ya existe y está actualizado: #{event.name}"
+  end
+
+
+  # Procesar imágenes para el evento de forma idempotente
+  e_data[:images].each_with_index do |img_url, idx|
+    # Solo crea la imagen si no existe una con la misma URL para este evento
+    unless event.event_images.exists?(image: img_url)
       event.event_images.create!(
         image: img_url,
         display_order: idx
       )
+      puts "  - Imagen agregada al evento '#{event.name}': #{img_url}"
+    else
+      # Opcional: Si la imagen ya existe pero el display_order podría haber cambiado
+      # image = event.event_images.find_by(image: img_url)
+      # if image && image.display_order != idx
+      #   image.update!(display_order: idx)
+      #   puts "  - Orden de imagen actualizado para '#{event.name}': #{img_url}"
+      # else
+      puts "  - Imagen ya existe para el evento '#{event.name}': #{img_url}"
+      # end
     end
-    puts "Evento creado: #{event.name}"
+  end
 
-    # Agregar comentarios si el evento está publicado
-    if event.published?
-      users.sample(3).each do |user|
+  # Agregar comentarios si el evento está publicado y aún no tiene los comentarios predefinidos.
+  # Para asegurar la idempotencia en comentarios, solo los creamos una vez al crear el evento,
+  # y si no existen para ese evento y usuario en particular.
+  if event.published?
+    users_for_comments = users.sample(3) # Selecciona 3 usuarios aleatorios para comentar
+    users_for_comments.each do |user|
+      comment_content = "Este evento se ve extremadamente interesante. Definitivamente voy a asistir con mis colegas."
+      # Solo crear el comentario si no existe un comentario idéntico del mismo usuario para este evento
+      unless event.comments.exists?(user: user, content: comment_content)
         Comment.create!(
           event: event,
           user: user,
-          content: "Este evento se ve extremadamente interesante. Definitivamente voy a asistir con mis colegas.",
-          rating: rand(4..5)
+          content: comment_content,
+          rating: rand(4..5) # Mantiene la aleatoriedad inicial para el rating
         )
+        puts "  - Comentario agregado al evento '#{event.name}' por #{user.email}"
+      else
+        puts "  - Comentario ya existe para el evento '#{event.name}' por #{user.email}"
       end
     end
   end
