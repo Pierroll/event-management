@@ -61,6 +61,7 @@ module Organizer
         :name, :description, :city, :address, :start_date, :end_date,
         :price, :currency, :max_capacity, :status, :category_id,
         :latitude, :longitude,
+        :primary_image,
         images: [], remove_image_ids: []
       )
     end

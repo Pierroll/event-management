@@ -27,6 +27,7 @@ class Event < ApplicationRecord
   # VALIDATIONS
   # =========================
   validates :name, presence: true
+  validate :must_have_at_least_one_image
 
   # Validaciones estrictas solo cuando se intenta publicar
   with_options if: :published? do |event|
@@ -35,7 +36,6 @@ class Event < ApplicationRecord
     event.validates :address, presence: true
     event.validates :start_date, presence: true
     event.validates :category_id, presence: true
-    event.validate :must_have_at_least_one_image
   end
 
   validates :price,
@@ -56,6 +56,7 @@ class Event < ApplicationRecord
   # =========================
   attribute :price, :decimal, default: 0
   attribute :average_rating, :decimal, default: 0
+  attr_accessor :primary_image_param
 
   # =========================
   # SCOPES
@@ -79,12 +80,23 @@ class Event < ApplicationRecord
   # =========================
   # METHODS
   # =========================
+  def primary_image
+    event_images.first
+  end
+
+  def secondary_images
+    event_images.offset(1)
+  end
+
   private
 
   def must_have_at_least_one_image
-    # Verificamos si tiene imágenes persistidas o imágenes nuevas adjuntas en el form
-    if event_images.empty? && (!respond_to?(:images) || images.blank?)
-      errors.add(:base, "Debes subir al menos una imagen para publicar el evento")
+    has_images = event_images.reject(&:marked_for_destruction?).any? ||
+                 (respond_to?(:images) && images.present?) ||
+                 primary_image_param.present?
+
+    unless has_images
+      errors.add(:base, "Debes subir al menos una imagen para registrar el evento")
     end
   end
 

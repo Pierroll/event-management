@@ -7,33 +7,36 @@ module Events
     def initialize(event, params)
       @event = event
       @params = params.to_h.deep_symbolize_keys
+      @primary_image_param = @params.delete(:primary_image)
       @images_params = @params.delete(:images) || []
       @remove_image_ids = @params.delete(:remove_image_ids) || []
     end
 
     def call
+      # Asignamos el parámetro temporal para validación del modelo en actualización
+      @event.primary_image_param = @primary_image_param if @primary_image_param.present?
+
       Event.transaction do
         # 1. Eliminar imágenes marcadas
         if @remove_image_ids.any?
           @event.event_images.where(id: @remove_image_ids).destroy_all
         end
 
-        # 2. Actualizar atributos principales del evento
+        # 2. Reemplazar imagen principal si se provee una nueva
+        if @primary_image_param.present?
+          @event.event_images.where(display_order: 0).destroy_all
+          build_and_save_image(@event, @primary_image_param, 0)
+        end
+
+        # 3. Actualizar atributos principales del evento
         if @event.update(@params)
-          # 3. Agregar nuevas imágenes
-          @images_params.each_with_index do |img_param, index|
+          # 4. Agregar nuevas imágenes secundarias al carrusel
+          @images_params.each do |img_param|
             next if img_param.blank?
 
             # Calcular el siguiente orden disponible
-            last_order = @event.event_images.maximum(:display_order) || -1
-            event_image = @event.event_images.build(display_order: last_order + 1)
-            
-            if file_attachment?(img_param)
-              event_image.file.attach(img_param)
-            else
-              event_image.image = img_param.to_s
-            end
-            event_image.save!
+            last_order = @event.event_images.maximum(:display_order) || 0
+            build_and_save_image(@event, img_param, last_order + 1)
           end
           @event
         else
@@ -46,6 +49,16 @@ module Events
     end
 
     private
+
+    def build_and_save_image(event, param, order)
+      event_image = event.event_images.build(display_order: order)
+      if file_attachment?(param)
+        event_image.file.attach(param)
+      else
+        event_image.image = param.to_s
+      end
+      event_image.save!
+    end
 
     def file_attachment?(param)
       param.respond_to?(:tempfile) ||
