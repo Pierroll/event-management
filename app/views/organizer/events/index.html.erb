@@ -86,8 +86,10 @@
                         </button>
                       <% end %>
                     <% end %>
+                    <%= link_to "Ver", organizer_event_path(event),
+                        class: "px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" %>
                     <%= link_to "Editar", edit_organizer_event_path(event),
-                        class: "px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors" %>
+                        class: "px-3 py-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200" %>
                   </div>
                 </td>
               </tr>
