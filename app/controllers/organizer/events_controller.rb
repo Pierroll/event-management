@@ -38,7 +38,7 @@ module Organizer
       @event = Events::UpdateService.call(@event, event_params)
 
       if @event.errors.empty?
-        redirect_to organizer_event_path(@event), notice: "Evento actualizado exitosamente."
+        redirect_to (request.referrer || organizer_events_path), notice: "Evento actualizado exitosamente."
       else
         render :edit, status: :unprocessable_entity
       end

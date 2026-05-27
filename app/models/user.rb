@@ -31,6 +31,9 @@ class User < ApplicationRecord
   # DEFAULTS
   # =========================
   attribute :active, :boolean, default: true
+  attr_accessor :selected_role
+
+  after_create :assign_selected_role
 
   # =========================
   # ROLE HELPERS
@@ -49,5 +52,13 @@ class User < ApplicationRecord
 
   def registered_user?
     role?('registered_user')
+  end
+
+  private
+
+  def assign_selected_role
+    role_name = selected_role || 'registered_user'
+    role = Role.find_by(name: role_name)
+    user_roles.create(role: role) if role
   end
 end

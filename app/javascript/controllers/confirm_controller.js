@@ -12,9 +12,26 @@ export default class extends Controller {
     })
   }
 
-  show(title, message) {
+  show(title, message, element) {
     this.titleTarget.textContent = title
     this.messageTarget.textContent = message
+    
+    // Customize UI based on action (optional, can detect keywords like "Eliminar" or "Cancelar")
+    const isDanger = message.toLowerCase().includes("cancelar") || message.toLowerCase().includes("eliminar")
+    const iconContainer = this.modalTarget.querySelector(".icon-container")
+    const confirmBtn = this.modalTarget.querySelector("[data-action='click->confirm#confirm']")
+
+    if (isDanger) {
+      iconContainer?.classList.add("bg-rose-50", "text-rose-500")
+      iconContainer?.classList.remove("bg-blue-50", "text-blue-500")
+      confirmBtn?.classList.add("text-rose-600")
+      confirmBtn?.classList.remove("text-blue-600")
+    } else {
+      iconContainer?.classList.add("bg-blue-50", "text-blue-500")
+      iconContainer?.classList.remove("bg-rose-50", "text-rose-500")
+      confirmBtn?.classList.add("text-blue-600")
+      confirmBtn?.classList.remove("text-rose-600")
+    }
     
     // Show modal
     this.modalTarget.classList.remove("hidden")
