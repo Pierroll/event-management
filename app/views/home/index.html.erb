@@ -11,7 +11,7 @@
       <div class="mt-10 flex flex-wrap gap-4">
         <%= link_to "Explorar eventos", events_path, class: "inline-flex items-center px-6 py-3 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-lg" %>
         <% unless user_signed_in? %>
-                  <%= link_to "Registrarse", new_user_registration_path, class: "inline-flex items-center px-6 py-3 border-2 border-white/30 text-white font-semibold rounded-lg hover:border-white/50 transition-colors" %>
+                  <%= link_to "Registrar", new_user_registration_path, class: "inline-flex items-center px-6 py-3 border-2 border-white/30 text-white font-semibold rounded-lg hover:border-white/50 transition-colors" %>
                 <% end %>
       </div>
     </div>
