@@ -3,11 +3,20 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="event-form"
 // Handles drag-and-drop image uploads, previews, and client-side validation
 export default class extends Controller {
-  static targets = ["dropzone", "fileInput", "previewContainer", "errorContainer", "filePane", "urlPane", "urlInput"]
+  static targets = ["dropzone", "fileInput", "previewContainer", "errorContainer", "filePane", "urlPane", "urlInput", "statusInput"]
 
   connect() {
     this.attachedFiles = []
     this.urlImages = []
+  }
+
+  // Set status before submit
+  setStatus(event) {
+    const status = event.currentTarget.dataset.status
+    if (this.hasStatusInputTarget) {
+      this.statusInputTarget.value = status
+      console.log("Setting status to:", status)
+    }
   }
 
   // Tab Switching Logic
