@@ -40,3 +40,6 @@
 .env
 .kilocode/
 config/master.key
+
+.atl/
+

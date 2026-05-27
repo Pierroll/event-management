@@ -65,7 +65,7 @@
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <% if event.draft? %>
-                      <%= form_with url: organizer_event_path(event), method: :patch, class: "inline-block" do |f| %>
+                      <%= form_with scope: :event, url: organizer_event_path(event), method: :patch, class: "inline-block" do |f| %>
                         <%= f.hidden_field :status, value: "published" %>
                         <button type="submit" 
                                 data-turbo-confirm="¿Estás seguro de que deseas publicar este evento? Será visible para todos los usuarios."
@@ -76,7 +76,7 @@
                       <% end %>
                     <% end %>
                     <% if event.published? %>
-                      <%= form_with url: organizer_event_path(event), method: :patch, class: "inline-block" do |f| %>
+                      <%= form_with scope: :event, url: organizer_event_path(event), method: :patch, class: "inline-block" do |f| %>
                         <%= f.hidden_field :status, value: "canceled" %>
                         <button type="submit" 
                                 data-turbo-confirm="¿Estás seguro de que deseas cancelar este evento? Esta acción no se puede deshacer."
