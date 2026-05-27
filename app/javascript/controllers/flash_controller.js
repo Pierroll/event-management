@@ -1,40 +1,38 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="flash"
-// Auto-hides flash messages after a timeout and allows manual dismissal
 export default class extends Controller {
-  static targets = ["message"]
   static values = {
     autoHideMs: { type: Number, default: 5000 }
   }
 
   connect() {
-    // Auto-hide flash messages after timeout
-    this.timeout = setTimeout(() => {
+    // Start auto-hide timer
+    this.hideTimeout = setTimeout(() => {
       this.hide()
     }, this.autoHideMsValue)
   }
 
   disconnect() {
-    if (this.timeout) {
-      clearTimeout(this.timeout)
-    }
+    if (this.hideTimeout) clearTimeout(this.hideTimeout)
+    if (this.removeTimeout) clearTimeout(this.removeTimeout)
   }
 
-  // Manual close button
   close(event) {
-    event.preventDefault()
+    if (event) event.preventDefault()
     this.hide()
   }
 
   hide() {
-    if (this.timeout) {
-      clearTimeout(this.timeout)
-    }
+    if (this.hideTimeout) clearTimeout(this.hideTimeout)
 
-    // Use CSS transition for smooth fade out
-    this.element.classList.add("opacity-0", "translate-y-[-10px]")
-    setTimeout(() => {
+    // Apply exit animations
+    this.element.classList.replace("opacity-100", "opacity-0")
+    this.element.classList.replace("translate-y-0", "-translate-y-2")
+    this.element.classList.add("pointer-events-none")
+    
+    // Remove from DOM after transition
+    this.removeTimeout = setTimeout(() => {
       this.element.remove()
     }, 300)
   }

@@ -60,6 +60,7 @@ module Organizer
       params.require(:event).permit(
         :name, :description, :city, :address, :start_date, :end_date,
         :price, :currency, :max_capacity, :status, :category_id,
+        :latitude, :longitude,
         images: [], remove_image_ids: []
       )
     end

@@ -34,7 +34,10 @@
             <% end %>
             <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete,
                 class: "text-sm text-gray-500 hover:text-red-600 transition-colors",
-                data: { turbo_confirm: "¿Cerrar sesión?" } %>
+                data: { 
+                  turbo_confirm: "¿Estás seguro de que deseas cerrar tu sesión actual?",
+                  turbo_confirm_title: "Cerrar sesión"
+                } %>
           </div>
         <% else %>
           <div class="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200">

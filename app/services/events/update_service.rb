@@ -21,10 +21,13 @@ module Events
         # 2. Actualizar atributos principales del evento
         if @event.update(@params)
           # 3. Agregar nuevas imágenes
-          @images_params.each do |img_param|
+          @images_params.each_with_index do |img_param, index|
             next if img_param.blank?
 
-            event_image = @event.event_images.build
+            # Calcular el siguiente orden disponible
+            last_order = @event.event_images.maximum(:display_order) || -1
+            event_image = @event.event_images.build(display_order: last_order + 1)
+            
             if file_attachment?(img_param)
               event_image.file.attach(img_param)
             else

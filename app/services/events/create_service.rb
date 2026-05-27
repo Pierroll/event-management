@@ -15,13 +15,14 @@ module Events
 
       Event.transaction do
         if event.save
-          @images_params.each do |img_param|
+          @images_params.each_with_index do |img_param, index|
             next if img_param.blank?
 
-            event_image = event.event_images.build
+            event_image = event.event_images.build(display_order: index)
             if file_attachment?(img_param)
               event_image.file.attach(img_param)
             else
+              # It's a URL string
               event_image.image = img_param.to_s
             end
             event_image.save!

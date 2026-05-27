@@ -25,24 +25,84 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-gray-50 text-gray-900 antialiased">
+  <body class="bg-gray-50 text-gray-900 antialiased" data-controller="confirm">
     <%# Navigation %>
     <%= render "shared/navbar" %>
 
-    <%# Flash Messages %>
+    <%# Custom Confirmation Modal %>
+    <div data-confirm-target="modal" 
+         class="hidden fixed inset-0 z-[200] items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm transition-all duration-300">
+      <div class="modal-content scale-95 opacity-0 bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
+        <div class="p-8 text-center">
+          <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 data-confirm-target="title" class="text-2xl font-bold text-gray-900 mb-2">Confirmar</h3>
+          <p data-confirm-target="message" class="text-gray-500 font-medium">¿Estás seguro de que quieres realizar esta acción?</p>
+        </div>
+        <div class="flex border-t border-gray-100">
+          <button data-action="click->confirm#cancel" 
+                  class="flex-1 px-6 py-4 text-sm font-bold text-gray-400 hover:text-gray-900 transition-colors border-r border-gray-100">
+            Cancelar
+          </button>
+          <button data-action="click->confirm#confirm" 
+                  class="flex-1 px-6 py-4 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <%# Flash Messages (High-End Toast System) %>
     <% if flash.any? %>
-      <div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+      <div class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 max-w-md w-full sm:w-[380px]">
         <% flash.each do |type, message| %>
-          <% alert_class = case type.to_s
-             when "notice", "success" then "bg-green-50 border-green-200 text-green-800"
-             when "alert", "error" then "bg-red-50 border-red-200 text-red-800"
-             when "warning" then "bg-yellow-50 border-yellow-200 text-yellow-800"
-             else "bg-blue-50 border-blue-200 text-blue-800"
-             end %>
-          <div data-controller="flash"
-               class="<%= alert_class %> border rounded-lg px-4 py-3 shadow-lg transition-all duration-300 flex items-start gap-2">
-            <div class="flex-1 text-sm"><%= message %></div>
-            <button data-action="click->flash#close" class="text-current opacity-50 hover:opacity-100">&times;</button>
+          <% 
+            config = case type.to_s
+            when "notice", "success" 
+              { border: "border-blue-500/20", shadow: "shadow-blue-500/10", accent: "bg-blue-600", 
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' }
+            when "alert", "error" 
+              { border: "border-rose-500/20", shadow: "shadow-rose-500/10", accent: "bg-rose-500",
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>' }
+            when "warning" 
+              { border: "border-amber-500/20", shadow: "shadow-amber-500/10", accent: "bg-amber-500",
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>' }
+            else 
+              { border: "border-blue-500/20", shadow: "shadow-blue-500/10", accent: "bg-blue-500",
+                icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>' }
+            end 
+          %>
+          <div data-controller="flash" 
+               data-turbo-cache="false"
+               class="group relative overflow-hidden bg-white/80 backdrop-blur-xl border <%= config[:border] %> rounded-2xl p-4 shadow-2xl <%= config[:shadow] %> flex items-center gap-4 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] transform opacity-100 translate-y-0 hover:scale-[1.02]"
+               role="alert">
+            
+            <%# Progress bar background %>
+            <div class="absolute bottom-0 left-0 h-1 <%= config[:accent] %> opacity-20 w-full"></div>
+            <%# Animated accent line %>
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 <%= config[:accent] %> rounded-r-full"></div>
+
+            <div class="flex-shrink-0 w-10 h-10 rounded-xl <%= config[:accent] %> flex items-center justify-center text-white shadow-lg <%= config[:shadow] %>">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <%= config[:icon].html_safe %>
+              </svg>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <h4 class="text-xs font-bold uppercase tracking-wider opacity-40 mb-0.5">Notificación</h4>
+              <p class="text-[15px] font-semibold text-gray-800 leading-tight truncate-2-lines"><%= message %></p>
+            </div>
+
+            <button type="button" 
+                    data-action="click->flash#close" 
+                    class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
         <% end %>
       </div>

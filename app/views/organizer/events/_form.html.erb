@@ -121,21 +121,72 @@
     </div>
   </div>
 
-  <%# Image Upload - Drag & Drop %>
-  <div class="md:col-span-2">
-    <%= f.label :images, "Imágenes del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
-    <div data-event-form-target="dropzone"
-         data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop"
-         class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50/30 transition-colors cursor-pointer">
-      <div class="text-4xl mb-2">📁</div>
-      <p class="text-sm text-gray-600">Arrastra y suelta imágenes aquí</p>
-      <p class="text-xs text-gray-400 mt-1">o haz clic para seleccionar archivos</p>
-      <%= f.file_field :images, multiple: true, accept: "image/*", data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
-          class: "hidden" %>
-    </div>
+  <%# Image Upload Section - Premium Experience %>
+  <div class="md:col-span-2 space-y-4" data-controller="event-form">
+    <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider opacity-60">Galería del evento</label>
+    
+    <div class="bg-gray-50/50 border border-gray-200 rounded-2xl p-6">
+      <%# Tabs %>
+      <div class="flex gap-4 mb-6 border-b border-gray-200 pb-4">
+        <button type="button" 
+                class="text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-4 -mb-4.5"
+                data-action="click->event-form#showTab" 
+                data-tab="file">
+          Subir archivos
+        </button>
+        <button type="button" 
+                class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
+                data-action="click->event-form#showTab" 
+                data-tab="url">
+          Desde URL
+        </button>
+      </div>
 
-    <%# Preview Container %>
-    <div data-event-form-target="previewContainer" class="mt-4 flex flex-wrap gap-2"></div>
+      <%# File Upload Pane %>
+      <div data-event-form-target="filePane">
+        <div data-event-form-target="dropzone"
+             data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop click->event-form#browse"
+             class="group relative border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center hover:border-blue-400 hover:bg-white transition-all cursor-pointer bg-white/50 backdrop-blur-sm">
+          
+          <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+
+          <h3 class="text-gray-900 font-bold mb-1">Arrastra tus fotos aquí</h3>
+          <p class="text-sm text-gray-500">O haz clic para explorar tus archivos</p>
+          <p class="text-[10px] text-gray-400 mt-4 uppercase tracking-widest font-bold">Máximo 5MB por imagen • JPG, PNG, WEBP</p>
+          
+          <%= f.file_field :images, multiple: true, accept: "image/*", 
+              data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
+              class: "hidden" %>
+        </div>
+      </div>
+
+      <%# URL Upload Pane %>
+      <div data-event-form-target="urlPane" class="hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Enlace de la imagen</label>
+          <div class="flex gap-2">
+            <input type="url" 
+                   data-event-form-target="urlInput"
+                   placeholder="https://ejemplo.com/imagen.jpg"
+                   class="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
+            <button type="button" 
+                    data-action="click->event-form#addFromUrl"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
+              Agregar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <%# Global Preview Container %>
+      <div data-event-form-target="previewContainer" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <%# Las imágenes se renderizan aquí dinámicamente %>
+      </div>
+    </div>
   </div>
 
   <%# Submit Button %>
