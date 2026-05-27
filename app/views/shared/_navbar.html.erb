@@ -1,61 +1,137 @@
 <%# Main Navigation Bar %>
-<nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+<nav class="bg-white border-b border-gray-100 sticky top-0 z-40" data-controller="navbar" data-action="keydown.esc->navbar#closeOnEsc">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-16">
+    <div class="flex justify-between items-center h-20">
       <%# Logo %>
-      <div class="flex items-center">
-        <%= link_to root_path, class: "flex items-center gap-2" do %>
-          <span class="text-xl font-bold text-gray-900">SGE</span>
-          <span class="text-sm text-gray-500 hidden sm:inline">Gestión de Eventos</span>
+      <div class="flex items-center gap-8">
+        <%= link_to root_path, class: "flex items-center gap-2 group" do %>
+          <span class="text-2xl font-black tracking-tighter text-blue-600 group-hover:text-blue-700 transition-colors">SGE</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400 hidden sm:inline">Eventos</span>
         <% end %>
+
+        <%# Desktop Navigation Links (Public/Assistant) %>
+        <div class="hidden lg:flex items-center gap-1">
+          <%= link_to events_path, class: "px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all" do %>
+            Explorar
+          <% end %>
+
+          <%# Categories Dropdown %>
+          <div class="relative">
+            <button type="button" 
+                    data-action="click->navbar#toggleDropdown"
+                    class="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all group">
+              Categorías
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <%# Dropdown Menu %>
+            <div data-navbar-target="dropdown" 
+                 class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+              <div class="px-4 py-2 mb-2 border-b border-gray-50">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Seleccionar interés</span>
+              </div>
+              <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <% navbar_categories.each do |category| %>
+                  <%= link_to events_path(category_id: category.id), class: "flex items-center gap-3 px-4 py-3 hover:bg-blue-50 group transition-colors" do %>
+                    <div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-bold text-gray-700 group-hover:text-blue-700 transition-colors"><%= category.name %></p>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <%# Navigation Links %>
-      <div class="hidden md:flex items-center gap-6">
-        <% if user_signed_in? && current_user.admin? %>
-          <%# Admin Navigation %>
-          <%= link_to "Usuarios", admin_users_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-          <%= link_to "Eventos", admin_events_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-          <%= link_to "Categorías", admin_categories_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-          <%= link_to "Admin", admin_dashboard_path, class: "text-sm font-medium text-purple-600 hover:text-purple-800 transition-colors font-semibold" %>
-        <% elsif user_signed_in? && current_user.organizer? %>
-          <%# Organizer Navigation %>
-          <%= link_to "Explorar", events_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-          <%= link_to "Mis Eventos", organizer_events_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-        <% else %>
-          <%# Public / Registered User Navigation %>
-          <%= link_to "Explorar", events_path, class: "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors" %>
-        <% end %>
-
+      <%# Right Side Actions %>
+      <div class="hidden md:flex items-center gap-4">
         <% if user_signed_in? %>
-          <div class="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200">
-            <%= link_to profile_path, class: "text-sm font-medium text-gray-700 hover:text-gray-900" do %>
-              <span><%= current_user.name %></span>
+          <% if current_user.admin? %>
+            <%= link_to "Admin Panel", admin_dashboard_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-purple-600 bg-purple-50 rounded-xl hover:bg-purple-100 transition-all border border-purple-100" %>
+          <% elsif current_user.organizer? %>
+            <%= link_to "Crear Evento", new_organizer_event_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all border border-blue-100" %>
+          <% end %>
+
+          <div class="flex items-center gap-3 ml-2 pl-6 border-l border-gray-100">
+            <%= link_to profile_path, class: "flex items-center gap-3 group" do %>
+              <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
+                <%= current_user.name[0].upcase %>
+              </div>
+              <div class="hidden xl:block">
+                <p class="text-xs font-black text-gray-900 leading-none mb-1"><%= current_user.name %></p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Mi Cuenta</p>
+              </div>
             <% end %>
-            <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete,
-                class: "text-sm text-gray-500 hover:text-red-600 transition-colors",
+
+            <%= button_to destroy_user_session_path, method: :delete,
+                class: "p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all",
                 data: { 
                   turbo_confirm: "¿Estás seguro de que deseas cerrar tu sesión actual?",
                   turbo_confirm_title: "Cerrar sesión"
-                } %>
+                } do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+            <% end %>
           </div>
         <% else %>
-          <div class="flex items-center gap-3 ml-4 pl-4 border-l border-gray-200">
-            <%= link_to "Iniciar sesión", new_user_session_path, class: "text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors" %>
+          <div class="flex items-center gap-2">
+            <%= link_to "Entrar", new_user_session_path, class: "px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors" %>
             <%= link_to "Registrarse", new_user_registration_path,
-                class: "text-sm font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" %>
+                class: "px-6 py-2.5 text-sm font-bold bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95" %>
           </div>
         <% end %>
       </div>
 
       <%# Mobile menu button %>
-      <div class="md:hidden">
-        <button data-action="click->navbar#toggle" class="p-2 text-gray-600 hover:text-gray-900">
+      <div class="lg:hidden">
+        <button data-action="click->navbar#toggle" class="w-10 h-10 flex items-center justify-center text-gray-500 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
         </button>
       </div>
+    </div>
+  </div>
+
+  <%# Mobile Menu Overlay %>
+  <div data-navbar-target="menu" class="hidden lg:hidden border-t border-gray-50 bg-white px-4 py-6 animate-in slide-in-from-top duration-300">
+    <div class="space-y-2">
+      <%= link_to "Explorar", events_path, class: "block px-4 py-3 text-base font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" %>
+      
+      <div class="pt-4 pb-2 px-4">
+        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Categorías</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2 px-2">
+        <% navbar_categories.each do |category| %>
+          <%= link_to category.name, events_path(category_id: category.id), class: "px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-lg" %>
+        <% end %>
+      </div>
+
+      <% if user_signed_in? %>
+        <div class="pt-6 mt-6 border-t border-gray-100 space-y-2">
+          <%= link_to "Mi Perfil", profile_path, class: "block px-4 py-3 text-base font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" %>
+          <% if current_user.admin? %>
+            <%= link_to "Dashboard Admin", admin_dashboard_path, class: "block px-4 py-3 text-base font-bold text-purple-600 hover:bg-purple-50 rounded-xl transition-all" %>
+          <% elsif current_user.organizer? %>
+            <%= link_to "Mis Eventos", organizer_events_path, class: "block px-4 py-3 text-base font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-all" %>
+          <% end %>
+          <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-3 text-base font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all" %>
+        </div>
+      <% else %>
+        <div class="pt-6 mt-6 border-t border-gray-100 flex flex-col gap-3 px-2">
+          <%= link_to "Iniciar sesión", new_user_session_path, class: "w-full py-3 text-center text-sm font-bold text-gray-600" %>
+          <%= link_to "Registrarse", new_user_registration_path, class: "w-full py-3 text-center text-sm font-bold bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20" %>
+        </div>
+      <% end %>
     </div>
   </div>
 </nav>

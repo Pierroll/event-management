@@ -68,7 +68,7 @@
         <%= link_to "Explorar eventos", events_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" %>
       <% else %>
               <% unless user_signed_in? %>
-                <%= link_to "Registrarse", new_user_registration_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" %>
+                <%= link_to "Registrarse como organizador", new_user_registration_path(role: 'organizer'), class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" %>
               <% end %>
             <% end %>
     </div>
