@@ -74,3 +74,19 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
 end
 
+# Configuración global de Geocoder para tests (evita llamadas de red y ArgumentErrors de stubs desconocidos)
+require 'geocoder'
+Geocoder.configure(lookup: :test, ip_lookup: :test)
+Geocoder::Lookup::Test.set_default_stub(
+  [
+    {
+      'coordinates'  => [0.0, 0.0],
+      'address'      => 'Dirección Ficticia',
+      'city'         => 'Ciudad Ficticia',
+      'state'        => 'Estado Ficticio',
+      'country'      => 'País Ficticio',
+      'country_code' => 'xx'
+    }
+  ]
+)
+

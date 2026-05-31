@@ -1,6 +1,15 @@
 <%# Organizer Event Form Partial %>
-<%= form_with model: [:organizer, event], local: true, html: { multipart: true },
-    data: { controller: "event-form", action: "submit->event-form#validate" }, class: "space-y-6" do |f| %>
+<%
+  existing_images = event.persisted? ? event.event_images.to_a : []
+  existing_count  = existing_images.size
+%>
+<%= form_with model: [:organizer, event], local: true,
+    html: { multipart: true },
+    data: {
+      controller: "event-form",
+      existing_images_count: existing_count
+    },
+    class: "space-y-6" do |f| %>
   
   <%# Hidden Status Field %>
   <%= f.hidden_field :status, data: { event_form_target: "statusInput" } %>
@@ -22,7 +31,7 @@
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-controller="event-map">
     <%# Name %>
     <div class="md:col-span-2">
       <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
@@ -52,7 +61,8 @@
       <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.text_field :city, id: "event_city",
           class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-          placeholder: "Ej: Lima" %>
+          placeholder: "Ej: Lima",
+          data: { event_map_target: "cityInput" } %>
     </div>
 
     <%# Address %>
@@ -60,7 +70,34 @@
       <%= f.label :address, "Dirección", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.text_field :address, id: "event_address",
           class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-          placeholder: "Ej: Av. Principal 123" %>
+          placeholder: "Ej: Av. Principal 123",
+          data: { event_map_target: "addressInput" } %>
+    </div>
+
+    <%# Bloque Prominente Selector de Ubicación en el Mapa %>
+    <div class="md:col-span-2 bg-blue-50/30 border border-blue-100 rounded-3xl p-6 text-center space-y-3 relative overflow-hidden">
+      <%# Hidden fields for coordinates %>
+      <%= f.hidden_field :latitude, data: { event_map_target: "latInput" } %>
+      <%= f.hidden_field :longitude, data: { event_map_target: "lngInput" } %>
+      
+      <div class="w-12 h-12 bg-blue-100/60 text-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+        <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-sm font-bold text-gray-900">Ubicación exacta en el mapa</h4>
+        <p class="text-xs text-gray-500 max-w-sm mx-auto">Hacé clic abajo para abrir el mapa, ubicar el evento exactamente y autocompletar la dirección.</p>
+      </div>
+      <button type="button" 
+              data-action="click->event-map#openModal"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/10 active:scale-95 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+        </svg>
+        Seleccionar ubicación en el mapa
+      </button>
     </div>
 
     <%# Start Date %>
@@ -103,86 +140,194 @@
           placeholder: "Ej: 500" %>
     </div>
 
-    <%# Latitude/Longitude (hidden, optional) %>
-    <div>
-      <%= f.label :latitude, "Latitud (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.text_field :latitude, step: 0.00000001,
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-          placeholder: "-12.046374" %>
-    </div>
-    <div>
-      <%= f.label :longitude, "Longitud (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.text_field :longitude, step: 0.00000001,
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-          placeholder: "-77.042793" %>
-    </div>
-  </div>
-
-  <%# Image Upload Section - Premium Experience %>
-  <div class="md:col-span-2 space-y-4">
-    <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider opacity-60">Galería del evento</label>
-    
-    <div class="bg-gray-50/50 border border-gray-200 rounded-2xl p-6">
-      <%# Tabs %>
-      <div class="flex gap-4 mb-6 border-b border-gray-200 pb-4">
-        <button type="button" 
-                class="text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-4 -mb-4.5"
-                data-action="click->event-form#showTab" 
-                data-tab="file">
-          Subir archivos
-        </button>
-        <button type="button" 
-                class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
-                data-action="click->event-form#showTab" 
-                data-tab="url">
-          Desde URL
-        </button>
-      </div>
-
-      <%# File Upload Pane %>
-      <div data-event-form-target="filePane">
-        <div data-event-form-target="dropzone"
-             data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop click->event-form#browse"
-             class="group relative border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center hover:border-blue-400 hover:bg-white transition-all cursor-pointer bg-white/50 backdrop-blur-sm">
-          
-          <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
+    <%# Map Selection Modal %>
+    <div data-event-map-target="modal" 
+         class="hidden fixed inset-0 z-[200] items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm transition-all duration-300">
+      <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        <%# Modal Header %>
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Seleccionar ubicación</h3>
+            <p class="text-xs text-gray-500 font-medium">Hacé clic en el mapa o arrastrá el marcador para definir la dirección exacta.</p>
           </div>
-
-          <h3 class="text-gray-900 font-bold mb-1">Arrastra tus fotos aquí</h3>
-          <p class="text-sm text-gray-500">O haz clic para explorar tus archivos</p>
-          <p class="text-[10px] text-gray-400 mt-4 uppercase tracking-widest font-bold">Máximo 5MB por imagen • JPG, PNG, WEBP</p>
-          
-          <%= f.file_field :images, multiple: true, accept: "image/*", 
-              data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
-              class: "hidden" %>
+          <button type="button" 
+                  data-action="click->event-map#closeModal"
+                  class="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-      </div>
 
-      <%# URL Upload Pane %>
-      <div data-event-form-target="urlPane" class="hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Enlace de la imagen</label>
+        <%# Modal Body %>
+        <div class="p-6 space-y-4">
+          <%# Buscador interno del mapa %>
           <div class="flex gap-2">
-            <input type="url" 
-                   data-event-form-target="urlInput"
-                   placeholder="https://ejemplo.com/imagen.jpg"
-                   class="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500">
+            <input type="text" 
+                   data-event-map-target="searchInput" 
+                   placeholder="Buscar calle, plaza, establecimiento..." 
+                   class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-gray-900">
             <button type="button" 
-                    data-action="click->event-form#addFromUrl"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
-              Agregar
+                    data-action="click->event-map#searchAddress"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              Buscar
             </button>
           </div>
+
+          <%# Map Div %>
+          <div data-event-map-target="mapContainer" 
+               class="w-full h-[350px] bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden relative z-10"></div>
+        </div>
+
+        <%# Modal Footer %>
+        <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
+          <button type="button" 
+                  data-action="click->event-map#closeModal"
+                  class="px-5 py-3 border border-gray-200 text-gray-700 hover:bg-gray-100 text-sm font-bold rounded-2xl transition-all">
+            Cancelar
+          </button>
+          <button type="button" 
+                  data-action="click->event-map#saveLocation"
+                  class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+            Confirmar ubicación
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <%# ─── Galería del evento ─────────────────────────────────────────────────── %>
+  <div class="md:col-span-2 space-y-4">
+    <div class="flex items-center justify-between">
+      <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider opacity-60">Galería del evento</label>
+      <span class="text-xs text-gray-400 font-medium">Máximo 5 imágenes • La primera es la principal</span>
+    </div>
+
+    <div class="bg-gray-50/50 border border-gray-200 rounded-2xl p-6 space-y-6">
+
+      <%# ── Imágenes EXISTENTES (solo en edit) ──────────────────────────── %>
+      <% if existing_images.any? %>
+        <div>
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Imágenes actuales</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <% existing_images.each_with_index do |img, idx| %>
+              <%
+                is_primary = idx == 0
+                badge_classes = is_primary ? "bg-blue-600 text-white" : "bg-black/40 text-white"
+              %>
+              <div class="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden border-2 <%= is_primary ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200' %> transition-all"
+                   data-image-id="<%= img.id %>">
+
+                <%= image_tag img.image_url,
+                    class: "w-full h-full object-cover",
+                    alt: "Imagen #{idx + 1} del evento" %>
+
+                <%# Botón eliminar %>
+                <button type="button"
+                        class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500 z-10"
+                        data-action="click->event-form#removeExisting">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+
+                <%# Badge Principal / Secundaria %>
+                <div class="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest <%= badge_classes %>">
+                  <% if is_primary %>
+                    <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    Principal
+                  <% else %>
+                    Secundaria
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <hr class="border-gray-200">
+      <% end %>
+
+      <%# ── Subir nuevas imágenes ────────────────────────────────────────── %>
+      <div>
+        <% if existing_images.any? %>
+          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Agregar más imágenes</p>
+        <% end %>
+
+        <%# Tabs %>
+        <div class="flex gap-4 border-b border-gray-200 pb-0 mb-5">
+          <button type="button"
+                  class="text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-[14px] -mb-[2px]"
+                  data-action="click->event-form#showTab"
+                  data-tab="file">
+            Subir archivos
+          </button>
+          <button type="button"
+                  class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors pb-[14px]"
+                  data-action="click->event-form#showTab"
+                  data-tab="url">
+            Desde URL
+          </button>
+        </div>
+
+        <%# File Upload Pane %>
+        <div data-event-form-target="filePane">
+          <div data-event-form-target="dropzone"
+               data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop click->event-form#browse"
+               class="group relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-white transition-all cursor-pointer bg-white/50">
+
+            <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+
+            <h3 class="text-gray-900 font-bold mb-1 text-sm">Arrastrá tus fotos aquí</h3>
+            <p class="text-xs text-gray-500">o hacé clic para explorar</p>
+            <p class="text-[10px] text-gray-400 mt-3 uppercase tracking-widest font-bold">Máx 5MB • JPG, PNG, WEBP</p>
+
+            <%= f.file_field :images, multiple: true, accept: "image/*",
+                data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
+                class: "hidden" %>
+
+            <%# Input separado para la imagen principal (JS lo usa en modo CREATE) %>
+            <%= f.file_field :primary_image, accept: "image/*",
+                data: { event_form_target: "primaryFileInput" },
+                class: "hidden" %>
+          </div>
+        </div>
+
+        <%# URL Pane %>
+        <div data-event-form-target="urlPane" class="hidden">
+          <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Enlace de imagen</label>
+            <div class="flex gap-2">
+              <input type="url"
+                     data-event-form-target="urlInput"
+                     placeholder="https://ejemplo.com/imagen.jpg"
+                     class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button type="button"
+                      data-action="click->event-form#addFromUrl"
+                      class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
+                Agregar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <%# Preview de imágenes NUEVAS (JS las inserta aquí) %>
+        <div data-event-form-target="previewContainer"
+             class="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         </div>
       </div>
 
-      <%# Global Preview Container %>
-      <div data-event-form-target="previewContainer" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <%# Las imágenes se renderizan aquí dinámicamente %>
-      </div>
     </div>
   </div>
 

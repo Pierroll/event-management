@@ -1,12 +1,55 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="event-detail"
-// Handles star rating UI and comment interactions
+// Handles star rating UI, map rendering, and comment interactions
 export default class extends Controller {
   static targets = ["starsContainer", "ratingInput", "commentForm"]
 
   connect() {
     this.setupStars()
+    this.setupMap()
+  }
+
+  disconnect() {
+    if (this.mapInstance) {
+      this.mapInstance.remove()
+      this.mapInstance = null
+    }
+  }
+
+  setupMap() {
+    const latAttr = this.element.dataset.lat
+    const lngAttr = this.element.dataset.lng
+    if (!latAttr || !lngAttr) return
+
+    const lat = parseFloat(latAttr)
+    const lng = parseFloat(lngAttr)
+    if (isNaN(lat) || isNaN(lng)) return
+
+    if (typeof L === "undefined") {
+      console.warn("[EventDetail] Leaflet L is not loaded.")
+      return
+    }
+
+    const coords = [lat, lng]
+
+    // Avoid double initialization
+    if (this.mapInstance) return
+
+    this.mapInstance = L.map(this.element).setView(coords, 15)
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(this.mapInstance)
+
+    L.marker(coords).addTo(this.mapInstance)
+
+    // Force map to recalculate container bounds
+    setTimeout(() => {
+      if (this.mapInstance) {
+        this.mapInstance.invalidateSize()
+      }
+    }, 200)
   }
 
   // Set up star rating from existing value
@@ -27,6 +70,7 @@ export default class extends Controller {
       })
     }
   }
+
 
   // Click on a star to set rating
   rate(event) {

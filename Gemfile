@@ -76,3 +76,5 @@ gem "tailwindcss-rails", "~> 4.4"
 gem "pundit", "~> 2.5"
 
 gem "kaminari", "~> 1.2"
+
+gem "geocoder", "~> 1.8"

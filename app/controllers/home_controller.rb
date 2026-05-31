@@ -10,5 +10,6 @@ class HomeController < ApplicationController
 
     @upcoming_events = Event.upcoming.limit(6)
     @categories = Category.active
+    @cities = Event.published_only.distinct.pluck(:city).compact_blank.sort
   end
 end

@@ -1,5 +1,17 @@
 class EventsController < ApplicationController
   def index
+    # Sincronizar parámetro de ciudad con la cookie global
+    if params[:city].present?
+      if params[:city] == "all"
+        cookies[:selected_city] = "all"
+        params[:city] = nil
+      else
+        cookies[:selected_city] = params[:city]
+      end
+    elsif cookies[:selected_city].present? && cookies[:selected_city] != "all"
+      params[:city] = cookies[:selected_city]
+    end
+
     base_scope = policy_scope(Event)
     @events = Events::SearchQuery.call(base_scope, search_params)
                                  .page(params[:page])

@@ -10,6 +10,12 @@ class Event < ApplicationRecord
   }
 
   # =========================
+  # GEOCODING
+  # =========================
+  geocoded_by :address
+  after_validation :geocode, if: ->(obj) { obj.address.present? && obj.address_changed? && obj.latitude.blank? && obj.longitude.blank? }
+
+  # =========================
   # RELATIONS
   # =========================
   belongs_to :organizer,
