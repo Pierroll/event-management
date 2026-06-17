@@ -8,18 +8,24 @@ Sistema de gestión de eventos desarrollado con Ruby on Rails 8, diseñado para 
 
 - [Stack Tecnológico](#stack-tecnológico)
 - [Arquitectura del Sistema](#arquitectura-del-sistema)
+- [Autenticación y Flujo de Registro](#autenticación-y-flujo-de-registro)
 - [Requisitos Previos](#requisitos-previos)
 - [Instalación por Sistema Operativo](#instalación-por-sistema-operativo)
 - [Configuración Inicial](#configuración-inicial)
 - [Base de Datos](#base-de-datos)
 - [Ejecutar el Proyecto](#ejecutar-el-proyecto)
+- [Tailwind CSS](#tailwind-css)
+- [Mapas con Leaflet](#mapas-con-leaflet)
 - [Endpoints y Rutas](#endpoints-y-rutas)
 - [Seed Inicial](#seed-inicial)
 - [Comandos Útiles](#comandos-útiles)
 - [Testing](#testing)
 - [Estructura del Proyecto](#estructura-del-proyecto)
+- [Rate Limiting](#rate-limiting)
 - [Convenciones Git](#convenciones-git)
 - [Deployment](#deployment)
+- [Seguridad](#seguridad)
+- [Recursos Adicionales](#recursos-adicionales)
 
 ---
 
@@ -34,18 +40,25 @@ Sistema de gestión de eventos desarrollado con Ruby on Rails 8, diseñado para 
 ### Frontend
 - **TailwindCSS 4.4** - Framework CSS
 - **Hotwire** (Turbo + Stimulus) - JavaScript moderno sin build step
-- **Leaflet** - Mapas interactivos
+- **Leaflet** - Mapas interactivos (CSS vía CDN unpkg.com)
 - **Importmap** - Gestión de módulos JavaScript
 
 ### Autenticación y Autorización
 - **Devise 5.0** - Autenticación de usuarios
 - **Pundit 2.5** - Autorización basada en políticas
+- **omniauth-google-oauth2 ~> 1.2** - Autenticación con Google OAuth
 
 ### Utilidades
 - **Kaminari 1.2** - Paginación
-- **Dotenv 3.2** - Variables de entorno
+- **Geocoder ~> 1.8** - Geocodificación de direcciones de eventos
+- **Dotenv ~> 3.2** - Variables de entorno
+- **rails-i18n ~> 8.0** - Internacionalización
 - **RSpec 8.0** - Framework de testing
 - **Capybara + Selenium** - Testing de sistema
+
+### Desarrollo
+- **Letter Opener** - Vista previa de emails en desarrollo
+- **Web Console** - Consola interactiva en páginas de error
 
 ### Solid Suite (Rails 8)
 - **Solid Cache** - Caching con backing de base de datos
@@ -70,13 +83,19 @@ Sistema de gestión de eventos desarrollado con Ruby on Rails 8, diseñado para 
 
 #### Service Objects
 Lógica de negocio compleja encapsulada en servicios:
-- `Events::CreateService` - Creación de eventos con imágenes
-- `Events::UpdateService` - Actualización de eventos
-- `Comments::CreateService` - Creación de comentarios
+
+- `ConfirmationCodeService` - Manejo de códigos de verificación email:
+  - Genera código de 6 dígitos, almacena hash SHA256
+  - Expira a los 15 minutos
+  - Máximo 3 intentos de verificación
+  - Reintento con cooldown de 60 segundos
+- `Events::CreateService` - Creación de eventos con imágenes (Active Storage + URL legacy)
+- `Events::UpdateService` - Actualización de eventos con reemplazo de imágenes
+- `Comments::CreateService` - Creación de comentarios con validación
 
 #### Query Objects
 Consultas complejas encapsuladas:
-- `Events::SearchQuery` - Búsqueda avanzada de eventos (city, category, query, dates, price)
+- `Events::SearchQuery` - Búsqueda avanzada de eventos por: city, category, query (texto), fechas (start_date, end_date), price (min/max)
 
 #### Policies (Pundit)
 Autorización por recurso:
@@ -89,11 +108,15 @@ Autorización por recurso:
 ### Modelos del Dominio
 
 ```
-User (Devise)
+User (Devise + Omniauth)
 ├── has_many :user_roles
 ├── has_many :roles, through: :user_roles
 ├── has_many :organized_events (as: organizer)
-└── has_many :comments
+├── has_many :comments
+├── confirmation_code (SHA256 hashed)
+├── confirmation_sent_at
+├── confirmation_attempts
+└── confirmed_at
 
 Role
 ├── has_many :user_roles
@@ -154,6 +177,42 @@ enum status: {
 
 ---
 
+## 🔐 Autenticación y Flujo de Registro
+
+### Registro vía Email con Confirmación
+
+El sistema implementa confirmación de email **custom** (NO usa `Devise :confirmable`).
+
+1. El usuario selecciona su rol (Asistir / Organizar)
+2. Completa el formulario de registro con email y contraseña
+3. Se envía un código de verificación de 6 dígitos vía `UserMailer#confirmation_code`
+4. El código se almacena como hash SHA256 con expiración de 15 minutos y máximo 3 intentos
+5. El usuario ingresa el código en `/confirmation/verify`
+6. Si es correcto, se confirma la cuenta (`confirmed_at` se setea) y se redirige al dashboard
+
+### Registro vía Google OAuth
+
+1. El usuario selecciona su rol (Asistir / Organizar)
+2. Hace clic en "Continuar con Google"
+3. Se envía una solicitud `POST /users/auth/google_oauth2/with_role` que guarda `session[:pending_role]` y redirige a Google
+4. Google callback en `/users/auth/google_oauth2/callback`
+5. Si el email ya existe, se asigna el rol pendiente y se inicia sesión
+6. Si es nuevo, se crea el usuario con datos de Google, se asigna el rol y se confirma automáticamente
+
+### Flujo OAuth con Rol
+
+```
+Usuario → selecciona rol → clic "Continuar con Google"
+  → POST /users/auth/google_oauth2/with_role
+    → session[:pending_role] = rol_seleccionado
+    → redirect_to /users/auth/google_oauth2
+      → Google callback → Users::OmniauthCallbacksController
+        → asigna pending_role al usuario
+        → inicia sesión
+```
+
+---
+
 ## 💻 Requisitos Previos
 
 Antes de comenzar, asegúrate de tener instalado:
@@ -162,8 +221,6 @@ Antes de comenzar, asegúrate de tener instalado:
 - **Git** - Control de versiones
 - **Ruby 3.3.1** - Lenguaje de programación
 - **PostgreSQL** - Base de datos
-- **Node.js** (v18+) - Runtime JavaScript
-- **Yarn** o **npm** - Gestor de paquetes JavaScript
 
 ---
 
@@ -196,17 +253,6 @@ brew install postgresql@16
 brew services start postgresql@16
 ```
 
-#### 4. Instalar Node.js
-```bash
-brew install node
-```
-
-Verificar instalación:
-```bash
-node -v  # Debe mostrar v18+
-npm -v
-```
-
 ---
 
 ### Linux (Ubuntu/Debian)
@@ -215,7 +261,7 @@ npm -v
 ```bash
 sudo apt update
 sudo apt install -y git curl build-essential libssl-dev libreadline-dev zlib1g-dev \
-  libpq-dev nodejs npm postgresql postgresql-contrib
+  libpq-dev postgresql postgresql-contrib
 ```
 
 #### 2. Instalar rbenv y Ruby
@@ -240,12 +286,6 @@ sudo -u postgres createuser --superuser $USER
 createdb
 ```
 
-#### 4. Verificar Node.js
-```bash
-node -v
-npm -v
-```
-
 ---
 
 ### Windows (WSL2 recomendado)
@@ -260,7 +300,7 @@ sudo apt update && sudo apt upgrade -y
 
 # Instalar dependencias
 sudo apt install -y git curl build-essential libssl-dev libreadline-dev zlib1g-dev \
-  libpq-dev nodejs npm postgresql postgresql-contrib
+  libpq-dev postgresql postgresql-contrib
 
 # Instalar rbenv y Ruby
 curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
@@ -294,21 +334,12 @@ cd event-management
 bundle install
 ```
 
-### 2. Instalar dependencias de JavaScript
+### 2. Crear archivo de variables de entorno
 ```bash
-yarn install
-# o
-npm install
-```
-
-### 3. Crear archivo de variables de entorno
-```bash
-cp .env.example .env
-# o crear manualmente
 touch .env
 ```
 
-### 4. Configurar variables de entorno
+### 3. Configurar variables de entorno
 Editar `.env` con tus credenciales:
 
 ```env
@@ -319,11 +350,27 @@ DB_PASSWORD=tu_password_postgres
 # Rails
 RAILS_MAX_THREADS=5
 
+# Google OAuth
+GOOGLE_CLIENT_ID=tu_google_client_id
+GOOGLE_CLIENT_SECRET=tu_google_client_secret
+
+# SMTP (Gmail)
+SMTP_ADDRESS=smtp.gmail.com
+SMTP_PORT=587
+SMTP_DOMAIN=gmail.com
+SMTP_USERNAME=tu_email@gmail.com
+SMTP_PASSWORD=tu_app_password
+MAILER_SENDER=SGE <noreply@tudominio.com>
+
+# App
+APP_HOST=localhost:3000
+APP_PROTOCOL=http
+
 # Production (opcional)
 EVENT_MANAGEMENT_DATABASE_PASSWORD=tu_password_production
 ```
 
-### 5. Configurar database.yml
+### 4. Configurar database.yml
 El archivo `config/database.yml` ya está configurado para usar variables de entorno. Verifica que coincidan con tu `.env`:
 
 ```yml
@@ -370,7 +417,13 @@ cat db/schema.rb
 
 ## 🏃 Ejecutar el Proyecto
 
-### Modo Desarrollo
+### Modo Desarrollo (recomendado)
+```bash
+bin/dev
+```
+Esto levanta el servidor Rails **y** el watcher de Tailwind CSS simultáneamente.
+
+### Servidor solo
 ```bash
 rails server
 # o
@@ -379,18 +432,52 @@ rails s
 
 Abrir en navegador: `http://localhost:3000`
 
-### Modo con Procfile (recomendado)
-```bash
-bundle exec foreman start
-# o
-bin/dev
-```
-
 ### Verificar que el servidor está corriendo
 ```bash
 curl http://localhost:3000/up
 # Debe retornar: OK
 ```
+
+---
+
+## 🎨 Tailwind CSS
+
+### Tailwind v4
+
+El proyecto usa **TailwindCSS v4** con `@import "tailwindcss"` en el archivo CSS principal. No existe archivo `tailwind.config.js` — la configuración se maneja directamente en CSS.
+
+### Safelist para JS dinámico
+
+Las clases que se togglean desde JavaScript (como `hidden`, `flex`, colores dinámicos) se safelistean con `@source inline()` directamente en el CSS:
+
+```css
+@import "tailwindcss";
+
+@source inline(".hidden");
+@source inline(".flex");
+```
+
+Esto evita que PurgeCSS elimine clases usadas solo en runtime por Stimulus controllers.
+
+### Compilación manual
+
+```bash
+bin/rails tailwindcss:build
+```
+
+### Watcher automático
+
+`bin/dev` ejecuta el Procfile.dev que corre `bin/rails tailwindcss:watch` en paralelo al servidor, recompilando automáticamente al detectar cambios.
+
+---
+
+## 🗺️ Mapas con Leaflet
+
+Los mapas interactivos se renderizan en la página de detalle del evento usando **Leaflet** con CSS cargado desde CDN (unpkg.com).
+
+- La inicialización del mapa se maneja mediante **Stimulus controllers**
+- `event_map_controller.js` - Renderiza el mapa con marcador en la ubicación del evento
+- Las coordenadas se obtienen via **Geocoder** al crear/actualizar un evento
 
 ---
 
@@ -412,8 +499,25 @@ curl http://localhost:3000/up
 | GET/POST | `/users/sign_in` | Iniciar sesión |
 | GET/POST | `/users/sign_up` | Registrarse |
 | GET/POST | `/users/password/new` | Recuperar contraseña |
-| GET/POST | `/users/confirmation` | Confirmar email |
 | DELETE | `/users/sign_out` | Cerrar sesión |
+| PATCH | `/users` | Actualizar usuario (Devise RegistrationsController#update) |
+| DELETE | `/users` | Cancelar cuenta (Devise RegistrationsController#destroy) |
+
+### Confirmación de Email
+
+| Método | Ruta | Controlador | Acción | Descripción |
+|--------|------|-------------|--------|-------------|
+| GET | `/confirmation/new` | `confirmations#new` | Formulario de confirmación | Ingresar código |
+| POST | `/confirmation` | `confirmations#create` | Enviar código | Enviar código al email |
+| POST | `/confirmation/verify` | `confirmations#verify` | Verificar código | Validar código de 6 dígitos |
+| POST | `/confirmation/resend` | `confirmations#resend` | Reenviar código | Reenviar con cooldown de 60s |
+
+### OAuth (Google)
+
+| Método | Ruta | Controlador | Descripción |
+|--------|------|-------------|-------------|
+| GET | `/users/auth/google_oauth2/callback` | `users/omniauth_callbacks#google_oauth2` | Callback de Google |
+| POST | `/users/auth/google_oauth2/with_role` | `users/omniauth_callbacks#authorize_with_role` | Inicia OAuth con rol en sesión |
 
 ### Perfil de Usuario (Requiere autenticación)
 
@@ -485,6 +589,7 @@ El seed crea datos de prueba para desarrollo y testing:
 | Rol | Email | Password | Nombre |
 |-----|-------|----------|--------|
 | Admin | `admin@eventos.com` | `admin123` | Admin Principal |
+| Admin | `admin@admin.com` | `admin123` | Admin General |
 | Organizer | `organizer@eventos.com` | `organizer123` | Organizador Oficial |
 | User | `user@eventos.com` | `user123` | Juan Pérez |
 | Users extra | `user0@eventos.com` ... `user4@eventos.com` | `password123` | Usuario Falso N |
@@ -604,8 +709,8 @@ Event.upcoming
 Event.by_city("Lima")
 
 # Crear evento
-Event.create!(name: "Mi Evento", description: "Descripción", city: "Lima", 
-              address: "Dirección", start_date: 1.week.from_now, 
+Event.create!(name: "Mi Evento", description: "Descripción", city: "Lima",
+              address: "Dirección", start_date: 1.week.from_now,
               category: Category.first, organizer: User.first)
 ```
 
@@ -619,7 +724,7 @@ bundle exec rspec
 #### Ejecutar tests específicos
 ```bash
 bundle exec rspec spec/models/user_spec.rb
-bundle exec rspec spec/controllers/events_controller_spec.rb
+bundle exec rspec spec/requests/events_spec.rb
 ```
 
 #### Ejecutar tests con formato detallado
@@ -727,6 +832,18 @@ rails routes | grep events
 rails routes --compact
 ```
 
+### Tailwind CSS
+
+#### Compilar manualmente
+```bash
+bin/rails tailwindcss:build
+```
+
+#### Watcher automático
+```bash
+bin/rails tailwindcss:watch
+```
+
 ---
 
 ## 🧪 Testing
@@ -739,16 +856,35 @@ El proyecto usa RSpec 8.0 para testing.
 
 ```
 spec/
-├── models/           # Tests de modelos
+├── models/                     # Tests de modelos
 │   ├── user_spec.rb
 │   ├── event_spec.rb
-│   └── ...
-├── controllers/      # Tests de controladores
-├── policies/         # Tests de políticas
-├── requests/         # Tests de requests
-├── features/         # Tests de integración
-├── rails_helper.rb   # Configuración de Rails
-└── spec_helper.rb    # Configuración de RSpec
+│   ├── comment_spec.rb
+│   ├── category_spec.rb
+│   ├── event_image_spec.rb
+│   ├── event_map_spec.rb
+│   ├── role_spec.rb
+│   └── user_role_spec.rb
+├── requests/                   # Tests de requests
+│   ├── events_spec.rb
+│   ├── omniauth_callbacks_spec.rb
+│   ├── confirmations_spec.rb
+│   ├── home_spec.rb
+│   ├── location_spec.rb
+│   └── organizer/
+├── policies/                   # Tests de políticas
+│   ├── event_policy_spec.rb
+│   ├── user_policy_spec.rb
+│   ├── category_policy_spec.rb
+│   └── comment_policy_spec.rb
+├── services/                   # Tests de servicios
+│   └── confirmation_code_service_spec.rb
+├── mailers/                    # Tests de mailers
+│   └── user_mailer_spec.rb
+├── support/                    # Soporte para tests
+│   └── omniauth.rb
+├── rails_helper.rb             # Configuración de Rails
+└── spec_helper.rb              # Configuración de RSpec
 ```
 
 ### Ejecutar Tests
@@ -770,16 +906,6 @@ bundle exec rspec --format documentation
 bundle exec rspec --order failed
 ```
 
-### System Testing con Capybara
-
-```bash
-# Ejecutar system tests
-bundle exec rspec spec/system/
-
-# System tests con headless Chrome
-HEADLESS=chrome bundle exec rspec spec/system/
-```
-
 ---
 
 ## 📁 Estructura del Proyecto
@@ -798,7 +924,11 @@ event-management/
 │   │   ├── organizer/      # Namespace organizer
 │   │   │   ├── base_controller.rb
 │   │   │   └── events_controller.rb
+│   │   ├── users/          # Devise overrides + Omniauth
+│   │   │   ├── omniauth_callbacks_controller.rb
+│   │   │   └── registrations_controller.rb
 │   │   ├── application_controller.rb
+│   │   ├── confirmations_controller.rb
 │   │   ├── events_controller.rb
 │   │   ├── comments_controller.rb
 │   │   ├── home_controller.rb
@@ -807,14 +937,21 @@ event-management/
 │   ├── javascript/        # JavaScript (Stimulus controllers)
 │   │   ├── controllers/
 │   │   │   ├── application.js
-│   │   │   ├── explore_controller.js
-│   │   │   ├── event_form_controller.js
+│   │   │   ├── index.js
+│   │   │   ├── carousel_controller.js
+│   │   │   ├── confirm_controller.js
 │   │   │   ├── event_detail_controller.js
+│   │   │   ├── event_form_controller.js
+│   │   │   ├── event_map_controller.js
+│   │   │   ├── explore_controller.js
 │   │   │   ├── flash_controller.js
+│   │   │   ├── location_controller.js
+│   │   │   ├── navbar_controller.js
 │   │   │   └── organizer_dashboard_controller.js
 │   │   └── application.js
 │   ├── jobs/               # Active Job jobs
 │   ├── mailers/            # Mailers
+│   │   └── user_mailer.rb
 │   ├── models/             # Modelos ActiveRecord
 │   │   ├── application_record.rb
 │   │   ├── user.rb
@@ -834,6 +971,7 @@ event-management/
 │   │   └── events/
 │   │       └── search_query.rb
 │   ├── services/           # Service objects
+│   │   ├── confirmation_code_service.rb
 │   │   ├── events/
 │   │   │   ├── create_service.rb
 │   │   │   └── update_service.rb
@@ -845,6 +983,8 @@ event-management/
 │       ├── organizer/
 │       ├── events/
 │       ├── devise/
+│       ├── confirmations/
+│       ├── profiles/
 │       └── shared/
 ├── bin/                    # Ejecutables Rails
 │   ├── rails
@@ -868,8 +1008,11 @@ event-management/
 ├── public/                 # Archivos públicos
 ├── spec/                   # Tests RSpec
 │   ├── models/
-│   ├── controllers/
+│   ├── requests/
 │   ├── policies/
+│   ├── services/
+│   ├── mailers/
+│   ├── support/
 │   ├── rails_helper.rb
 │   └── spec_helper.rb
 ├── storage/                # Active Storage
@@ -877,7 +1020,6 @@ event-management/
 ├── tmp/                    # Archivos temporales
 ├── vendor/                 # Gems vendorizadas
 ├── .env                    # Variables de entorno (NO commitear)
-├── .env.example            # Ejemplo de .env
 ├── .gitignore              # Archivos ignorados por Git
 ├── .ruby-version           # Versión de Ruby
 ├── Dockerfile              # Configuración Docker
@@ -888,6 +1030,35 @@ event-management/
 ├── README.md               # Este archivo
 └── config.ru               # Configuración Rack
 ```
+
+### Stimulus Controllers
+
+El proyecto usa los siguientes controladores Stimulus:
+
+| Controller | Descripción |
+|------------|-------------|
+| `explore_controller.js` | Búsqueda y filtros en exploración de eventos |
+| `event_form_controller.js` | Formulario de creación/edición de eventos |
+| `event_detail_controller.js` | Interacciones en detalle de evento |
+| `event_map_controller.js` | Renderizado de mapa Leaflet |
+| `flash_controller.js` | Auto-dismiss de mensajes flash |
+| `organizer_dashboard_controller.js` | Dashboard del organizador |
+| `confirm_controller.js` | Confirmación de email (código de 6 dígitos) |
+| `carousel_controller.js` | Carrusel de imágenes de evento |
+| `location_controller.js` | Selección de ubicación con autocompletado |
+| `navbar_controller.js` | Comportamiento de la barra de navegación |
+
+---
+
+## ⏱️ Rate Limiting
+
+Actualmente **no hay rate limiting implementado** en la aplicación. Esto es una consideración futura para:
+
+- Endpoints de confirmación de email (evitar abuso de envío de códigos)
+- Creación de comentarios
+- Intentos de login (Devise ya incluye `Lockable` opcional pero no está activado)
+
+Si el proyecto escala a producción, se recomienda implementar rate limiting via Rack::Attack o middleware similar.
 
 ---
 
@@ -1034,7 +1205,7 @@ RAILS_SERVE_STATIC_FILES=true
 ### Variables Sensibles
 
 **NUNCA** commitear:
-- `.env` - Usa `.env.example` como plantilla
+- `.env` - Usa la lista de variables más arriba como plantilla
 - `config/master.key` - Ya está en `.gitignore`
 - Contraseñas hardcodeadas
 - API keys
@@ -1050,9 +1221,9 @@ bundle exec bundler-audit check
 ### Headers de Seguridad
 
 El proyecto incluye:
-- CSP (Content Security Policy)
-- CSRF protection
-- Secure headers (configurados en Rails 8)
+- ~~CSP (Content Security Policy)~~ — **COMENTADO** en `config/initializers/content_security_policy.rb`. No está activo. Pendiente de configuración para producción.
+- CSRF protection — Activo via `protect_from_forgery with: :exception`
+- Secure headers — Configurados por defecto en Rails 8
 
 ---
 
@@ -1064,6 +1235,8 @@ El proyecto incluye:
 - [Pundit Documentation](https://github.com/varvet/pundit)
 - [TailwindCSS](https://tailwindcss.com/docs)
 - [Hotwire](https://hotwired.dev/)
+- [Leaflet](https://leafletjs.com/)
+- [Omniauth Google OAuth2](https://github.com/zquestz/omniauth-google-oauth2)
 
 ### Comunidad
 - [Ruby on Rails Forum](https://discuss.rubyonrails.org/)
@@ -1111,4 +1284,4 @@ Para preguntas o problemas:
 
 ---
 
-**Última actualización:** Mayo 2026
+**Última actualización:** Junio 2026
