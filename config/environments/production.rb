@@ -64,16 +64,20 @@ Rails.application.configure do
     protocol: ENV.fetch("APP_PROTOCOL", "https")
   }
 
-  # Configure outgoing SMTP server (Gmail).
+  # Configure outgoing SMTP server (Gmail, SendGrid, etc.).
+  # SMTP_PORT=587 (STARTTLS) or 465 (SSL/TLS)
   if ENV["SMTP_ADDRESS"].present? && ENV["SMTP_PASSWORD"].present?
     config.action_mailer.smtp_settings = {
       address:              ENV.fetch("SMTP_ADDRESS"),
-      port:                 ENV.fetch("SMTP_PORT", 587),
+      port:                 ENV.fetch("SMTP_PORT", 587).to_i,
       domain:               ENV.fetch("SMTP_DOMAIN", ENV.fetch("APP_HOST", "localhost")),
       user_name:            ENV.fetch("SMTP_USERNAME"),
       password:             ENV.fetch("SMTP_PASSWORD"),
-      authentication:       :plain,
-      enable_starttls_auto: true
+      authentication:       (ENV["SMTP_AUTH"] || "plain").to_sym,
+      enable_starttls_auto: ENV.fetch("SMTP_STARTTLS", "true") == "true",
+      ssl:                  ENV.fetch("SMTP_SSL", "false") == "true",
+      open_timeout:         ENV.fetch("SMTP_OPEN_TIMEOUT", 10).to_i,
+      read_timeout:         ENV.fetch("SMTP_READ_TIMEOUT", 10).to_i
     }
   end
 
