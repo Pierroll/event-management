@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source inline("bg-blue-400 bg-blue-600 hover:bg-blue-700 bg-gray-50 bg-white text-gray-400 text-gray-700 hover:bg-gray-50 border-gray-200 border-gray-300 cursor-not-allowed");
+
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
     width: 4px;

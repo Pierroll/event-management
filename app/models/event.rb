@@ -87,34 +87,28 @@ class Event < ApplicationRecord
   # METHODS
   # =========================
   def primary_image
-    event_images.first
+    event_images.min_by(&:display_order)
   end
 
   def secondary_images
-    event_images.offset(1)
+    sorted = event_images.sort_by(&:display_order)
+    sorted.drop(1)
   end
 
   private
 
   def must_have_at_least_one_image
-    has_images = event_images.reject(&:marked_for_destruction?).any? ||
-                 (respond_to?(:images) && images.present?) ||
-                 primary_image_param.present?
+    return if event_images.reject(&:marked_for_destruction?).any? ||
+              primary_image_param.present?
 
-    unless has_images
-      errors.add(:base, "Debes subir al menos una imagen para registrar el evento")
-    end
+    errors.add(:base, :no_images)
   end
 
   def end_date_after_start_date
-    return if end_date.blank?
-    return if start_date.blank?
+    return if end_date.blank? || start_date.blank?
 
     if end_date <= start_date
-      errors.add(
-        :end_date,
-        'must be after start date'
-      )
+      errors.add(:end_date, :after_start_date)
     end
   end
 end

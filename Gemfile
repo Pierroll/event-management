@@ -57,6 +57,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Preview emails in the browser instead of sending
+  gem "letter_opener"
 end
 
 group :test do
@@ -78,3 +81,7 @@ gem "pundit", "~> 2.5"
 gem "kaminari", "~> 1.2"
 
 gem "geocoder", "~> 1.8"
+
+gem "rails-i18n", "~> 8.0"
+
+gem "omniauth-google-oauth2", "~> 1.2"

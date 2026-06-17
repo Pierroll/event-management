@@ -42,7 +42,10 @@ module Events
     def filter_by_query(relation)
       if @params[:query].present?
         q = "%#{@params[:query].to_s.downcase}%"
-        relation.where("LOWER(name) LIKE :q OR LOWER(description) LIKE :q", q: q)
+        relation.where(
+          "LOWER(name) LIKE :q OR LOWER(description) LIKE :q",
+          q: q
+        )
       else
         relation
       end

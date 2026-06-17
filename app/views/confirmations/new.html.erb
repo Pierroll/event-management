@@ -1,0 +1,38 @@
+<%# Confirmation Code Page %>
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Verifica tu correo</h1>
+      <p class="mt-2 text-gray-500">
+        Hemos enviado un código de 6 dígitos a <strong><%= @email %></strong>
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
+      <%= form_tag verify_confirmation_path, class: "space-y-5" do %>
+        <div>
+          <%= label_tag :confirmation_code, "Código de verificación", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= text_field_tag :confirmation_code, nil,
+              maxlength: 6,
+              inputmode: "numeric",
+              pattern: "[0-9]*",
+              autocomplete: "one-time-code",
+              class: "w-full text-center text-2xl tracking-[0.5em] border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+              placeholder: "000000",
+              required: true %>
+        </div>
+
+        <%= submit_tag "Verificar código",
+            class: "w-full px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+      <% end %>
+
+      <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+        <%= form_tag resend_confirmation_path, class: "inline" do %>
+          <%= submit_tag "Reenviar código",
+              class: "text-sm text-blue-600 hover:text-blue-700 hover:underline bg-transparent border-none cursor-pointer" %>
+        <% end %>
+        <p class="text-xs text-gray-400 mt-1">Puedes solicitar un nuevo código cada 60 segundos</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -43,3 +43,6 @@ config/master.key
 
 .atl/
 
+.agents
+.atl.kilocode
+.opencodeclient_secret*.json

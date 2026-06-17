@@ -6,13 +6,13 @@ class EventsController < ApplicationController
         cookies[:selected_city] = "all"
         params[:city] = nil
       else
-        cookies[:selected_city] = params[:city]
+        cookies[:selected_city] = sanitize_city(params[:city])
       end
     elsif cookies[:selected_city].present? && cookies[:selected_city] != "all"
       params[:city] = cookies[:selected_city]
     end
 
-    base_scope = policy_scope(Event)
+    base_scope = policy_scope(Event).includes(:category, :organizer, :event_images)
     @events = Events::SearchQuery.call(base_scope, search_params)
                                  .page(params[:page])
                                  .per(9)
@@ -30,5 +30,10 @@ class EventsController < ApplicationController
 
   def search_params
     params.permit(:city, :category_id, :query, :start_date, :end_date, :price_min, :price_max)
+  end
+
+  def sanitize_city(city)
+    # Evitar valores maliciosos o excesivamente largos en la cookie
+    city.to_s.strip.truncate(100)
   end
 end

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Organizer::Events", type: :request do
   let!(:organizer_role) { Role.find_or_create_by!(name: 'organizer') }
-  let!(:user) { User.create!(name: 'Organizador Test', email: 'test@eventos.com', password: 'password123', password_confirmation: 'password123', selected_role: 'organizer') }
+  let!(:user) { User.create!(name: 'Organizador Test', email: 'test@eventos.com', password: 'password123', password_confirmation: 'password123', selected_role: 'organizer', confirmed_at: Time.current) }
   let!(:category) { Category.create!(name: 'Tecnología', slug: 'tecnologia', description: 'Tecnología y eventos') }
   
   # Creamos un evento válido listo para ser publicado

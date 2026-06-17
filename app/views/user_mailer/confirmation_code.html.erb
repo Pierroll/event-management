@@ -1,0 +1,17 @@
+<h1>¡Bienvenido a SGE!</h1>
+
+<p>Gracias por registrarte. Para verificar tu correo electrónico, usa el siguiente código:</p>
+
+<div style="text-align: center; margin: 32px 0;">
+  <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; background: #f3f4f6; padding: 16px 24px; border-radius: 8px; font-family: monospace;">
+    <%= @code %>
+  </span>
+</div>
+
+<p>Este código expirará en <%= @expiry_minutes %> minutos.</p>
+
+<p>Si no solicitaste este código, puedes ignorar este mensaje.</p>
+
+<hr>
+
+<p style="color: #6b7280; font-size: 12px;">SGE — Sistema de Gestión de Eventos</p>

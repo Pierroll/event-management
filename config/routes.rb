@@ -1,5 +1,19 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {
+    omniauth_callbacks: "users/omniauth_callbacks",
+    registrations: "users/registrations"
+  }
+
+  # Custom OAuth with role selection (redirects to Google with role in session)
+  devise_scope :user do
+    post "users/auth/google_oauth2/with_role", to: "users/omniauth_callbacks#authorize_with_role", as: :user_google_oauth2_authorize_with_role
+  end
+
+  # Email confirmation
+  resource :confirmation, only: [:new, :create], controller: "confirmations" do
+    post :verify, on: :collection
+    post :resend, on: :collection
+  end
 
   # Public pages
   root "home#index"

@@ -6,7 +6,8 @@ class User < ApplicationRecord
          :registerable,
          :recoverable,
          :rememberable,
-         :validatable
+         :validatable,
+         :omniauthable, omniauth_providers: [:google_oauth2]
 
   # =========================
   # RELATIONS
@@ -26,6 +27,7 @@ class User < ApplicationRecord
   # =========================
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
+  validate :selected_role_presence, on: :create
 
   # =========================
   # DEFAULTS
@@ -34,6 +36,42 @@ class User < ApplicationRecord
   attr_accessor :selected_role
 
   after_create :assign_selected_role
+
+  # =========================
+  # OAUTH & CONFIRMATION
+  # =========================
+  def self.from_google(auth, role_name: nil)
+    user = find_by(email: auth.info.email)
+
+    if user
+      user.update!(provider: auth.provider, uid: auth.uid)
+    else
+      user = new(
+        email: auth.info.email,
+        name: auth.info.name,
+        password: SecureRandom.hex(32),
+        provider: auth.provider,
+        uid: auth.uid,
+        confirmed_at: Time.current
+      )
+      user.selected_role = role_name
+      user.save!
+    end
+
+    user
+  end
+
+  def confirmed?
+    confirmed_at.present? || provider.present?
+  end
+
+  def confirm_with_code(code)
+    ConfirmationCodeService.verify(self, code)
+  end
+
+  def generate_confirmation_code
+    ConfirmationCodeService.generate(self)
+  end
 
   # =========================
   # ROLE HELPERS
@@ -57,8 +95,15 @@ class User < ApplicationRecord
   private
 
   def assign_selected_role
-    role_name = selected_role || 'registered_user'
-    role = Role.find_by(name: role_name)
+    return unless selected_role
+
+    role = Role.find_by(name: selected_role)
     user_roles.create(role: role) if role
+  end
+
+  def selected_role_presence
+    return if provider.present? # OAuth users get role via session
+
+    errors.add(:selected_role, "Debes elegir un tipo de cuenta") if selected_role.blank?
   end
 end

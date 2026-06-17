@@ -39,8 +39,46 @@ es:
         restrict_dependent_destroy:
           has_one: "No se puede eliminar el registro porque existe un %{record} dependiente"
           has_many: "No se puede eliminar el registro porque existen %{record} dependientes"
+      models:
+        event:
+          attributes:
+            base:
+              no_images: "Debes subir al menos una imagen para registrar el evento"
+            end_date:
+              after_start_date: "debe ser posterior a la fecha de inicio"
+        event_image:
+          attributes:
+            base:
+              image_or_file_required: "Debe proporcionar una URL de imagen o adjuntar un archivo"
+
+  confirmations:
+    sent: "Te hemos enviado un código de verificación a tu correo electrónico."
+    verified: "Correo electrónico verificado exitosamente."
+    expired: "Código expirado — solicite uno nuevo."
+    exhausted: "Código agotado — solicite uno nuevo."
+    invalid: "Código incorrecto — intente de nuevo."
+    resend_cooldown: "Debe esperar 60 segundos antes de solicitar un nuevo código."
+    resend_success: "Se ha enviado un nuevo código de verificación a tu correo."
+    required: "Debes verificar tu correo electrónico antes de continuar."
+
+  pundit:
+    errors:
+      not_authorized: "No estás autorizado para realizar esta acción."
 
   devise:
+    failure:
+      already_authenticated: "Ya has iniciado sesión."
+      inactive: "Tu cuenta aún no está activada."
+      invalid: "%{authentication_keys} o contraseña inválidos."
+      locked: "Tu cuenta está bloqueada."
+      last_attempt: "Tienes un intento más antes de que tu cuenta sea bloqueada."
+      not_found_in_database: "%{authentication_keys} o contraseña inválidos."
+      timeout: "Tu sesión expiró. Inicia sesión nuevamente."
+      unauthenticated: "Debes iniciar sesión o registrarte para continuar."
+      unconfirmed: "Debes confirmar tu correo electrónico antes de continuar."
+    omniauth:
+      email_not_verified: "El correo electrónico no fue verificado por Google."
+      failure: "No se pudo autenticar con %{kind}: %{reason}."
     sessions:
       signed_in: "Sesión iniciada correctamente."
       signed_out: "Sesión cerrada correctamente."

@@ -18,11 +18,9 @@ class EventImage < ApplicationRecord
             default: 0
 
   # =========================
-  # ORDER
+  # SCOPES
   # =========================
-  default_scope {
-    order(display_order: :asc)
-  }
+  scope :ordered, -> { order(display_order: :asc) }
 
   # =========================
   # METHODS
@@ -39,7 +37,7 @@ class EventImage < ApplicationRecord
 
   def image_or_file_present
     if image.blank? && !file.attached?
-      errors.add(:base, 'Debe proporcionar una URL de imagen o adjuntar un archivo')
+      errors.add(:base, :image_or_file_required)
     end
   end
 end

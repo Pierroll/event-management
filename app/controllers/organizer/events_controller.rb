@@ -3,7 +3,10 @@ module Organizer
     before_action :set_event, only: [:show, :edit, :update, :destroy]
 
     def index
-      @events = policy_scope(Event).where(organizer_id: current_user.id).page(params[:page]).per(10)
+      @events = policy_scope(Event)
+                  .includes(:category, :event_images)
+                  .where(organizer_id: current_user.id)
+                  .page(params[:page]).per(10)
     end
 
     def show

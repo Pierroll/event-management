@@ -51,18 +51,18 @@ def assign_role_idempotently(user, role_name)
   end
 end
 
-# Admin
+# Admin (eventos.com)
 admin_user = User.find_or_initialize_by(email: "admin@eventos.com")
 if admin_user.new_record?
   admin_user.name = "Admin Principal"
   admin_user.password = "admin123"
   admin_user.password_confirmation = "admin123"
   admin_user.active = true
+  admin_user.confirmed_at = Time.current
+  admin_user.selected_role = "admin"
   admin_user.save!
   puts "Admin creado (admin@eventos.com / admin123)"
 else
-  # Si el usuario ya existe, solo actualizamos el nombre y el estado si han cambiado.
-  # NO modificamos la contraseña para evitar re-hasheos innecesarios.
   if admin_user.name != "Admin Principal" || !admin_user.active
     admin_user.update!(name: "Admin Principal", active: true)
     puts "Admin actualizado (admin@eventos.com)"
@@ -72,6 +72,22 @@ else
 end
 assign_role_idempotently(admin_user, "admin")
 
+# Admin (admin.com) — el que usás para probar
+admin_admin = User.find_or_initialize_by(email: "admin@admin.com")
+if admin_admin.new_record?
+  admin_admin.name = "Admin Local"
+  admin_admin.password = "admin123"
+  admin_admin.password_confirmation = "admin123"
+  admin_admin.active = true
+  admin_admin.confirmed_at = Time.current
+  admin_admin.selected_role = "admin"
+  admin_admin.save!
+  puts "Admin creado (admin@admin.com / admin123)"
+else
+  puts "Admin ya existe (admin@admin.com)"
+end
+assign_role_idempotently(admin_admin, "admin")
+
 
 # Organizer
 organizer_user = User.find_or_initialize_by(email: "organizer@eventos.com")
@@ -80,6 +96,8 @@ if organizer_user.new_record?
   organizer_user.password = "organizer123"
   organizer_user.password_confirmation = "organizer123"
   organizer_user.active = true
+  organizer_user.confirmed_at = Time.current
+  organizer_user.selected_role = "organizer"
   organizer_user.save!
   puts "Organizador creado (organizer@eventos.com / organizer123)"
 else
@@ -99,6 +117,8 @@ if registered_user.new_record?
   registered_user.password = "user123"
   registered_user.password_confirmation = "user123"
   registered_user.active = true
+  registered_user.confirmed_at = Time.current
+  registered_user.selected_role = "registered_user"
   registered_user.save!
   puts "Usuario común creado (user@eventos.com / user123)"
 else
@@ -121,6 +141,8 @@ users = [registered_user]
     u.password = "password123"
     u.password_confirmation = "password123"
     u.active = true
+    u.confirmed_at = Time.current
+    u.selected_role = "registered_user"
     u.save!
     puts "Usuario extra creado: #{u.email}"
   else

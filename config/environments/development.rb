@@ -31,14 +31,32 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
-
-  # Make template changes take effect immediately.
+  # Configure Action Mailer for development.
+  # If SMTP credentials are present, sends real emails (your classmates will receive them).
+  # Otherwise, falls back to letter_opener (previews in browser).
+  if ENV["SMTP_ADDRESS"].present? && ENV["SMTP_PASSWORD"].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      address:              ENV.fetch("SMTP_ADDRESS"),
+      port:                 ENV.fetch("SMTP_PORT", 587),
+      domain:               ENV.fetch("SMTP_DOMAIN", ENV.fetch("APP_HOST", "localhost")),
+      user_name:            ENV.fetch("SMTP_USERNAME"),
+      password:             ENV.fetch("SMTP_PASSWORD"),
+      authentication:       :plain,
+      enable_starttls_auto: true
+    }
+  else
+    config.action_mailer.delivery_method = :letter_opener
+  end
+  config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
+  config.action_mailer.perform_deliveries = true
 
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+  # Set host to be used by links generated in mailer templates.
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("APP_HOST", "localhost:3000"),
+    protocol: ENV.fetch("APP_PROTOCOL", "http")
+  }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

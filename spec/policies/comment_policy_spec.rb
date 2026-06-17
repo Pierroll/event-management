@@ -1,27 +1,43 @@
 require 'rails_helper'
 
 RSpec.describe CommentPolicy, type: :policy do
-  let(:user) { User.new }
-
   subject { described_class }
 
-  permissions ".scope" do
-    pending "add some examples to (or delete) #{__FILE__}"
+  let(:user) { User.create!(name: "User", email: "user@test.com", password: "password123", active: true) }
+  let(:other_user) { User.create!(name: "Other", email: "other@test.com", password: "password123", active: true) }
+  let(:admin) do
+    User.create!(name: "Admin", email: "admin@test.com", password: "password123", active: true).tap do |u|
+      u.roles << Role.find_or_create_by!(name: "admin")
+    end
   end
-
-  permissions :show? do
-    pending "add some examples to (or delete) #{__FILE__}"
-  end
+  let(:guest) { nil }
+  let(:comment) { Comment.new(user: user) }
 
   permissions :create? do
-    pending "add some examples to (or delete) #{__FILE__}"
-  end
+    it "allows authenticated users" do
+      expect(subject).to permit(user, Comment.new)
+    end
 
-  permissions :update? do
-    pending "add some examples to (or delete) #{__FILE__}"
+    it "denies guests" do
+      expect(subject).not_to permit(guest, Comment.new)
+    end
   end
 
   permissions :destroy? do
-    pending "add some examples to (or delete) #{__FILE__}"
+    it "allows admin to delete any comment" do
+      expect(subject).to permit(admin, comment)
+    end
+
+    it "allows the comment author to delete their own comment" do
+      expect(subject).to permit(user, comment)
+    end
+
+    it "denies other users" do
+      expect(subject).not_to permit(other_user, comment)
+    end
+
+    it "denies guests" do
+      expect(subject).not_to permit(guest, comment)
+    end
   end
 end
