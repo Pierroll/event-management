@@ -19,7 +19,10 @@ Rails.application.routes.draw do
   root "home#index"
   resources :events, only: [:index, :show] do
     resources :comments, only: [:create, :destroy]
+    resources :bookings, only: [:new, :create]
   end
+
+  resources :bookings, only: [:index, :show]
 
   # User profile
   resource :profile, only: [:show, :edit, :update]

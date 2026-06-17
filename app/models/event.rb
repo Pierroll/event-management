@@ -29,6 +29,9 @@ class Event < ApplicationRecord
   has_many :comments,
            dependent: :destroy
 
+  has_many :bookings,
+           dependent: :destroy
+
   # =========================
   # VALIDATIONS
   # =========================
@@ -93,6 +96,19 @@ class Event < ApplicationRecord
   def secondary_images
     sorted = event_images.sort_by(&:display_order)
     sorted.drop(1)
+  end
+
+  # ── Booking / Availability ──
+  def remaining_capacity
+    max_capacity - bookings.active.sum(:quantity)
+  end
+
+  def sold_out?
+    max_capacity.present? && remaining_capacity <= 0
+  end
+
+  def available?
+    published? && !sold_out?
   end
 
   private

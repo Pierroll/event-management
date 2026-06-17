@@ -177,6 +177,51 @@
         </div>
       </div>
 
+      <%# Availability & Booking %>
+      <% if @event.max_capacity.present? || @event.price.present? %>
+      <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-sm text-blue-700 font-medium">Disponibilidad</p>
+            <% if @event.sold_out? %>
+              <p class="text-lg font-bold text-red-600">🚫 Agotado</p>
+              <p class="text-xs text-red-500">No quedan entradas disponibles</p>
+            <% else %>
+              <p class="text-lg font-bold text-gray-900">
+                <%= @event.remaining_capacity %> / <%= @event.max_capacity %>
+                <span class="text-sm font-normal text-gray-500">lugares disponibles</span>
+              </p>
+              <% if @event.remaining_capacity <= @event.max_capacity * 0.2 && @event.remaining_capacity > 0 %>
+                <p class="text-xs text-orange-600 font-medium">⚠️ Quedan pocos lugares</p>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-500">Precio</p>
+            <p class="text-2xl font-bold <%= @event.price > 0 ? "text-gray-900" : "text-green-600" %>">
+              <%= @event.price > 0 ? number_to_currency(@event.price, unit: "S/ ") : "Gratis" %>
+            </p>
+            <% if user_signed_in? && @event.available? %>
+              <%= link_to "Comprar entrada",
+                  new_event_booking_path(@event),
+                  class: "mt-2 inline-block px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95" %>
+            <% elsif !user_signed_in? && @event.available? %>
+              <p class="text-xs text-gray-400 mt-2">
+                <%= link_to "Inicia sesión", new_user_session_path, class: "text-blue-600 hover:underline" %> para comprar entradas
+              </p>
+            <% end %>
+          </div>
+        </div>
+        <%# ponytail: capacity bar is purely visual, no calculation overhead %>
+        <% unless @event.sold_out? || @event.max_capacity.nil? || @event.max_capacity == 0 %>
+          <div class="mt-4 w-full bg-blue-200 rounded-full h-2.5">
+            <% pct = [(@event.bookings.active.sum(:quantity).to_f / @event.max_capacity * 100), 100].min %>
+            <div class="bg-blue-600 h-2.5 rounded-full transition-all" style="width: <%= pct %>%"></div>
+          </div>
+        <% end %>
+      </div>
+      <% end %>
+
       <%# Description %>
       <div class="mt-8">
         <h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>

@@ -101,3 +101,15 @@ es:
         subject: "Instrucciones para restablecer contraseña"
       unlock_instructions:
         subject: "Instrucciones para desbloquear cuenta"
+
+  # ── Bookings ──
+  bookings:
+    created: "¡Compra confirmada! Tus entradas están listas."
+    status:
+      pending: "Pendiente de pago"
+      confirmed: "Confirmada"
+      cancelled: "Cancelada"
+    errors:
+      capacity_exceeded: "Ya no hay suficientes lugares disponibles para este evento."
+      not_available: "Este evento no tiene entradas disponibles."
+      not_found: "No se encontró la compra solicitada."
