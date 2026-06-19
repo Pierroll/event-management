@@ -11,6 +11,9 @@ application.register("confirm", ConfirmController)
 import NavbarController from "controllers/navbar_controller"
 application.register("navbar", NavbarController)
 
+import TicketTypesController from "controllers/ticket_types_controller"
+application.register("ticket-types", TicketTypesController)
+
 // Eager load all other controllers defined in this directory
 import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
 eagerLoadControllersFrom("controllers", application)

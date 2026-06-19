@@ -29,7 +29,8 @@ class Comment < ApplicationRecord
   # =========================
   # CALLBACKS
   # =========================
-  after_save :update_event_rating
+  # after_save rating update is handled by Comments::CreateService within a transaction.
+  # after_destroy still needs the callback since there's no DestroyService (yet).
   after_destroy :update_event_rating
 
   # =========================

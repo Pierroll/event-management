@@ -3,39 +3,39 @@
   <%# Header %>
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">Mis eventos</h1>
-      <p class="mt-1 text-gray-500">Gestiona tus eventos creados</p>
+      <h1 class="text-3xl font-bold text-heading">Mis eventos</h1>
+      <p class="mt-1 text-body-tertiary">Gestiona tus eventos creados</p>
     </div>
-    <%= link_to new_organizer_event_path, class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" do %>
+    <%= link_to new_organizer_event_path, class: "inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" do %>
       <span class="mr-1.5">+</span> Nuevo evento
     <% end %>
   </div>
 
   <%# Events Table %>
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <div class="bg-white rounded-badge border border-border overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full">
         <thead>
-          <tr class="bg-gray-50 border-b border-gray-200">
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-            <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          <tr class="bg-surface-secondary border-b border-border">
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Evento</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Categoría</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Fecha</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Estado</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Precio</th>
+            <th class="text-right px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200" data-organizer-dashboard-target="eventRow">
+        <tbody class="divide-y divide-gray-200">
           <% if @events.any? %>
             <% @events.each do |event| %>
-              <tr class="hover:bg-gray-50 transition-colors">
+              <tr class="hover:bg-surface-secondary transition-colors">
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                    <div class="w-10 h-10 bg-surface-secondary rounded-card overflow-hidden shrink-0">
                       <% if event.event_images.any? %>
                         <%= image_tag event.event_images.first.image_url, class: "w-full h-full object-cover" %>
                       <% else %>
-                        <div class="w-full h-full flex items-center justify-center text-gray-300">
+                        <div class="w-full h-full flex items-center justify-center text-muted">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                           </svg>
@@ -43,24 +43,29 @@
                       <% end %>
                     </div>
                     <div>
-                      <%= link_to event.name, organizer_event_path(event), class: "text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors" %>
-                      <p class="text-xs text-gray-500"><%= event.city %></p>
+                      <%= link_to event.name, organizer_event_path(event), class: "text-sm font-medium text-heading hover:text-link transition-colors" %>
+                      <p class="text-xs text-body-tertiary"><%= event.city %></p>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-600"><%= event.category&.name || "—" %></td>
-                <td class="px-6 py-4 text-sm text-gray-600"><%= l(event.start_date, format: :short) if event.start_date %></td>
+                <td class="px-6 py-4 text-sm text-body-secondary"><%= event.category&.name || "—" %></td>
+                <td class="px-6 py-4 text-sm text-body-secondary"><%= l(event.start_date, format: :short) if event.start_date %></td>
                 <td class="px-6 py-4">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                    <%= event.published? ? "bg-green-100 text-green-800" : "" %>
-                    <%= event.draft? ? "bg-yellow-100 text-yellow-800" : "" %>
-                    <%= event.canceled? ? "bg-red-100 text-red-800" : "" %>
-                    <%= event.finished? ? "bg-gray-100 text-gray-800" : "" %>">
-                    <%= event.status.humanize %>
-                  </span>
+                  <%= event_status_badge(event, classes: "inline-flex items-center px-2.5 py-0.5 text-xs font-medium") %>
                 </td>
-                <td class="px-6 py-4 text-sm font-medium">
-                  <%= event.price > 0 ? number_to_currency(event.price, unit: "S/") : "Gratis" %>
+                <td class="px-6 py-4 text-sm">
+                  <% price_range = event.price_range %>
+                  <% min_price = price_range.is_a?(Range) ? price_range.first : price_range %>
+                  <% if min_price %>
+                    <span class="font-medium <%= min_price > 0 ? "text-heading" : "text-success" %>">
+                      <%= min_price > 0 ? number_to_currency(min_price, unit: "S/") : "Gratis" %>
+                    </span>
+                    <% if price_range.is_a?(Range) %>
+                      <span class="text-muted">+</span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-muted">—</span>
+                  <% end %>
                 </td>
                 <td class="px-6 py-4 text-right">
                   <div class="flex items-center justify-end gap-2">
@@ -70,7 +75,7 @@
                         <button type="submit" 
                                 data-turbo-confirm="¿Estás seguro de que deseas publicar este evento? Será visible para todos los usuarios."
                                 data-turbo-confirm-title="Publicar evento"
-                                class="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors border border-emerald-200">
+                                class="px-3 py-1.5 text-xs font-bold bg-success/10 text-success rounded-card hover:bg-success/20 transition-colors border border-success/30">
                           Publicar
                         </button>
                       <% end %>
@@ -81,15 +86,15 @@
                         <button type="submit" 
                                 data-turbo-confirm="¿Estás seguro de que deseas cancelar este evento? Esta acción no se puede deshacer."
                                 data-turbo-confirm-title="Cancelar evento"
-                                class="px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200">
+                                class="px-3 py-1.5 text-xs font-bold bg-error/10 text-error rounded-card hover:bg-error/15 transition-colors border border-error/30">
                           Cancelar
                         </button>
                       <% end %>
                     <% end %>
                     <%= link_to "Ver", organizer_event_path(event),
-                        class: "px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" %>
+                        class: "px-3 py-1.5 text-xs font-bold bg-white border border-border text-body rounded-card hover:bg-surface-secondary transition-colors" %>
                     <%= link_to "Editar", edit_organizer_event_path(event),
-                        class: "px-3 py-1.5 text-xs font-bold bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200" %>
+                        class: "px-3 py-1.5 text-xs font-bold bg-primary/10 text-link-hover rounded-card hover:bg-primary/20 transition-colors border border-primary/30" %>
                   </div>
                 </td>
               </tr>
@@ -97,15 +102,15 @@
           <% else %>
             <tr>
               <td colspan="6" class="px-6 py-16 text-center">
-                <div class="w-20 h-20 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div class="w-20 h-20 bg-surface-secondary text-muted rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                   </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">No tienes eventos creados</h3>
-                <p class="mt-2 text-gray-500 max-w-xs mx-auto text-sm">Empieza a organizar tus propios eventos y llega a cientos de personas.</p>
+                <h3 class="text-xl font-bold text-heading">No tienes eventos creados</h3>
+                <p class="mt-2 text-body-tertiary max-w-xs mx-auto text-sm">Empieza a organizar tus propios eventos y llega a cientos de personas.</p>
                 <%= link_to new_organizer_event_path,
-                    class: "mt-8 inline-flex items-center px-6 py-3 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95" do %>
+                    class: "mt-8 inline-flex items-center px-6 py-3 bg-primary text-white text-sm font-bold rounded-badge hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95" do %>
                   <span class="mr-2">+</span> Crear mi primer evento
                 <% end %>
               </td>

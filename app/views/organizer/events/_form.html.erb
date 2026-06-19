@@ -19,11 +19,11 @@
 
   <%# Rails Validation Errors %>
   <% if event.errors.any? %>
-    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-      <h3 class="text-sm font-medium text-red-800">
+    <div class="bg-error/10 border border-error/30 rounded-card p-4">
+      <h3 class="text-sm font-medium text-error">
         <%= pluralize(event.errors.count, "error") %> impidieron guardar:
       </h3>
-      <ul class="mt-2 list-disc list-inside text-sm text-red-600">
+      <ul class="mt-2 list-disc list-inside text-sm text-error">
         <% event.errors.full_messages.each do |msg| %>
           <li><%= msg %></li>
         <% end %>
@@ -34,65 +34,65 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-controller="event-map">
     <%# Name %>
     <div class="md:col-span-2">
-      <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.text_field :name, id: "event_name",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
           placeholder: "Ej: Conferencia de Tecnología 2025" %>
     </div>
 
     <%# Description %>
     <div class="md:col-span-2">
-      <%= f.label :description, "Descripción", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :description, "Descripción", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.text_area :description, rows: 5, id: "event_description",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
           placeholder: "Describe los detalles del evento..." %>
     </div>
 
     <%# Category %>
     <div>
-      <%= f.label :category_id, "Categoría", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :category_id, "Categoría", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.collection_select :category_id, Category.active, :id, :name,
           { prompt: "Seleccionar categoría" }, id: "event_category_id",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
     </div>
 
     <%# City %>
     <div>
-      <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.text_field :city, id: "event_city",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
           placeholder: "Ej: Lima",
           data: { event_map_target: "cityInput" } %>
     </div>
 
     <%# Address %>
     <div>
-      <%= f.label :address, "Dirección", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :address, "Dirección", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.text_field :address, id: "event_address",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
           placeholder: "Ej: Av. Principal 123",
           data: { event_map_target: "addressInput" } %>
     </div>
 
     <%# Bloque Prominente Selector de Ubicación en el Mapa %>
-    <div class="md:col-span-2 bg-blue-50/30 border border-blue-100 rounded-3xl p-6 text-center space-y-3 relative overflow-hidden">
+    <div class="md:col-span-2 bg-primary/[0.03] border border-primary/20 rounded-3xl p-6 text-center space-y-3 relative overflow-hidden">
       <%# Hidden fields for coordinates %>
       <%= f.hidden_field :latitude, data: { event_map_target: "latInput" } %>
       <%= f.hidden_field :longitude, data: { event_map_target: "lngInput" } %>
       
-      <div class="w-12 h-12 bg-blue-100/60 text-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+      <div class="w-12 h-12 bg-primary/12 text-link rounded-2xl flex items-center justify-center mx-auto shadow-raised">
         <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
         </svg>
       </div>
       <div class="space-y-1">
-        <h4 class="text-sm font-bold text-gray-900">Ubicación exacta en el mapa</h4>
-        <p class="text-xs text-gray-500 max-w-sm mx-auto">Hacé clic abajo para abrir el mapa, ubicar el evento exactamente y autocompletar la dirección.</p>
+        <h4 class="text-sm font-bold text-heading">Ubicación exacta en el mapa</h4>
+        <p class="text-xs text-body-tertiary max-w-sm mx-auto">Hacé clic abajo para abrir el mapa, ubicar el evento exactamente y autocompletar la dirección.</p>
       </div>
       <button type="button" 
               data-action="click->event-map#openModal"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/10 active:scale-95 cursor-pointer">
+              class="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-2xl transition-all shadow-lg shadow-primary/10 active:scale-95 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
@@ -102,42 +102,100 @@
 
     <%# Start Date %>
     <div>
-      <%= f.label :start_date, "Fecha de inicio", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :start_date, "Fecha de inicio", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.datetime_field :start_date, id: "event_start_date",
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
     </div>
 
     <%# End Date %>
     <div>
-      <%= f.label :end_date, "Fecha de fin (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :end_date, "Fecha de fin (opcional)", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.datetime_field :end_date,
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-    </div>
-
-    <%# Price %>
-    <div>
-      <%= f.label :price, "Precio", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <div class="relative">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">S/</span>
-        <%= f.number_field :price, id: "event_price", step: 0.01, min: 0,
-            class: "w-full pl-8 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-            placeholder: "0.00" %>
-      </div>
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
     </div>
 
     <%# Currency %>
     <div>
-      <%= f.label :currency, "Moneda", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :currency, "Moneda de los precios", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.select :currency, [["PEN (Soles)", "PEN"], ["USD (Dólares)", "USD"]],
-          {}, class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+          {}, class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
     </div>
 
     <%# Max Capacity %>
     <div>
-      <%= f.label :max_capacity, "Capacidad máxima (opcional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.label :max_capacity, "Capacidad máxima (opcional)", class: "block text-sm font-medium text-body mb-1" %>
       <%= f.number_field :max_capacity, min: 1,
-          class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+          class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
           placeholder: "Ej: 500" %>
+    </div>
+
+    <%# ─── Tipos de entrada ─────────────────────────────────────────────── %>
+    <div class="md:col-span-2 space-y-3">
+      <div class="flex items-center justify-between">
+        <label class="block text-sm font-bold text-body">Tipos de entrada</label>
+        <span class="text-xs text-muted">Definí al menos uno</span>
+      </div>
+
+      <div data-controller="ticket-types" class="space-y-3">
+        <template data-ticket-types-target="template">
+          <div class="flex gap-3 items-start p-3 bg-surface-secondary rounded-badge border border-border" data-ticket-types-target="row">
+            <div class="flex-1 space-y-2">
+              <input type="text" name="event[ticket_types_attributes][__INDEX__][name]"
+                     placeholder="Ej: General, VIP, Estudiantil"
+                     class="w-full border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+              <div class="flex gap-2">
+                <input type="number" name="event[ticket_types_attributes][__INDEX__][price]"
+                       step="0.01" min="0" placeholder="Precio"
+                       class="w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                <input type="number" name="event[ticket_types_attributes][__INDEX__][quantity_total]"
+                       min="1" placeholder="Cant. total"
+                       class="w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+
+              </div>
+            </div>
+            <button type="button" data-action="ticket-types#remove"
+                    class="shrink-0 mt-1 w-8 h-8 bg-error/10 hover:bg-error/20 text-error rounded-card flex items-center justify-center transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </template>
+
+        <div data-ticket-types-target="rows">
+          <% if f.object.persisted? %>
+            <%= f.fields_for :ticket_types do |tt| %>
+              <div class="flex gap-3 items-start p-3 bg-surface-secondary rounded-badge border border-border">
+                <div class="flex-1 space-y-2">
+                  <%= tt.text_field :name, placeholder: "Ej: General, VIP, Estudiantil",
+                      class: "w-full border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                  <div class="flex gap-2">
+                    <%= tt.number_field :price, step: 0.01, min: 0, placeholder: "Precio",
+                        class: "w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                    <%= tt.number_field :quantity_total, min: 1, placeholder: "Cant. total",
+                        class: "w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                  </div>
+                </div>
+                <%= tt.check_box :_destroy, class: "hidden" %>
+                <button type="button" data-action="ticket-types#remove"
+                        class="shrink-0 mt-1 w-8 h-8 bg-error/10 hover:bg-error/20 text-error rounded-card flex items-center justify-center transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+
+        <button type="button" data-action="ticket-types#add"
+                class="text-sm font-bold text-link hover:text-link-hover transition-colors flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Agregar tipo de entrada
+        </button>
+      </div>
     </div>
 
     <%# Map Selection Modal %>
@@ -146,14 +204,14 @@
       <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         <%# Modal Header %>
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div class="p-6 border-b border-border-light flex items-center justify-between bg-surface-secondary/50">
           <div>
-            <h3 class="text-lg font-bold text-gray-900">Seleccionar ubicación</h3>
-            <p class="text-xs text-gray-500 font-medium">Hacé clic en el mapa o arrastrá el marcador para definir la dirección exacta.</p>
+            <h3 class="text-lg font-bold text-heading">Seleccionar ubicación</h3>
+            <p class="text-xs text-body-tertiary font-medium">Hacé clic en el mapa o arrastrá el marcador para definir la dirección exacta.</p>
           </div>
           <button type="button" 
                   data-action="click->event-map#closeModal"
-                  class="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+                  class="w-8 h-8 rounded-full hover:bg-surface-tertiary flex items-center justify-center text-muted hover:text-heading transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -167,10 +225,10 @@
             <input type="text" 
                    data-event-map-target="searchInput" 
                    placeholder="Buscar calle, plaza, establecimiento..." 
-                   class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-medium text-gray-900">
+                   class="flex-1 bg-surface-secondary border border-border rounded-badge px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium text-heading">
             <button type="button" 
                     data-action="click->event-map#searchAddress"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+                    class="bg-primary hover:bg-primary-hover text-white px-5 py-2 rounded-badge text-sm font-bold transition-all active:scale-95 shadow-md shadow-primary/10 flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
@@ -180,19 +238,19 @@
 
           <%# Map Div %>
           <div data-event-map-target="mapContainer" 
-               class="w-full h-[350px] bg-gray-50 border border-gray-100 rounded-2xl overflow-hidden relative z-10"></div>
+               class="w-full h-[350px] bg-surface-secondary border border-border-light rounded-2xl overflow-hidden relative z-10"></div>
         </div>
 
         <%# Modal Footer %>
-        <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
+        <div class="p-6 border-t border-border-light flex justify-end gap-3 bg-surface-secondary/50">
           <button type="button" 
                   data-action="click->event-map#closeModal"
-                  class="px-5 py-3 border border-gray-200 text-gray-700 hover:bg-gray-100 text-sm font-bold rounded-2xl transition-all">
+                  class="px-5 py-3 border border-border text-body hover:bg-surface-secondary text-sm font-bold rounded-2xl transition-all">
             Cancelar
           </button>
           <button type="button" 
                   data-action="click->event-map#saveLocation"
-                  class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                  class="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-2xl transition-all active:scale-95 shadow-lg shadow-primary/20">
             Confirmar ubicación
           </button>
         </div>
@@ -205,23 +263,23 @@
   <%# ─── Galería del evento ─────────────────────────────────────────────────── %>
   <div class="md:col-span-2 space-y-4">
     <div class="flex items-center justify-between">
-      <label class="block text-sm font-bold text-gray-700 uppercase tracking-wider opacity-60">Galería del evento</label>
-      <span class="text-xs text-gray-400 font-medium">Máximo 5 imágenes • La primera es la principal</span>
+      <label class="block text-sm font-bold text-body uppercase tracking-wider opacity-60">Galería del evento</label>
+      <span class="text-xs text-muted font-medium">Máximo 5 imágenes • La primera es la principal</span>
     </div>
 
-    <div class="bg-gray-50/50 border border-gray-200 rounded-2xl p-6 space-y-6">
+    <div class="bg-surface-secondary/50 border border-border rounded-2xl p-6 space-y-6">
 
       <%# ── Imágenes EXISTENTES (solo en edit) ──────────────────────────── %>
       <% if existing_images.any? %>
         <div>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Imágenes actuales</p>
+          <p class="text-xs font-bold text-body-tertiary uppercase tracking-wider mb-3">Imágenes actuales</p>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <% existing_images.each_with_index do |img, idx| %>
               <%
                 is_primary = idx == 0
-                badge_classes = is_primary ? "bg-blue-600 text-white" : "bg-black/40 text-white"
+                badge_classes = is_primary ? "bg-primary text-white" : "bg-black/40 text-white"
               %>
-              <div class="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden border-2 <%= is_primary ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200' %> transition-all"
+              <div class="group relative aspect-square bg-surface-secondary rounded-badge overflow-hidden border-2 <%= is_primary ? 'border-primary ring-2 ring-primary/30' : 'border-border' %> transition-all"
                    data-image-id="<%= img.id %>">
 
                 <%= image_tag img.image_url,
@@ -230,7 +288,7 @@
 
                 <%# Botón eliminar %>
                 <button type="button"
-                        class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500 z-10"
+                        class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error/100 z-10"
                         data-action="click->event-form#removeExisting">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
@@ -252,25 +310,25 @@
             <% end %>
           </div>
         </div>
-        <hr class="border-gray-200">
+        <hr class="border-border">
       <% end %>
 
       <%# ── Subir nuevas imágenes ────────────────────────────────────────── %>
       <div>
         <% if existing_images.any? %>
-          <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Agregar más imágenes</p>
+          <p class="text-xs font-bold text-body-tertiary uppercase tracking-wider mb-3">Agregar más imágenes</p>
         <% end %>
 
         <%# Tabs %>
-        <div class="flex gap-4 border-b border-gray-200 pb-0 mb-5">
+        <div class="flex gap-4 border-b border-border pb-0 mb-5">
           <button type="button"
-                  class="text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-[14px] -mb-[2px]"
+                  class="text-sm font-bold text-link border-b-2 border-primary pb-[14px] -mb-[2px]"
                   data-action="click->event-form#showTab"
                   data-tab="file">
             Subir archivos
           </button>
           <button type="button"
-                  class="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors pb-[14px]"
+                  class="text-sm font-bold text-muted hover:text-body-secondary transition-colors pb-[14px]"
                   data-action="click->event-form#showTab"
                   data-tab="url">
             Desde URL
@@ -281,17 +339,17 @@
         <div data-event-form-target="filePane">
           <div data-event-form-target="dropzone"
                data-action="dragover->event-form#dragOver dragleave->event-form#dragLeave drop->event-form#drop click->event-form#browse"
-               class="group relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-white transition-all cursor-pointer bg-white/50">
+               class="group relative border-2 border-dashed border-border-input rounded-2xl p-8 text-center hover:border-primary hover:bg-white transition-all cursor-pointer bg-white/50">
 
-            <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+            <div class="w-14 h-14 bg-primary/10 text-link rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
             </div>
 
-            <h3 class="text-gray-900 font-bold mb-1 text-sm">Arrastrá tus fotos aquí</h3>
-            <p class="text-xs text-gray-500">o hacé clic para explorar</p>
-            <p class="text-[10px] text-gray-400 mt-3 uppercase tracking-widest font-bold">Máx 5MB • JPG, PNG, WEBP</p>
+            <h3 class="text-heading font-bold mb-1 text-sm">Arrastrá tus fotos aquí</h3>
+            <p class="text-xs text-body-tertiary">o hacé clic para explorar</p>
+            <p class="text-[10px] text-muted mt-3 uppercase tracking-widest font-bold">Máx 5MB • JPG, PNG, WEBP</p>
 
             <%= f.file_field :images, multiple: true, accept: "image/*",
                 data: { event_form_target: "fileInput", action: "change->event-form#fileChange" },
@@ -306,16 +364,16 @@
 
         <%# URL Pane %>
         <div data-event-form-target="urlPane" class="hidden">
-          <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Enlace de imagen</label>
+          <div class="bg-white rounded-2xl p-4 border border-border shadow-raised">
+            <label class="block text-xs font-bold text-muted uppercase mb-2">Enlace de imagen</label>
             <div class="flex gap-2">
               <input type="url"
                      data-event-form-target="urlInput"
                      placeholder="https://ejemplo.com/imagen.jpg"
-                     class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                     class="flex-1 bg-surface-secondary border border-border rounded-badge px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
               <button type="button"
                       data-action="click->event-form#addFromUrl"
-                      class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
+                      class="bg-primary text-white px-5 py-2 rounded-badge text-sm font-bold hover:bg-primary-hover transition-colors">
                 Agregar
               </button>
             </div>
@@ -332,21 +390,21 @@
   </div>
 
   <%# Submit Buttons %>
-  <div class="flex flex-col sm:flex-row items-center gap-3 pt-8 border-t border-gray-200">
+  <div class="flex flex-col sm:flex-row items-center gap-3 pt-8 border-t border-border">
     <button type="submit" 
             data-action="click->event-form#setStatus" 
             data-status="published"
-            class="w-full sm:w-auto px-10 py-4 bg-blue-600 text-white text-sm font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20 active:scale-95">
+            class="w-full sm:w-auto px-10 py-4 bg-primary text-white text-sm font-bold rounded-2xl hover:bg-primary-hover transition-all shadow-xl shadow-primary/20 active:scale-95">
       <%= event.new_record? ? "Publicar evento ahora" : "Guardar y Publicar" %>
     </button>
     
     <button type="submit" 
             data-action="click->event-form#setStatus" 
             data-status="draft"
-            class="w-full sm:w-auto px-10 py-4 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-2xl hover:bg-gray-50 transition-all active:scale-95">
+            class="w-full sm:w-auto px-10 py-4 bg-white border border-border text-body text-sm font-bold rounded-2xl hover:bg-surface-secondary transition-all active:scale-95">
       Guardar como borrador
     </button>
 
     <%= link_to "Cancelar", organizer_events_path,
-        class: "w-full sm:w-auto px-6 py-4 text-gray-400 text-sm font-bold hover:text-gray-600 transition-colors text-center" %>
+        class: "w-full sm:w-auto px-6 py-4 text-muted text-sm font-bold hover:text-body-secondary transition-colors text-center" %>
   </div><% end %>

@@ -56,12 +56,12 @@ export default class extends Controller {
 
     event.currentTarget.parentElement.querySelectorAll("button[data-tab]").forEach(btn => {
       const active = btn.dataset.tab === tab
-      btn.classList.toggle("text-blue-600", active)
+      btn.classList.toggle("text-link", active)
       btn.classList.toggle("border-b-2", active)
-      btn.classList.toggle("border-blue-600", active)
+      btn.classList.toggle("border-primary", active)
       btn.classList.toggle("pb-[14px]", active)
       btn.classList.toggle("-mb-[18px]", active)
-      btn.classList.toggle("text-gray-400", !active)
+      btn.classList.toggle("text-muted", !active)
     })
   }
 
@@ -72,17 +72,17 @@ export default class extends Controller {
 
   dragOver(event) {
     event.preventDefault()
-    this.dropzoneTarget.classList.add("border-blue-500", "bg-blue-50/50")
+    this.dropzoneTarget.classList.add("border-primary", "bg-surface-secondary/50")
   }
 
   dragLeave(event) {
     event.preventDefault()
-    this.dropzoneTarget.classList.remove("border-blue-500", "bg-blue-50/50")
+    this.dropzoneTarget.classList.remove("border-primary", "bg-surface-secondary/50")
   }
 
   drop(event) {
     event.preventDefault()
-    this.dropzoneTarget.classList.remove("border-blue-500", "bg-blue-50/50")
+    this.dropzoneTarget.classList.remove("border-primary", "bg-surface-secondary/50")
     this.processFiles(Array.from(event.dataTransfer.files))
   }
 
@@ -209,8 +209,8 @@ export default class extends Controller {
   buildPreviewCard(src, isPrimary, type, fileIndex, urlIndex) {
     const wrap = document.createElement("div")
     wrap.dataset.newPreview = "true"
-    wrap.className = `group relative aspect-square bg-gray-100 rounded-xl overflow-hidden border-2 transition-all ${
-      isPrimary ? "border-blue-500 ring-2 ring-blue-300/50" : "border-gray-200"
+    wrap.className = `group relative aspect-square bg-surface-secondary rounded-card overflow-hidden border-2 transition-all ${
+      isPrimary ? "border-primary ring-2 ring-primary/30" : "border-border"
     }`
 
     // Imagen
@@ -237,7 +237,7 @@ export default class extends Controller {
     // Badge
     const badge = document.createElement("div")
     if (isPrimary) {
-      badge.className = "absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-[9px] font-bold text-white uppercase tracking-widest rounded-md"
+      badge.className = "absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-primary text-[9px] font-bold text-white uppercase tracking-widest rounded-input"
       badge.innerHTML = `<svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>Principal`
     } else {
       badge.className = "absolute bottom-2 left-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm text-[9px] font-bold text-white uppercase tracking-widest rounded-md"

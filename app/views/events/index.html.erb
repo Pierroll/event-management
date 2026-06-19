@@ -3,21 +3,21 @@
   <%# Page Header %>
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">Explorar eventos</h1>
-      <p class="mt-1 text-gray-500">Descubre eventos increíbles cerca de ti</p>
+      <h1 class="text-3xl font-bold text-heading">Explorar eventos</h1>
+      <p class="mt-1 text-body-tertiary">Descubre eventos increíbles cerca de ti</p>
     </div>
 
     <%# View Toggle %>
-    <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1" data-controller="explore">
-      <button type="button" data-action="click->explore#toggleView" data-explore-mode-param="list"
-              class="px-3 py-1.5 text-sm font-medium rounded-md bg-white text-gray-900 shadow-sm explore-view-btn">
+    <div class="flex items-center gap-1 bg-surface-secondary rounded-card p-1" data-controller="explore">
+      <button type="button" data-action="click->explore#toggleView" data-explore-mode-param="list" data-explore-target="viewToggle"
+              class="px-3 py-1.5 text-sm font-medium rounded-md bg-white text-heading shadow-raised explore-view-btn">
         <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
         </svg>
         Lista
       </button>
-      <button type="button" data-action="click->explore#toggleView" data-explore-mode-param="map"
-              class="px-3 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900 explore-view-btn">
+      <button type="button" data-action="click->explore#toggleView" data-explore-mode-param="map" data-explore-target="viewToggle"
+              class="px-3 py-1.5 text-sm font-medium rounded-md text-body-secondary hover:text-heading explore-view-btn">
         <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
@@ -31,8 +31,8 @@
 
   <%# Loading indicator %>
   <div id="loading-indicator" class="hidden text-center py-8">
-    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
-    <p class="mt-2 text-sm text-gray-500">Buscando eventos...</p>
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+    <p class="mt-2 text-sm text-body-tertiary">Buscando eventos...</p>
   </div>
 
   <%# Events Grid %>
@@ -47,16 +47,16 @@
         <%= paginate @events %>
       </div>
     <% else %>
-      <div class="text-center py-16 bg-white rounded-xl border border-gray-200">
-        <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="text-center py-16 bg-white rounded-badge border border-border">
+        <svg class="w-16 h-16 mx-auto text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <h3 class="mt-4 text-lg font-semibold text-gray-900">No se encontraron eventos</h3>
-        <p class="mt-2 text-gray-500">Intenta ajustar los filtros de búsqueda.</p>
+        <h3 class="mt-4 text-lg font-semibold text-heading">No se encontraron eventos</h3>
+        <p class="mt-2 text-body-tertiary">Intenta ajustar los filtros de búsqueda.</p>
       </div>
     <% end %>
   </div>
 
   <%# Map Container %>
-  <div id="map-container" data-explore-target="mapContainer" class="hidden h-[500px] rounded-xl border border-gray-200 overflow-hidden"></div>
+  <div id="map-container" data-explore-target="mapContainer" class="hidden h-[500px] rounded-badge border border-border overflow-hidden"></div>
 </div>

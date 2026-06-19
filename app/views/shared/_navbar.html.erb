@@ -1,17 +1,17 @@
 <%# Main Navigation Bar %>
-<nav class="bg-white border-b border-gray-100 sticky top-0 z-40" data-controller="navbar" data-action="keydown.esc->navbar#closeOnEsc">
+<nav class="bg-white border-b border-border-light sticky top-0 z-40" data-controller="navbar" data-action="keydown.esc->navbar#closeOnEsc">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-20">
       <%# Logo %>
       <div class="flex items-center gap-8">
         <%= link_to root_path, class: "flex items-center gap-2 group" do %>
-          <span class="text-2xl font-black tracking-tighter text-blue-600 group-hover:text-blue-700 transition-colors">SGE</span>
-          <span class="text-xs font-bold uppercase tracking-widest text-gray-400 hidden sm:inline">Eventos</span>
+          <span class="text-2xl font-black tracking-tighter text-link group-hover:text-link-hover transition-colors">SGE</span>
+          <span class="text-xs font-bold uppercase tracking-widest text-muted hidden sm:inline">Eventos</span>
         <% end %>
 
         <%# Desktop Navigation Links (Public/Assistant) %>
         <div class="hidden lg:flex items-center gap-1">
-          <%= link_to events_path, class: "px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all" do %>
+          <%= link_to events_path, class: "px-4 py-2 text-sm font-bold text-body-tertiary hover:text-heading hover:bg-surface-secondary rounded-badge transition-all" do %>
             Explorar
           <% end %>
 
@@ -19,29 +19,29 @@
           <div class="relative">
             <button type="button" 
                     data-action="click->navbar#toggleDropdown"
-                    class="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all group">
+                    class="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-body-tertiary hover:text-heading hover:bg-surface-secondary rounded-badge transition-all group">
               Categorías
-              <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-muted group-hover:text-body-secondary transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
 
             <%# Dropdown Menu %>
             <div data-navbar-target="dropdown" 
-                 class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
-              <div class="px-4 py-2 mb-2 border-b border-gray-50">
-                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Seleccionar interés</span>
+                 class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-border-light py-3 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+              <div class="px-4 py-2 mb-2 border-b border-border-light">
+                <span class="text-[10px] font-black uppercase tracking-widest text-muted">Seleccionar interés</span>
               </div>
               <div class="max-h-[60vh] overflow-y-auto custom-scrollbar">
                 <% navbar_categories.each do |category| %>
-                  <%= link_to events_path(category_id: category.id), class: "flex items-center gap-3 px-4 py-3 hover:bg-blue-50 group transition-colors" do %>
-                    <div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                  <%= link_to events_path(category_id: category.id), class: "flex items-center gap-3 px-4 py-3 hover:bg-primary/10 group transition-colors" do %>
+                    <div class="w-8 h-8 bg-surface-secondary rounded-card flex items-center justify-center text-muted group-hover:bg-primary/20 group-hover:text-link transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                       </svg>
                     </div>
                     <div>
-                      <p class="text-sm font-bold text-gray-700 group-hover:text-blue-700 transition-colors"><%= category.name %></p>
+                      <p class="text-sm font-bold text-body group-hover:text-link-hover transition-colors"><%= category.name %></p>
                     </div>
                   <% end %>
                 <% end %>
@@ -51,34 +51,31 @@
 
           <%# Location Dropdown %>
           <div class="relative" data-controller="location" data-action="click@window->location#close">
-            <% 
-              active_city = cookies[:selected_city]
-              city_label = (active_city.present? && active_city != "all") ? active_city : "Ubicación"
-            %>
+            <% active_city = cookies[:selected_city] %>
             <button type="button" 
                     data-action="click->location#toggleDropdown"
-                    class="flex items-center gap-1.5 px-4 py-2 text-sm font-bold <%= (active_city.present? && active_city != "all") ? 'text-blue-600 bg-blue-50/50' : 'text-gray-500' %> hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all group">
-              <svg class="w-4 h-4 <%= (active_city.present? && active_city != "all") ? 'text-blue-500' : 'text-gray-400' %> group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center gap-1.5 px-4 py-2 text-sm font-bold <%= (selected_city_label != "Ubicación") ? 'text-link bg-primary/5' : 'text-body-tertiary' %> hover:text-heading hover:bg-surface-secondary rounded-badge transition-all group">
+              <svg class="w-4 h-4 <%= (selected_city_label != "Ubicación") ? 'text-link' : 'text-muted' %> group-hover:text-body-secondary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              <span><%= city_label %></span>
-              <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span><%= selected_city_label %></span>
+              <svg class="w-4 h-4 text-muted group-hover:text-body-secondary transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
 
             <%# Location Dropdown Menu %>
             <div data-location-target="dropdown" 
-                 class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden z-50">
+                 class="hidden absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-border-light py-3 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden z-50">
               
-              <div class="px-4 py-2 mb-2 border-b border-gray-50 flex items-center justify-between">
-                <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Filtrar por ciudad</span>
+              <div class="px-4 py-2 mb-2 border-b border-border-light flex items-center justify-between">
+                <span class="text-[10px] font-black uppercase tracking-widest text-muted">Filtrar por ciudad</span>
                 <% if active_city.present? && active_city != "all" %>
                   <button type="button" 
                           data-action="click->location#select" 
                           data-location-city-param="all"
-                          class="text-[10px] font-bold text-red-500 hover:text-red-700 transition-colors">
+                          class="text-[10px] font-bold text-error hover:text-error transition-colors">
                     Limpiar
                   </button>
                 <% end %>
@@ -90,12 +87,12 @@
                   <button type="button" 
                           data-action="click->location#select" 
                           data-location-city-param="<%= city %>"
-                          class="w-full text-left flex items-center justify-between px-4 py-3 hover:bg-blue-50 group transition-colors <%= is_selected ? 'bg-blue-50/30' : '' %>">
-                    <span class="text-sm font-bold <%= is_selected ? 'text-blue-600' : 'text-gray-700 group-hover:text-blue-700' %> transition-colors">
+                          class="w-full text-left flex items-center justify-between px-4 py-3 hover:bg-primary/10 group transition-colors <%= is_selected ? 'bg-primary/[0.03]' : '' %>">
+                    <span class="text-sm font-bold <%= is_selected ? 'text-link' : 'text-body group-hover:text-link-hover' %> transition-colors">
                       <%= city %>
                     </span>
                     <% if is_selected %>
-                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4 text-link" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                       </svg>
                     <% end %>
@@ -103,15 +100,15 @@
                 <% end %>
                 
                 <% if navbar_cities.empty? %>
-                  <p class="text-xs text-gray-400 px-4 py-2 italic text-center">No hay ciudades con eventos</p>
+                  <p class="text-xs text-muted px-4 py-2 italic text-center">No hay ciudades con eventos</p>
                 <% end %>
               </div>
 
-              <div class="border-t border-gray-50 mt-2 pt-2 px-2">
+              <div class="border-t border-border-light mt-2 pt-2 px-2">
                 <button type="button" 
                         data-action="click->location#forceDetect"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-blue-50 text-xs font-bold text-gray-600 hover:text-blue-600 rounded-xl transition-all group">
-                  <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-secondary hover:bg-primary/10 text-xs font-bold text-body-secondary hover:text-link rounded-badge transition-all group">
+                  <svg class="w-4 h-4 text-muted group-hover:text-link" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   Detectar automáticamente
@@ -128,24 +125,24 @@
       <div class="hidden md:flex items-center gap-4">
         <% if user_signed_in? %>
           <% if current_user.admin? %>
-            <%= link_to "Admin Panel", admin_dashboard_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-purple-600 bg-purple-50 rounded-xl hover:bg-purple-100 transition-all border border-purple-100" %>
+            <%= link_to "Admin Panel", admin_dashboard_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-brand-plum bg-brand-plum/10 rounded-badge hover:bg-brand-plum/20 transition-all border border-brand-plum/20" %>
           <% elsif current_user.organizer? %>
-            <%= link_to "Crear Evento", new_organizer_event_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all border border-blue-100" %>
+            <%= link_to "Crear Evento", new_organizer_event_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-link bg-primary/10 rounded-badge hover:bg-primary/20 transition-all border border-primary/20" %>
           <% end %>
 
-          <div class="flex items-center gap-3 ml-2 pl-6 border-l border-gray-100">
+          <div class="flex items-center gap-3 ml-2 pl-6 border-l border-border-light">
             <%= link_to profile_path, class: "flex items-center gap-3 group" do %>
-              <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-gray-500 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
+              <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-body-tertiary font-bold border-2 border-white shadow-raised group-hover:shadow-md transition-all">
                 <%= current_user.name[0].upcase %>
               </div>
               <div class="hidden xl:block">
-                <p class="text-xs font-black text-gray-900 leading-none mb-1"><%= current_user.name %></p>
-                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Mi Cuenta</p>
+                <p class="text-xs font-black text-heading leading-none mb-1"><%= current_user.name %></p>
+                <p class="text-[10px] font-bold text-muted uppercase tracking-tighter">Mi Cuenta</p>
               </div>
             <% end %>
 
             <%= button_to destroy_user_session_path, method: :delete,
-                class: "p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all",
+                class: "p-2.5 text-muted hover:text-error hover:bg-error/10 rounded-badge transition-all",
                 data: { 
                   turbo_confirm: "¿Estás seguro de que deseas cerrar tu sesión actual?",
                   turbo_confirm_title: "Cerrar sesión"
@@ -157,16 +154,16 @@
           </div>
         <% else %>
           <div class="flex items-center gap-2">
-            <%= link_to "Entrar", new_user_session_path, class: "px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors" %>
+            <%= link_to "Entrar", new_user_session_path, class: "px-6 py-2.5 text-sm font-bold text-body-secondary hover:text-heading transition-colors" %>
             <%= link_to "Registrarse", new_user_registration_path,
-                class: "px-6 py-2.5 text-sm font-bold bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95" %>
+                class: "px-6 py-2.5 text-sm font-bold bg-primary text-white rounded-2xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95" %>
           </div>
         <% end %>
       </div>
 
       <%# Mobile menu button %>
       <div class="lg:hidden">
-        <button data-action="click->navbar#toggle" class="w-10 h-10 flex items-center justify-center text-gray-500 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
+        <button data-action="click->navbar#toggle" class="w-10 h-10 flex items-center justify-center text-body-tertiary bg-surface-secondary rounded-badge hover:bg-surface-secondary transition-all">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
@@ -176,42 +173,39 @@
   </div>
 
   <%# Mobile Menu Overlay %>
-  <div data-navbar-target="menu" class="hidden lg:hidden border-t border-gray-50 bg-white px-4 py-6 animate-in slide-in-from-top duration-300">
+  <div data-navbar-target="menu" class="hidden lg:hidden border-t border-border-light bg-white px-4 py-6 animate-in slide-in-from-top duration-300">
     <div class="space-y-2">
-      <%= link_to "Explorar", events_path, class: "block px-4 py-3 text-base font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" %>
+      <%= link_to "Explorar", events_path, class: "block px-4 py-3 text-base font-bold text-body hover:bg-primary/10 hover:text-link rounded-badge transition-all" %>
       
       <%# Mobile Location Selector %>
       <div class="pt-4 pb-2 px-4">
-        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Ubicación</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-muted">Ubicación</span>
       </div>
       <div class="px-2" data-controller="location">
-        <% 
-          active_city_mobile = cookies[:selected_city]
-          city_label_mobile = (active_city_mobile.present? && active_city_mobile != "all") ? active_city_mobile : "Seleccionar Ciudad"
-        %>
+        <% active_city_mobile = cookies[:selected_city] %>
         <div class="relative">
           <button type="button" 
                   data-action="click->location#toggleDropdown"
-                  class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all">
+                  class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-body bg-surface-secondary hover:bg-surface-secondary rounded-badge transition-all">
             <div class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-body-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              <span><%= city_label_mobile %></span>
+              <span><%= selected_city_label(fallback: "Seleccionar Ciudad") %></span>
             </div>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
 
           <%# Mobile Dropdown Menu %>
           <div data-location-target="dropdown" 
-               class="hidden mt-2 bg-gray-50/50 border border-gray-100 rounded-2xl py-2 overflow-hidden space-y-1 z-50">
+               class="hidden mt-2 bg-surface-secondary/50 border border-border-light rounded-2xl py-2 overflow-hidden space-y-1 z-50">
             <button type="button" 
                     data-action="click->location#select" 
                     data-location-city-param="all"
-                    class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-100 <%= (active_city_mobile.blank? || active_city_mobile == "all") ? 'text-blue-600 bg-blue-50/30' : '' %>">
+                    class="w-full text-left px-4 py-2.5 text-sm font-bold text-body-tertiary hover:bg-surface-secondary <%= (active_city_mobile.blank? || active_city_mobile == "all") ? 'text-link bg-primary/[0.03]' : '' %>">
               Todas las ciudades
             </button>
             <% navbar_cities.each do |city| %>
@@ -219,13 +213,13 @@
               <button type="button" 
                       data-action="click->location#select" 
                       data-location-city-param="<%= city %>"
-                      class="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-100 <%= is_selected ? 'text-blue-600 bg-blue-50/30' : '' %>">
+                      class="w-full text-left px-4 py-2.5 text-sm font-bold text-body hover:bg-surface-secondary <%= is_selected ? 'text-link bg-primary/[0.03]' : '' %>">
                 <%= city %>
               </button>
             <% end %>
             <button type="button" 
                     data-action="click->location#forceDetect"
-                    class="w-full text-left px-4 py-2.5 text-xs font-black uppercase text-blue-600 bg-blue-50 hover:bg-blue-100 flex items-center gap-1.5 mt-1">
+                    class="w-full text-left px-4 py-2.5 text-xs font-black uppercase text-link bg-primary/10 hover:bg-primary/20 flex items-center gap-1.5 mt-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
@@ -236,28 +230,28 @@
       </div>
 
       <div class="pt-4 pb-2 px-4">
-        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Categorías</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-muted">Categorías</span>
       </div>
       <div class="grid grid-cols-2 gap-2 px-2">
         <% navbar_categories.each do |category| %>
-          <%= link_to category.name, events_path(category_id: category.id), class: "px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-lg" %>
+          <%= link_to category.name, events_path(category_id: category.id), class: "px-4 py-2 text-sm font-bold text-body-tertiary hover:bg-surface-secondary rounded-card" %>
         <% end %>
       </div>
 
       <% if user_signed_in? %>
-        <div class="pt-6 mt-6 border-t border-gray-100 space-y-2">
-          <%= link_to "Mi Perfil", profile_path, class: "block px-4 py-3 text-base font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all" %>
+        <div class="pt-6 mt-6 border-t border-border-light space-y-2">
+          <%= link_to "Mi Perfil", profile_path, class: "block px-4 py-3 text-base font-bold text-body hover:bg-primary/10 hover:text-link rounded-badge transition-all" %>
           <% if current_user.admin? %>
-            <%= link_to "Dashboard Admin", admin_dashboard_path, class: "block px-4 py-3 text-base font-bold text-purple-600 hover:bg-purple-50 rounded-xl transition-all" %>
+            <%= link_to "Dashboard Admin", admin_dashboard_path, class: "block px-4 py-3 text-base font-bold text-brand-plum hover:bg-brand-plum/10 rounded-badge transition-all" %>
           <% elsif current_user.organizer? %>
-            <%= link_to "Mis Eventos", organizer_events_path, class: "block px-4 py-3 text-base font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-all" %>
+            <%= link_to "Mis Eventos", organizer_events_path, class: "block px-4 py-3 text-base font-bold text-link hover:bg-primary/10 rounded-badge transition-all" %>
           <% end %>
-          <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-3 text-base font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all" %>
+          <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-3 text-base font-bold text-error hover:bg-error/10 rounded-badge transition-all" %>
         </div>
       <% else %>
-        <div class="pt-6 mt-6 border-t border-gray-100 flex flex-col gap-3 px-2">
-          <%= link_to "Iniciar sesión", new_user_session_path, class: "w-full py-3 text-center text-sm font-bold text-gray-600" %>
-          <%= link_to "Registrarse", new_user_registration_path, class: "w-full py-3 text-center text-sm font-bold bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20" %>
+        <div class="pt-6 mt-6 border-t border-border-light flex flex-col gap-3 px-2">
+          <%= link_to "Iniciar sesión", new_user_session_path, class: "w-full py-3 text-center text-sm font-bold text-body-secondary" %>
+          <%= link_to "Registrarse", new_user_registration_path, class: "w-full py-3 text-center text-sm font-bold bg-primary text-white rounded-2xl shadow-lg shadow-primary/20" %>
         </div>
       <% end %>
     </div>

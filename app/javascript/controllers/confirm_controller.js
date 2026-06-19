@@ -22,15 +22,15 @@ export default class extends Controller {
     const confirmBtn = this.modalTarget.querySelector("[data-action='click->confirm#confirm']")
 
     if (isDanger) {
-      iconContainer?.classList.add("bg-rose-50", "text-rose-500")
-      iconContainer?.classList.remove("bg-blue-50", "text-blue-500")
-      confirmBtn?.classList.add("text-rose-600")
-      confirmBtn?.classList.remove("text-blue-600")
+      iconContainer?.classList.add("bg-error/10", "text-error")
+      iconContainer?.classList.remove("bg-surface-secondary", "text-link")
+      confirmBtn?.classList.add("text-error")
+      confirmBtn?.classList.remove("text-link")
     } else {
-      iconContainer?.classList.add("bg-blue-50", "text-blue-500")
-      iconContainer?.classList.remove("bg-rose-50", "text-rose-500")
-      confirmBtn?.classList.add("text-blue-600")
-      confirmBtn?.classList.remove("text-rose-600")
+      iconContainer?.classList.add("bg-surface-secondary", "text-link")
+      iconContainer?.classList.remove("bg-error/10", "text-error")
+      confirmBtn?.classList.add("text-link")
+      confirmBtn?.classList.remove("text-error")
     }
     
     // Show modal
@@ -39,6 +39,8 @@ export default class extends Controller {
     
     // Smooth entry
     setTimeout(() => {
+      this.modalTarget.classList.remove("opacity-0")
+      this.modalTarget.classList.add("opacity-100")
       this.modalTarget.querySelector(".modal-content").classList.remove("scale-95", "opacity-0")
       this.modalTarget.querySelector(".modal-content").classList.add("scale-100", "opacity-100")
     }, 10)
@@ -59,11 +61,14 @@ export default class extends Controller {
   }
 
   hide() {
+    this.modalTarget.classList.remove("opacity-100")
+    this.modalTarget.classList.add("opacity-0")
     this.modalTarget.querySelector(".modal-content").classList.replace("scale-100", "scale-95")
     this.modalTarget.querySelector(".modal-content").classList.replace("opacity-100", "opacity-0")
     
     setTimeout(() => {
-      this.modalTarget.classList.replace("flex", "hidden")
-    }, 200)
+      this.modalTarget.classList.remove("flex")
+      this.modalTarget.classList.add("hidden")
+    }, 150)
   }
 }

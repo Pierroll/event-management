@@ -24,5 +24,7 @@ class Category < ApplicationRecord
   # =========================
   # SCOPES
   # =========================
+  # NOTE: this is deliberately distinct from Booking.occupying_capacity and
+  # Ticket.active — "active" here means the boolean column, not a status combination.
   scope :active, -> { where(active: true) }
 end

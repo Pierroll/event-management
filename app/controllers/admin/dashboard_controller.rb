@@ -4,7 +4,7 @@ module Admin
       @total_users = User.count
       @total_events = Event.count
       @total_comments = Comment.count
-      @published_events = Event.published_only.count
+      @published_events = Event.published.count
     end
   end
 end

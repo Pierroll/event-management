@@ -1,16 +1,16 @@
 <%# Admin Edit User %>
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Editar usuario</h1>
-    <%= link_to "← Volver", admin_user_path(@user), class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+    <h1 class="text-2xl font-bold text-heading">Editar usuario</h1>
+    <%= link_to "← Volver", admin_user_path(@user), class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+  <div class="bg-white rounded-badge border border-border p-6 md:p-8">
     <%= form_with model: [:admin, @user], local: true, class: "space-y-6" do |f| %>
       <% if @user.errors.any? %>
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 class="text-sm font-medium text-red-800">Errores:</h3>
-          <ul class="mt-2 list-disc list-inside text-sm text-red-600">
+        <div class="bg-error/10 border border-error/30 rounded-card p-4">
+          <h3 class="text-sm font-medium text-error">Errores:</h3>
+          <ul class="mt-2 list-disc list-inside text-sm text-error">
             <% @user.errors.full_messages.each do |msg| %>
               <li><%= msg %></li>
             <% end %>
@@ -19,34 +19,34 @@
       <% end %>
 
       <div>
-        <%= f.label :name, "Nombre", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= f.text_field :name, class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        <%= f.label :name, "Nombre", class: "block text-sm font-medium text-body mb-1" %>
+        <%= f.text_field :name, class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
       </div>
 
       <div>
-        <%= f.label :email, "Correo electrónico", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= f.email_field :email, class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        <%= f.label :email, "Correo electrónico", class: "block text-sm font-medium text-body mb-1" %>
+        <%= f.email_field :email, class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
       </div>
 
       <div>
         <div class="flex items-center gap-3">
-          <%= f.check_box :active, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-          <%= f.label :active, "Usuario activo", class: "text-sm font-medium text-gray-700" %>
+          <%= f.check_box :active, class: "h-4 w-4 text-link focus:ring-primary border-border-input rounded" %>
+          <%= f.label :active, "Usuario activo", class: "text-sm font-medium text-body" %>
         </div>
       </div>
 
       <%# Roles %>
       <div>
-        <p class="block text-sm font-medium text-gray-700 mb-2">Roles</p>
+        <p class="block text-sm font-medium text-body mb-2">Roles</p>
         <div class="space-y-2">
           <% @roles.each do |role| %>
-            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label class="flex items-center gap-3 p-3 border border-border rounded-card hover:bg-surface-secondary cursor-pointer">
               <%= check_box_tag "user[role_ids][]", role.id, @user.roles.include?(role),
-                  class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                  class: "h-4 w-4 text-link focus:ring-primary border-border-input rounded" %>
               <div>
-                <span class="text-sm font-medium text-gray-900"><%= role.name.humanize %></span>
+                <span class="text-sm font-medium text-heading"><%= role.name.humanize %></span>
                 <% if role.description.present? %>
-                  <p class="text-xs text-gray-500"><%= role.description %></p>
+                  <p class="text-xs text-body-tertiary"><%= role.description %></p>
                 <% end %>
               </div>
             </label>
@@ -54,9 +54,9 @@
         </div>
       </div>
 
-      <div class="flex gap-3 pt-4 border-t border-gray-200">
-        <%= f.submit "Guardar cambios", class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
-        <%= link_to "Cancelar", admin_user_path(@user), class: "px-6 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors" %>
+      <div class="flex gap-3 pt-4 border-t border-border">
+        <%= f.submit "Guardar cambios", class: "px-6 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
+        <%= link_to "Cancelar", admin_user_path(@user), class: "px-6 py-2 border border-border-input text-body text-sm font-medium rounded-card hover:bg-surface-secondary transition-colors" %>
       </div>
     <% end %>
   </div>

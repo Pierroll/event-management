@@ -29,7 +29,6 @@ class User < ApplicationRecord
   # =========================
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
-  validate :selected_role_presence, on: :create
 
   # =========================
   # DEFAULTS
@@ -97,15 +96,7 @@ class User < ApplicationRecord
   private
 
   def assign_selected_role
-    return unless selected_role
-
-    role = Role.find_by(name: selected_role)
+    role = Role.find_by(name: selected_role.presence || "registered_user")
     user_roles.create(role: role) if role
-  end
-
-  def selected_role_presence
-    return if provider.present? # OAuth users get role via session
-
-    errors.add(:selected_role, "Debes elegir un tipo de cuenta") if selected_role.blank?
   end
 end

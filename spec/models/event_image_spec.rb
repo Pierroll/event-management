@@ -15,7 +15,6 @@ RSpec.describe EventImage, type: :model do
       address: "Av. Test 123",
       start_date: 1.day.from_now,
       end_date: 1.day.from_now + 2.hours,
-      price: 0,
       currency: "PEN",
       category: category,
       organizer: organizer,

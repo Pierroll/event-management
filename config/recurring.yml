@@ -1,0 +1,7 @@
+# Recurring jobs for Solid Queue
+# Runs every 5 minutes via bin/jobs or SOLID_QUEUE_IN_PUMA
+#
+expire_bookings:
+  class: ExpireBookingsJob
+  schedule: every 5 minutes
+  description: "Expire pending bookings whose hold time has passed"

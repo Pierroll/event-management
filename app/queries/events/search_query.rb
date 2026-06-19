@@ -62,13 +62,21 @@ module Events
     end
 
     def filter_by_price(relation)
-      if @params[:price_min].present?
-        relation = relation.where("price >= ?", @params[:price_min])
-      end
-      if @params[:price_max].present?
-        relation = relation.where("price <= ?", @params[:price_max])
-      end
-      relation
+      return relation if @params[:price_min].blank? && @params[:price_max].blank?
+
+      conds = ["ticket_types.event_id = events.id"]
+      binds = {}
+
+      conds << "ticket_types.price >= :price_min" if @params[:price_min].present?
+      binds[:price_min] = @params[:price_min] if @params[:price_min].present?
+
+      conds << "ticket_types.price <= :price_max" if @params[:price_max].present?
+      binds[:price_max] = @params[:price_max] if @params[:price_max].present?
+
+      relation.where(
+        "EXISTS (SELECT 1 FROM ticket_types WHERE #{conds.join(' AND ')})",
+        binds
+      )
     end
   end
 end

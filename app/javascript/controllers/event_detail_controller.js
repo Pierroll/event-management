@@ -105,11 +105,11 @@ export default class extends Controller {
     stars.forEach(star => {
       const starValue = parseInt(star.dataset.rating) || 0
       if (starValue <= rating) {
-        star.classList.remove("text-gray-300")
+        star.classList.remove("text-muted")
         star.classList.add("text-yellow-400")
       } else {
         star.classList.remove("text-yellow-400")
-        star.classList.add("text-gray-300")
+        star.classList.add("text-muted")
       }
     })
   }

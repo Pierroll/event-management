@@ -22,14 +22,18 @@ Rails.application.routes.draw do
     resources :bookings, only: [:new, :create]
   end
 
-  resources :bookings, only: [:index, :show]
+  resources :bookings, only: [:index, :show] do
+    resources :payments, only: [:new, :create]
+  end
 
   # User profile
   resource :profile, only: [:show, :edit, :update]
 
   # Organizer namespace
   namespace :organizer do
-    resources :events
+    resources :events do
+      resource :check_in, only: [:show, :create], controller: "check_ins"
+    end
   end
 
   # Admin namespace
@@ -38,6 +42,13 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :show, :edit, :update]
     resources :events, only: [:index, :show, :edit, :update]
     resources :categories
+  end
+
+  # Webhooks
+  namespace :webhooks do
+    resources :payments, only: [], controller: :payments do
+      post :receive, on: :collection
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

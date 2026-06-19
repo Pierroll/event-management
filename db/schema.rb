@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_18_091321) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,12 +46,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
     t.datetime "booked_at", null: false
     t.datetime "created_at", null: false
     t.bigint "event_id", null: false
+    t.datetime "expires_at"
     t.integer "quantity", default: 1, null: false
     t.integer "status", default: 0, null: false
+    t.bigint "ticket_type_id", null: false
+    t.decimal "unit_price", precision: 10, scale: 2, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["event_id", "status"], name: "index_bookings_on_event_and_status"
     t.index ["event_id"], name: "index_bookings_on_event_id"
+    t.index ["ticket_type_id"], name: "index_bookings_on_ticket_type_id"
     t.index ["user_id", "event_id"], name: "index_bookings_on_user_and_event"
     t.index ["user_id"], name: "index_bookings_on_user_id"
   end
@@ -102,7 +106,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
     t.integer "max_capacity"
     t.string "name", null: false
     t.bigint "organizer_id", null: false
-    t.decimal "price", precision: 10, scale: 2, default: "0.0", null: false
     t.datetime "start_date", null: false
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
@@ -113,12 +116,53 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
     t.index ["status"], name: "index_events_on_status"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.bigint "booking_id", null: false
+    t.datetime "created_at", null: false
+    t.string "provider", default: "mock", null: false
+    t.string "provider_charge_id"
+    t.jsonb "raw_response", default: {}
+    t.integer "status", default: 0
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_payments_on_booking_id"
+    t.index ["booking_id"], name: "index_payments_on_booking_id_unique", unique: true
+    t.index ["provider_charge_id"], name: "index_payments_on_provider_charge_id", unique: true, where: "(provider_charge_id IS NOT NULL)"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_roles_on_name", unique: true
+  end
+
+  create_table "ticket_types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.integer "max_per_order", default: 10
+    t.string "name", null: false
+    t.integer "position", default: 0
+    t.decimal "price", precision: 10, scale: 2, default: "0.0", null: false
+    t.integer "quantity_total", null: false
+    t.datetime "sales_end_at"
+    t.datetime "sales_start_at"
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "name"], name: "index_ticket_types_on_event_id_and_name", unique: true
+    t.index ["event_id"], name: "index_ticket_types_on_event_id"
+  end
+
+  create_table "tickets", force: :cascade do |t|
+    t.string "attendee_email"
+    t.string "attendee_name"
+    t.bigint "booking_id", null: false
+    t.datetime "checked_in_at"
+    t.datetime "created_at", null: false
+    t.string "qr_code", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_tickets_on_booking_id"
+    t.index ["qr_code"], name: "index_tickets_on_qr_code", unique: true
   end
 
   create_table "user_roles", force: :cascade do |t|
@@ -157,12 +201,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "bookings", "events"
+  add_foreign_key "bookings", "ticket_types"
   add_foreign_key "bookings", "users"
   add_foreign_key "comments", "events"
   add_foreign_key "comments", "users"
   add_foreign_key "event_images", "events"
   add_foreign_key "events", "categories"
   add_foreign_key "events", "users", column: "organizer_id"
+  add_foreign_key "payments", "bookings"
+  add_foreign_key "ticket_types", "events"
+  add_foreign_key "tickets", "bookings"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "user_roles", "users", column: "assigned_by_id"

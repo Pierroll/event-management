@@ -1,78 +1,82 @@
 <%# Admin Event Detail %>
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-6">
-    <%= link_to "← Eventos", admin_events_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
-    <%= link_to "Editar evento", edit_admin_event_path(@event), class: "px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors" %>
+    <%= link_to "← Eventos", admin_events_path, class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
+    <%= link_to "Editar evento", edit_admin_event_path(@event), class: "px-4 py-2 bg-accent text-white text-sm font-medium rounded-card hover:bg-accent-hover transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+  <div class="bg-white rounded-badge border border-border p-6 md:p-8">
     <%# Header %>
     <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900"><%= @event.name %></h1>
-        <p class="text-sm text-gray-500 mt-1">
-          Organizado por <span class="font-medium text-gray-700"><%= @event.organizer.name %></span>
+        <h1 class="text-2xl font-bold text-heading"><%= @event.name %></h1>
+        <p class="text-sm text-body-tertiary mt-1">
+          Organizado por <span class="font-medium text-body"><%= @event.organizer.name %></span>
           (<%= @event.organizer.email %>)
         </p>
       </div>
-      <span class="shrink-0 px-3 py-1 rounded-full text-sm font-medium
-        <%= @event.published? ? "bg-green-100 text-green-800" : "" %>
-        <%= @event.draft? ? "bg-yellow-100 text-yellow-800" : "" %>
-        <%= @event.canceled? ? "bg-red-100 text-red-800" : "" %>
-        <%= @event.finished? ? "bg-gray-100 text-gray-800" : "" %>">
-        <%= @event.status.humanize %>
-      </span>
+      <%= event_status_badge(@event, classes: "shrink-0 px-3 py-1 text-sm font-medium") %>
     </div>
 
     <%# Details Grid %>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="space-y-4">
         <div>
-          <p class="text-sm text-gray-500">Categoría</p>
-          <p class="font-medium text-gray-900"><%= @event.category&.name || "—" %></p>
+          <p class="text-sm text-body-tertiary">Categoría</p>
+          <p class="font-medium text-heading"><%= @event.category&.name || "—" %></p>
         </div>
         <div>
-          <p class="text-sm text-gray-500">Fecha de inicio</p>
-          <p class="font-medium text-gray-900"><%= l(@event.start_date, format: :long) if @event.start_date %></p>
+          <p class="text-sm text-body-tertiary">Fecha de inicio</p>
+          <p class="font-medium text-heading"><%= l(@event.start_date, format: :long) if @event.start_date %></p>
         </div>
         <% if @event.end_date %>
           <div>
-            <p class="text-sm text-gray-500">Fecha de fin</p>
-            <p class="font-medium text-gray-900"><%= l(@event.end_date, format: :long) %></p>
+            <p class="text-sm text-body-tertiary">Fecha de fin</p>
+            <p class="font-medium text-heading"><%= l(@event.end_date, format: :long) %></p>
           </div>
         <% end %>
         <div>
-          <p class="text-sm text-gray-500">Ciudad</p>
-          <p class="font-medium text-gray-900"><%= @event.city %></p>
+          <p class="text-sm text-body-tertiary">Ciudad</p>
+          <p class="font-medium text-heading"><%= @event.city %></p>
         </div>
         <div>
-          <p class="text-sm text-gray-500">Dirección</p>
-          <p class="font-medium text-gray-900"><%= @event.address %></p>
+          <p class="text-sm text-body-tertiary">Dirección</p>
+          <p class="font-medium text-heading"><%= @event.address %></p>
         </div>
       </div>
       <div class="space-y-4">
         <div>
-          <p class="text-sm text-gray-500">Precio</p>
-          <p class="font-bold text-xl"><%= @event.price > 0 ? number_to_currency(@event.price, unit: "S/ ") : "Gratis" %></p>
+          <p class="text-sm text-body-tertiary">Tipos de entrada</p>
+          <div class="space-y-1 mt-1">
+            <% @event.ticket_types.ordered.each do |tt| %>
+              <p class="text-sm <%= tt.price > 0 ? "text-heading" : "text-success" %>">
+                <%= tt.name %>: <%= tt.price > 0 ? number_to_currency(tt.price, unit: "S/ ") : "Gratis" %>
+                <span class="text-muted">(<%= tt.remaining_capacity %> disp.)</span>
+              </p>
+            <% end %>
+            <% if @event.ticket_types.empty? %>
+              <p class="text-sm text-muted">Sin tipos de entrada</p>
+            <% end %>
+          </div>
         </div>
         <div>
-          <p class="text-sm text-gray-500">Moneda</p>
-          <p class="font-medium text-gray-900"><%= @event.currency %></p>
+          <p class="text-sm text-body-tertiary">Moneda</p>
+          <p class="font-medium text-heading"><%= @event.currency %></p>
         </div>
         <% if @event.max_capacity %>
           <div>
-            <p class="text-sm text-gray-500">Capacidad máxima</p>
-            <p class="font-medium text-gray-900"><%= @event.max_capacity %> personas</p>
+            <p class="text-sm text-body-tertiary">Capacidad máxima</p>
+            <p class="font-medium text-heading"><%= @event.max_capacity %> personas</p>
           </div>
         <% end %>
         <div>
-          <p class="text-sm text-gray-500">Valoración promedio</p>
-          <p class="font-medium text-gray-900"><%= @event.average_rating > 0 ? "#{@event.average_rating} ★ (#{@event.comments.count} comentarios)" : "Sin valoraciones" %></p>
+          <p class="text-sm text-body-tertiary">Valoración promedio</p>
+          <p class="font-medium text-heading"><%= @event.average_rating > 0 ? "#{@event.average_rating} ★ (#{@event.comments.count} comentarios)" : "Sin valoraciones" %></p>
         </div>
         <% if @event.latitude.present? && @event.longitude.present? %>
           <div>
-            <p class="text-sm text-gray-500">Coordenadas</p>
-            <p class="font-medium text-gray-900"><%= @event.latitude %>, <%= @event.longitude %></p>
+            <p class="text-sm text-body-tertiary">Coordenadas</p>
+            <p class="font-medium text-heading"><%= @event.latitude %>, <%= @event.longitude %></p>
           </div>
         <% end %>
       </div>
@@ -80,7 +84,7 @@
 
     <%# Description %>
     <div class="mt-8">
-      <h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
+      <h2 class="text-lg font-semibold text-heading mb-3">Descripción</h2>
       <div class="prose prose-gray max-w-none">
         <%= simple_format @event.description %>
       </div>
@@ -89,10 +93,10 @@
     <%# Images %>
     <% if @event.event_images.any? %>
       <div class="mt-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-3">Imágenes del evento</h2>
+        <h2 class="text-lg font-semibold text-heading mb-3">Imágenes del evento</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <% @event.event_images.each do |img| %>
-            <div class="aspect-video rounded-lg overflow-hidden border border-gray-200">
+            <div class="aspect-video rounded-card overflow-hidden border border-border">
               <%= image_tag img.image_url, class: "w-full h-full object-cover" %>
             </div>
           <% end %>
@@ -101,9 +105,9 @@
     <% end %>
 
     <%# Audit Info %>
-    <div class="mt-8 pt-6 border-t border-gray-200">
-      <h2 class="text-sm font-medium text-gray-500 mb-2">Información del sistema</h2>
-      <div class="grid grid-cols-2 gap-4 text-xs text-gray-400">
+    <div class="mt-8 pt-6 border-t border-border">
+      <h2 class="text-sm font-medium text-body-tertiary mb-2">Información del sistema</h2>
+      <div class="grid grid-cols-2 gap-4 text-xs text-muted">
         <div>Creado: <%= l(@event.created_at, format: :long) %></div>
         <div>Actualizado: <%= l(@event.updated_at, format: :long) %></div>
       </div>

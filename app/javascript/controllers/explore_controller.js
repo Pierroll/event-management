@@ -91,9 +91,9 @@ export default class extends Controller {
     // Update active button styles
     this.viewToggleTargets.forEach(btn => {
       btn.classList.remove("bg-brand-primary", "text-white")
-      btn.classList.add("bg-gray-100", "text-gray-600")
+      btn.classList.add("bg-surface-secondary", "text-body-secondary")
     })
-    event.currentTarget.classList.remove("bg-gray-100", "text-gray-600")
+    event.currentTarget.classList.remove("bg-surface-secondary", "text-body-secondary")
     event.currentTarget.classList.add("bg-brand-primary", "text-white")
   }
 
@@ -147,11 +147,11 @@ export default class extends Controller {
       const marker = L.marker(coords)
       const popupContent = `
         <div class="p-2 select-none">
-          <h4 class="font-semibold text-gray-900">${name}</h4>
-          <p class="text-xs text-gray-500 my-1">${city} | ${date}</p>
+          <h4 class="font-semibold text-heading">${name}</h4>
+          <p class="text-xs text-body-tertiary my-1">${city} | ${date}</p>
           <div class="flex items-center justify-between mt-2">
-            <span class="text-xs font-bold text-blue-600">${parseFloat(price) > 0 ? `S/${price}` : "Gratis"}</span>
-            <a href="/events/${eventId}" class="text-xs font-medium text-blue-500 hover:underline">Ver detalle →</a>
+            <span class="text-xs font-bold text-link">${parseFloat(price) > 0 ? `S/${price}` : "Gratis"}</span>
+            <a href="/events/${eventId}" class="text-xs font-medium text-link hover:underline">Ver detalle →</a>
           </div>
         </div>
       `

@@ -1,10 +1,13 @@
 module Organizer
   class EventsController < BaseController
+    include EventScoping
+
     before_action :set_event, only: [:show, :edit, :update, :destroy]
 
     def index
+      authorize Event
       @events = policy_scope(Event)
-                  .includes(:category, :event_images)
+                  .includes(:category, :event_images, :ticket_types)
                   .where(organizer_id: current_user.id)
                   .page(params[:page]).per(10)
     end
@@ -55,17 +58,14 @@ module Organizer
 
     private
 
-    def set_event
-      @event = Event.find(params[:id])
-    end
-
     def event_params
       params.require(:event).permit(
         :name, :description, :city, :address, :start_date, :end_date,
-        :price, :currency, :max_capacity, :status, :category_id,
+        :currency, :max_capacity, :status, :category_id,
         :latitude, :longitude,
         :primary_image,
-        images: [], remove_image_ids: []
+        images: [], remove_image_ids: [],
+        ticket_types_attributes: [:id, :name, :price, :quantity_total, :_destroy]
       )
     end
   end

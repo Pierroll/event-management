@@ -8,8 +8,7 @@ class HomeController < ApplicationController
       end
     end
 
-    @upcoming_events = Event.upcoming.limit(6)
-    @categories = Category.active
-    @cities = Event.published_only.distinct.pluck(:city).compact_blank.sort
+    @upcoming_events = Event.upcoming.includes(:ticket_types).limit(6)
+    @cities = Event.published.distinct.pluck(:city).compact_blank.sort
   end
 end

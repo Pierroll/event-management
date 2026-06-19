@@ -1,11 +1,11 @@
 <%# New Category %>
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Nueva categoría</h1>
-    <%= link_to "← Categorías", admin_categories_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+    <h1 class="text-2xl font-bold text-heading">Nueva categoría</h1>
+    <%= link_to "← Categorías", admin_categories_path, class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+  <div class="bg-white rounded-badge border border-border p-6 md:p-8">
     <%= render "form", category: @category %>
   </div>
 </div>

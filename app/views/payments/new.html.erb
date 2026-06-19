@@ -1,0 +1,86 @@
+<% content_for :title, "Completar pago — #{@booking.event.name}" %>
+
+<div class="max-w-lg mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-heading mb-6">Completar pago</h1>
+
+  <%# Booking Summary %>
+  <div class="bg-white rounded-2xl shadow-raised border border-border p-6 mb-6 space-y-3">
+    <h2 class="text-lg font-semibold text-heading"><%= @booking.event.name %></h2>
+    <div class="text-sm text-body-secondary space-y-1">
+      <p><span class="font-medium">Tipo:</span> <%= @booking.ticket_type.name %></p>
+      <p><span class="font-medium">Cantidad:</span> <%= @booking.quantity %></p>
+      <p><span class="font-medium">Precio unitario:</span> <%= number_to_currency @booking.unit_price, unit: "S/ " %></p>
+    </div>
+    <div class="pt-3 border-t border-border-light flex justify-between items-center">
+      <span class="font-semibold text-heading">Total</span>
+      <span class="text-xl font-bold text-link">
+        <%= number_to_currency @booking.total_price, unit: "S/ " %>
+      </span>
+    </div>
+  </div>
+
+  <%# Expiration Timer %>
+  <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6 text-center"
+       data-controller="checkout-timer"
+       data-checkout-timer-expires-at-value="<%= @booking.expires_at.iso8601 %>">
+    <p class="text-sm text-yellow-700 font-medium">
+      Tiempo restante para completar el pago
+    </p>
+    <p class="text-2xl font-bold text-yellow-800 font-mono tabular-nums mt-1"
+       data-checkout-timer-target="display">
+      --:--
+    </p>
+  </div>
+
+  <%# Payment Form %>
+  <%= form_with url: booking_payments_path(@booking),
+                method: :post,
+                id: "payment-form",
+                class: "space-y-4" do |f| %>
+    <%= hidden_field_tag :culqi_token_id, nil, id: "culqi_token_id" %>
+
+    <div class="bg-white rounded-2xl shadow-raised border border-border p-6">
+      <div id="culqi-checkout" class="min-h-[200px] flex items-center justify-center">
+        <button type="button" id="pay-button"
+                class="w-full py-4 bg-primary text-white text-sm font-bold rounded-2xl hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 active:scale-95">
+          Pagar con Culqi
+        </button>
+      </div>
+    </div>
+
+    <p class="text-xs text-muted text-center">
+      Tus datos están seguros. El pago se procesa de forma segura a través de Culqi.
+    </p>
+  <% end %>
+</div>
+
+<%# Culqi JS + integration %>
+<%# ponytail: direct script tag for Culqi CDN, swap to importmap if Culqi provides an ES module %>
+<script src="https://checkout.culqi.com/js/v4"></script>
+<script>
+  document.getElementById('pay-button').addEventListener('click', function() {
+    Culqi.publicKey = '<%= ENV["CULQI_PUBLIC_KEY"] %>';
+    Culqi.settings({
+      title: '<%= j @booking.event.name %>',
+      currency: 'PEN',
+      description: '<%= j @booking.ticket_type.name %> x<%= @booking.quantity %>',
+      amount: <%= (@booking.total_price * 100).to_i %>
+    });
+    Culqi.open();
+  });
+
+  document.addEventListener('culqi_token', function(event) {
+    const token = event.detail;
+    document.getElementById('culqi_token_id').value = token.id;
+    document.getElementById('payment-form').submit();
+  });
+
+  document.addEventListener('culqi_close', function() {
+    console.log('Culqi checkout closed');
+  });
+
+  document.addEventListener('culqi_error', function(event) {
+    const error = event.detail;
+    alert('Error de pago: ' + error.user_message);
+  });
+</script>

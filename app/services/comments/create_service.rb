@@ -18,8 +18,20 @@ module Comments
         return comment
       end
 
-      comment.save
+      ActiveRecord::Base.transaction do
+        comment.save!
+        comment.event.update!(average_rating: recalculated_rating(comment.event))
+      end
+
       comment
+    rescue ActiveRecord::RecordInvalid
+      comment
+    end
+
+    private
+
+    def recalculated_rating(event)
+      event.comments.average(:rating).to_f.round(2)
     end
   end
 end

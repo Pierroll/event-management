@@ -1,6 +1,130 @@
 @import "tailwindcss";
 
-@source inline("bg-blue-400 bg-blue-600 hover:bg-blue-700 bg-gray-50 bg-white text-gray-400 text-gray-700 hover:bg-gray-50 border-gray-200 border-gray-300 cursor-not-allowed");
+@source inline("bg-surface-secondary/50");
+
+/* ==========================================================================
+   DESIGN TOKENS — Eventbrite Inspired Design System
+   Use these via utility classes: bg-primary, text-heading, border-border, etc.
+   See docs/desing-system/eventbrite-inspired.md for full reference.
+   ========================================================================== */
+@theme {
+  /* -----------------------------------------------------------------------
+     TYPOGRAPHY
+     Plus Jakarta Sans — replaces Neue Plak (paid font) with same DNA
+     ----------------------------------------------------------------------- */
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* -----------------------------------------------------------------------
+     BRAND COLORS
+     Direct palette access: bg-brand-plum, text-brand-blue, etc.
+     ----------------------------------------------------------------------- */
+  --color-brand-plum: #39364F;
+  --color-brand-blue: #3659E3;
+  --color-brand-blue-bright: #3D64FF;
+  --color-brand-blue-dark: #304FC9;
+  --color-brand-navy: #304FC9;
+  --color-brand-coral: #F05537;
+
+  /* -----------------------------------------------------------------------
+     NEUTRAL SCALE — plum/gray-lavender family
+     Use for backgrounds, text, borders: bg-neutral-50, text-neutral-700, etc.
+     ----------------------------------------------------------------------- */
+  --color-neutral-50: #F8F7FA;   /* Light Lavender — subtle bg surfaces */
+  --color-neutral-100: #EEEDF2;  /* Pale Lavender — tertiary bg, dividers */
+  --color-neutral-200: #DBDAE3;  /* Light Divider — default borders */
+  --color-neutral-300: #A9A8B3;  /* Gray-Purple — placeholder, disabled */
+  --color-neutral-400: #6F7287;  /* Mid-Tone Gray — tertiary text */
+  --color-neutral-500: #585163;  /* Charcoal Gray — secondary body text */
+  --color-neutral-600: #4B4D63;  /* Slate Gray — supporting text */
+  --color-neutral-700: #39364F;  /* Deep Plum — headings, primary text */
+
+  /* -----------------------------------------------------------------------
+     SEMANTIC TEXT COLORS
+     ----------------------------------------------------------------------- */
+  --color-heading: #39364F;
+  --color-body: #39364F;
+  --color-body-secondary: #585163;
+  --color-body-tertiary: #6F7287;
+  --color-muted: #A9A8B3;
+  --color-inverse: #FFFFFF;
+  --color-link: #3659E3;
+  --color-link-hover: #304FC9;
+
+  /* -----------------------------------------------------------------------
+     SEMANTIC ACTION COLORS
+     ----------------------------------------------------------------------- */
+  --color-primary: #3659E3;
+  --color-primary-hover: #304FC9;
+  --color-primary-active: #2A3BA8;
+  --color-primary-disabled: #A9A8B3;
+
+  --color-accent: #F05537;
+  --color-accent-hover: #D6441F;
+
+  /* -----------------------------------------------------------------------
+     SEMANTIC STATUS COLORS
+     ----------------------------------------------------------------------- */
+  --color-success: #22C55E;
+  --color-error: #D1410C;
+  --color-warning: #F05537;
+  --color-info: #3659E3;
+
+  /* -----------------------------------------------------------------------
+     SURFACE / BACKGROUND COLORS
+     ----------------------------------------------------------------------- */
+  --color-surface: #FFFFFF;       --color-surface-foreground: #39364F;
+  --color-surface-secondary: #F8F7FA;
+  --color-surface-tertiary: #EEEDF2;
+  --color-background: #F8F7FA;
+
+  /* -----------------------------------------------------------------------
+     BORDER COLORS
+     ----------------------------------------------------------------------- */
+  --color-border: #DBDAE3;
+  --color-border-light: #EFEFEF;
+  --color-border-input: #DBDAE3;
+  --color-border-focus: #DEEEFF;
+
+  /* -----------------------------------------------------------------------
+     BORDER RADIUS
+     Map: minimal(inputs)=4px, standard(cards)=8px, rounded(badges)=12px, pill(buttons)=9999px
+     ----------------------------------------------------------------------- */
+  --radius-input: 4px;
+  --radius-card: 8px;
+  --radius-container: 8px;
+  --radius-badge: 12px;
+  --radius-pill: 9999px;
+
+  /* -----------------------------------------------------------------------
+     SHADOWS / ELEVATION
+     All use desaturated dark shadow color for clean, modern depth
+     ----------------------------------------------------------------------- */
+  --shadow-raised: 0px 2px 8px rgba(40, 44, 53, 0.08);
+  --shadow-elevated: 0px 1px 20px rgba(40, 44, 53, 0.10),
+                     0px 2px 5px rgba(40, 44, 53, 0.10);
+  --shadow-floating: 0px 8px 16px rgba(240, 85, 55, 0.25);
+  --shadow-high: 0px 12px 24px rgba(40, 44, 53, 0.15);
+
+  /* -----------------------------------------------------------------------
+     SPACING — extend Tailwind default scale
+     Tailwind covers 0–24rem. Add missing 72px (18 rem units ÷ 0.25).
+     ----------------------------------------------------------------------- */
+  --spacing-18: 4.5rem;  /* 72px — between spacing-16(64px) and spacing-20(80px) */
+
+  /* -----------------------------------------------------------------------
+     MOTION — Easing curves
+     ----------------------------------------------------------------------- */
+  --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* -----------------------------------------------------------------------
+     MOTION — Durations
+     ----------------------------------------------------------------------- */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slide: 500ms;
+}
 
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
@@ -17,3 +141,53 @@
     background: #d1d5db;
   }
 }
+
+/* ==========================================================================
+   DESIGN ENGINEERING — Emil Kowalski's Principles
+   Micro-interactions, active press states, and hover controls.
+   ========================================================================== */
+
+/* Active scale press feedback on interactive elements */
+button,
+input[type="submit"],
+.btn-pressable {
+  transition: transform var(--duration-fast) var(--ease-spring), 
+              background-color var(--duration-fast) ease, 
+              border-color var(--duration-fast) ease, 
+              box-shadow var(--duration-fast) ease;
+}
+
+button:active,
+input[type="submit"]:active,
+.btn-pressable:active {
+  transform: scale(0.97);
+}
+
+/* Hover lift and active press for card containers */
+.card-pressable {
+  transition: transform var(--duration-normal) var(--ease-spring), 
+              box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-pressable:hover {
+    transform: translateY(-2px) scale(1.008);
+  }
+}
+
+.card-pressable:active {
+  transform: scale(0.99);
+}
+
+/* Accessibility: Respect system preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  button,
+  input[type="submit"],
+  .btn-pressable,
+  .card-pressable {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+

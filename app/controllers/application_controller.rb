@@ -9,6 +9,8 @@ class ApplicationController < ActionController::Base
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
+  after_action :verify_authorized, unless: :pundit_skippable?
+
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :require_email_confirmation
 
@@ -40,6 +42,19 @@ class ApplicationController < ActionController::Base
     return if current_user.confirmed?
 
     redirect_to new_confirmation_path, alert: t("confirmations.required")
+  end
+
+  def pundit_skippable?
+    devise_controller? ||
+      self.class == HomeController ||
+      self.class == ConfirmationsController ||
+      self.class.name.start_with?("Webhooks::") ||
+      self.class == Rails::HealthController ||
+      # TODO(deuda-tecnica): Admin::* exceptuado temporalmente.
+      # Ver hallazgo #5 de auditoría — el namespace Admin
+      # completo bypassa Pundit (usa solo ensure_admin! por rol,
+      # sin policy_scope ni authorize por recurso).
+      self.class.name.start_with?("Admin::")
   end
 
   def user_not_authorized(exception)

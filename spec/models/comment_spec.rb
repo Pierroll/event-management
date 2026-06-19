@@ -16,7 +16,6 @@ RSpec.describe Comment, type: :model do
       address: "Av. Test 123",
       start_date: 1.day.from_now,
       end_date: 1.day.from_now + 2.hours,
-      price: 0,
       currency: "PEN",
       category: category,
       organizer: organizer,
@@ -73,14 +72,18 @@ RSpec.describe Comment, type: :model do
   end
 
   describe "callbacks" do
-    it "updates event average_rating after save" do
+    # after_save rating update is handled by Comments::CreateService.
+    # These tests go through the service to verify the full flow.
+
+    it "updates event average_rating after save via service" do
       expect {
-        Comment.create!(content: "Gran evento, muy educativo!", rating: 4, user: user, event: event)
+        Comments::CreateService.call(user, event, { content: "Gran evento, muy educativo!", rating: 4 })
       }.to change { event.reload.average_rating }.from(0).to(4.0)
     end
 
     it "recalculates average_rating after destroy" do
-      comment = Comment.create!(content: "Comentario único de calificación.", rating: 3, user: user, event: event)
+      Comments::CreateService.call(user, event, { content: "Comentario único de calificación.", rating: 3 })
+      comment = event.comments.first!
       expect {
         comment.destroy
       }.to change { event.reload.average_rating }.from(3.0).to(0.0)
@@ -88,8 +91,8 @@ RSpec.describe Comment, type: :model do
 
     it "averages multiple comments correctly" do
       other_user = User.create!(name: "Other", email: "other@comment.com", password: "password123")
-      Comment.create!(content: "Buen evento, me gustó.", rating: 5, user: user, event: event)
-      Comment.create!(content: "Estuvo regular nomas.", rating: 3, user: other_user, event: event)
+      Comments::CreateService.call(user, event, { content: "Buen evento, me gustó.", rating: 5 })
+      Comments::CreateService.call(other_user, event, { content: "Estuvo regular nomas.", rating: 3 })
 
       expect(event.reload.average_rating).to eq(4.0)
     end

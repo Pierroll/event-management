@@ -32,6 +32,11 @@ class Event < ApplicationRecord
   has_many :bookings,
            dependent: :destroy
 
+  has_many :ticket_types,
+           dependent: :restrict_with_error
+
+  accepts_nested_attributes_for :ticket_types, allow_destroy: true
+
   # =========================
   # VALIDATIONS
   # =========================
@@ -47,11 +52,6 @@ class Event < ApplicationRecord
     event.validates :category_id, presence: true
   end
 
-  validates :price,
-            numericality: {
-              greater_than_or_equal_to: 0
-            }
-
   validates :average_rating,
             numericality: {
               greater_than_or_equal_to: 0,
@@ -63,19 +63,14 @@ class Event < ApplicationRecord
   # =========================
   # DEFAULTS
   # =========================
-  attribute :price, :decimal, default: 0
   attribute :average_rating, :decimal, default: 0
   attr_accessor :primary_image_param
 
   # =========================
   # SCOPES
   # =========================
-  scope :published_only, -> {
-    where(status: :published)
-  }
-
   scope :upcoming, -> {
-    published_only.where('start_date > ?', Time.current)
+    published.where('start_date > ?', Time.current)
   }
 
   scope :by_city, ->(city) {
@@ -90,25 +85,54 @@ class Event < ApplicationRecord
   # METHODS
   # =========================
   def primary_image
-    event_images.min_by(&:display_order)
+    # Use SQL ordering when persisted (loads 1 record), fallback to in-memory for unsaved
+    if persisted?
+      event_images.order(:display_order).first
+    else
+      event_images.min_by(&:display_order)
+    end
   end
 
   def secondary_images
-    sorted = event_images.sort_by(&:display_order)
-    sorted.drop(1)
+    if persisted?
+      event_images.order(:display_order).offset(1)
+    else
+      event_images.sort_by(&:display_order).drop(1)
+    end
   end
 
   # ── Booking / Availability ──
   def remaining_capacity
-    max_capacity - bookings.active.sum(:quantity)
+    if max_capacity.present?
+      [max_capacity - bookings.occupying_capacity.sum(:quantity), 0].max
+    else
+      total_quantity = ticket_types.sum(:quantity_total)
+      total_booked = bookings.occupying_capacity.sum(:quantity)
+      [total_quantity - total_booked, 0].max
+    end
   end
 
   def sold_out?
-    max_capacity.present? && remaining_capacity <= 0
+    remaining_capacity <= 0
   end
 
+  # available? = publicado Y no agotado (no considera ventana de venta,
+  # eso es responsabilidad de TicketType)
   def available?
     published? && !sold_out?
+  end
+
+  # ── Pricing ──
+  def price_range
+    return nil if ticket_types.empty?
+
+    prices = ticket_types.map(&:price)
+    min = prices.min
+    max = prices.max
+
+    return min if min == max
+
+    min..max
   end
 
   private

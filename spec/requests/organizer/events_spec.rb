@@ -14,7 +14,6 @@ RSpec.describe "Organizer::Events", type: :request do
       address: "Miraflores",
       start_date: 1.day.from_now,
       end_date: 2.days.from_now,
-      price: 0,
       category: category,
       organizer: user,
       status: :draft
@@ -33,7 +32,6 @@ RSpec.describe "Organizer::Events", type: :request do
       address: "Miraflores",
       start_date: 1.day.from_now,
       end_date: 2.days.from_now,
-      price: 0,
       category: category,
       organizer: user,
       status: :published
@@ -103,7 +101,6 @@ RSpec.describe "Organizer::Events", type: :request do
         city: "Lima",
         address: "Av. Larco 123",
         start_date: 2.days.from_now,
-        price: 0,
         category_id: category.id,
         status: "published",
         primary_image: primary_file,

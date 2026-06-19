@@ -36,7 +36,6 @@ RSpec.describe Event, type: :model do
         city: "Lima",
         address: "Av. Arequipa 4567, Lima",
         start_date: 3.days.from_now,
-        price: 0.00,
         category: category,
         organizer: organizer,
         status: :draft
@@ -63,7 +62,6 @@ RSpec.describe Event, type: :model do
         latitude: -12.11111,
         longitude: -77.22222,
         start_date: 3.days.from_now,
-        price: 0.00,
         category: category,
         organizer: organizer,
         status: :draft

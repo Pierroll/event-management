@@ -1,14 +1,14 @@
 <%# Event Detail Page %>
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <%# Back Link %>
-  <%= link_to "← Volver a eventos", events_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors mb-6 inline-block" %>
+  <%= link_to "← Volver a eventos", events_path, class: "text-sm text-body-tertiary hover:text-body transition-colors mb-6 inline-block" %>
 
   <%# Event Header %>
   <%
     images = @event.event_images.to_a
     has_many = images.size > 1
   %>
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden"
+  <div class="bg-white rounded-badge border border-border overflow-hidden"
        <%= "data-controller='carousel' data-carousel-index-value='0'".html_safe if has_many %>>
     <%# Galeria / Carrusel %>
     <% if images.any? %>
@@ -16,17 +16,17 @@
 
         <%# Slides %>
         <% images.each_with_index do |img, idx| %>
-          <div class="<%= has_many ? 'absolute inset-0 transition-opacity duration-500' : 'relative w-full h-full' %>"
+          <div class="<%= has_many ? 'absolute inset-0 transition-opacity duration-250 ease-out' : 'relative w-full h-full' %>"
                <%= "data-carousel-target='slide' style='#{idx == 0 ? "opacity:1;z-index:10" : "opacity:0;z-index:0;pointer-events:none"}'".html_safe if has_many %>>
             <%= image_tag img.image_url,
                 class: "w-full h-full object-cover",
                 alt: "#{@event.name} – imagen #{idx + 1}" %>
             <% if idx == 0 && has_many %>
-              <div class="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm z-10">
-                <svg class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <div class="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-raised z-10">
+                <svg class="w-3.5 h-3.5 text-link" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
-                <span class="text-[10px] font-bold text-blue-700 uppercase tracking-widest">Principal</span>
+                <span class="text-[10px] font-bold text-link-hover uppercase tracking-widest">Principal</span>
               </div>
             <% end %>
           </div>
@@ -36,14 +36,14 @@
           <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20"></div>
 
           <button type="button" data-action="click->carousel#prev"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/50 backdrop-blur-sm rounded-full transition-all text-white">
+                  class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/50 backdrop-blur-sm rounded-full transition-[background-color,transform] duration-150 ease-out active:scale-90 text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
 
           <button type="button" data-action="click->carousel#next"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/50 backdrop-blur-sm rounded-full transition-all text-white">
+                  class="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 flex items-center justify-center bg-white/20 hover:bg-white/50 backdrop-blur-sm rounded-full transition-[background-color,transform] duration-150 ease-out active:scale-90 text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
             </svg>
@@ -55,7 +55,7 @@
                       data-action="click->carousel#jump"
                       data-index="<%= idx %>"
                       data-carousel-target="dot"
-                      class="w-2.5 h-2.5 rounded-full bg-white transition-all duration-300"
+                      class="w-2.5 h-2.5 rounded-full bg-white transition-[opacity,transform] duration-200 ease-out"
                       style="<%= idx == 0 ? 'opacity: 1; transform: scale(1.25);' : 'opacity: 0.4; transform: scale(1);' %>">
               </button>
             <% end %>
@@ -65,13 +65,13 @@
 
       <%# Miniaturas debajo del carrusel (cuando hay 2+ imagenes) %>
       <% if has_many %>
-        <div class="flex gap-2 p-3 bg-gray-50 border-b border-gray-200 overflow-x-auto">
+        <div class="flex gap-2 p-3 bg-surface-secondary border-b border-border overflow-x-auto">
           <% images.each_with_index do |img, idx| %>
             <button type="button"
                     data-action="click->carousel#jump"
                     data-index="<%= idx %>"
                     data-carousel-target="thumb"
-                    class="shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 <%= idx == 0 ? 'border-blue-500 opacity-100' : 'border-transparent opacity-60 hover:opacity-90' %>">
+                    class="shrink-0 w-16 h-12 rounded-card overflow-hidden border-2 transition-[border-color,opacity,transform] duration-150 ease-out active:scale-95 <%= idx == 0 ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-90' %>">
               <%= image_tag img.image_url, class: "w-full h-full object-cover", alt: "" %>
             </button>
           <% end %>
@@ -83,19 +83,19 @@
       <%# Title and Status %>
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900"><%= @event.name %></h1>
+          <h1 class="text-2xl md:text-3xl font-bold text-heading"><%= @event.name %></h1>
           <% if @event.category %>
-            <span class="inline-block mt-2 px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full">
+            <span class="inline-block mt-2 px-3 py-1 bg-primary/10 text-link-hover text-sm font-medium rounded-full">
               <%= @event.category.name %>
             </span>
           <% end %>
         </div>
         <% if @event.average_rating > 0 %>
-          <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg">
+          <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-card">
             <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            <span class="font-semibold text-gray-900"><%= @event.average_rating %></span>
+            <span class="font-semibold text-heading"><%= @event.average_rating %></span>
           </div>
         <% end %>
       </div>
@@ -104,119 +104,121 @@
       <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="space-y-4">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <div>
-              <p class="text-sm text-gray-500">Fecha de inicio</p>
-              <p class="font-medium text-gray-900"><%= l(@event.start_date, format: :long) if @event.start_date %></p>
+              <p class="text-sm text-body-tertiary">Fecha de inicio</p>
+              <p class="font-medium text-heading"><%= l(@event.start_date, format: :long) if @event.start_date %></p>
             </div>
           </div>
           <% if @event.end_date %>
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div>
-                <p class="text-sm text-gray-500">Fecha de fin</p>
-                <p class="font-medium text-gray-900"><%= l(@event.end_date, format: :long) %></p>
+                <p class="text-sm text-body-tertiary">Fecha de fin</p>
+                <p class="font-medium text-heading"><%= l(@event.end_date, format: :long) %></p>
               </div>
             </div>
           <% end %>
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             <div>
-              <p class="text-sm text-gray-500">Ubicación</p>
-              <p class="font-medium text-gray-900"><%= @event.address %></p>
-              <p class="text-sm text-gray-500"><%= @event.city %></p>
+              <p class="text-sm text-body-tertiary">Ubicación</p>
+              <p class="font-medium text-heading"><%= @event.address %></p>
+              <p class="text-sm text-body-tertiary"><%= @event.city %></p>
             </div>
           </div>
         </div>
 
         <div class="space-y-4">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p class="text-sm text-gray-500">Precio</p>
-              <p class="font-bold text-xl <%= @event.price > 0 ? "text-gray-900" : "text-green-600" %>">
-                <%= @event.price > 0 ? number_to_currency(@event.price, unit: "S/ ") : "Gratis" %>
+              <p class="text-sm text-body-tertiary">Precios desde</p>
+              <p class="font-bold text-xl text-heading">
+                <% if (range = @event.price_range) %>
+                  <% if range.is_a?(Range) %>
+                    <%= number_to_currency(range.first, unit: "S/ ") %> – <%= number_to_currency(range.last, unit: "S/ ") %>
+                  <% else %>
+                    <%= range > 0 ? number_to_currency(range, unit: "S/ ") : "Gratis" %>
+                  <% end %>
+                <% else %>
+                  —
+                <% end %>
               </p>
             </div>
           </div>
           <% if @event.max_capacity %>
             <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               <div>
-                <p class="text-sm text-gray-500">Capacidad máxima</p>
-                <p class="font-medium text-gray-900"><%= @event.max_capacity %> personas</p>
+                <p class="text-sm text-body-tertiary">Capacidad máxima</p>
+                <p class="font-medium text-heading"><%= @event.max_capacity %> personas</p>
               </div>
             </div>
           <% end %>
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-muted mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
             </svg>
             <div>
-              <p class="text-sm text-gray-500">Estado</p>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
-                <%= @event.published? ? "bg-green-100 text-green-800" : "" %>
-                <%= @event.draft? ? "bg-yellow-100 text-yellow-800" : "" %>
-                <%= @event.canceled? ? "bg-red-100 text-red-800" : "" %>
-                <%= @event.finished? ? "bg-gray-100 text-gray-800" : "" %>">
-                <%= @event.status.humanize %>
-              </span>
+              <p class="text-sm text-body-tertiary">Estado</p>
+              <%= event_status_badge(@event, classes: "text-sm font-medium") %>
             </div>
           </div>
         </div>
       </div>
 
-      <%# Availability & Booking %>
-      <% if @event.max_capacity.present? || @event.price.present? %>
-      <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p class="text-sm text-blue-700 font-medium">Disponibilidad</p>
-            <% if @event.sold_out? %>
-              <p class="text-lg font-bold text-red-600">🚫 Agotado</p>
-              <p class="text-xs text-red-500">No quedan entradas disponibles</p>
-            <% else %>
-              <p class="text-lg font-bold text-gray-900">
-                <%= @event.remaining_capacity %> / <%= @event.max_capacity %>
-                <span class="text-sm font-normal text-gray-500">lugares disponibles</span>
-              </p>
-              <% if @event.remaining_capacity <= @event.max_capacity * 0.2 && @event.remaining_capacity > 0 %>
-                <p class="text-xs text-orange-600 font-medium">⚠️ Quedan pocos lugares</p>
-              <% end %>
-            <% end %>
+      <%# Ticket Types & Booking %>
+      <% if @event.ticket_types.any? %>
+      <div class="mt-8 space-y-3">
+        <h2 class="text-lg font-semibold text-heading">Tipos de entrada</h2>
+        <% @event.ticket_types.ordered.on_sale.each do |tt| %>
+          <div class="p-4 bg-white border border-border rounded-badge card-pressable hover:border-primary/30 hover:shadow-raised">
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0 flex-1">
+                <h3 class="font-semibold text-heading"><%= tt.name %></h3>
+                <p class="text-sm text-body-tertiary mt-0.5">
+                  <% if tt.available? %>
+                    <%= tt.remaining_capacity %> disponibles
+                    <% if tt.max_per_order.present? %>
+                      · máx. <%= tt.max_per_order %> por persona
+                    <% end %>
+                  <% else %>
+                    <span class="text-error font-medium">Agotado</span>
+                  <% end %>
+                </p>
+              </div>
+              <div class="text-right shrink-0">
+                <p class="text-lg font-bold <%= tt.price > 0 ? "text-heading" : "text-success" %>">
+                  <%= tt.price > 0 ? number_to_currency(tt.price, unit: "S/ ") : "Gratis" %>
+                </p>
+                <% if user_signed_in? && tt.available? && @event.available? %>
+                  <%= link_to "Comprar",
+                      new_event_booking_path(@event, ticket_type_id: tt.id),
+                      class: "mt-1 inline-block px-5 py-2 bg-primary text-white text-sm font-semibold rounded-badge hover:bg-primary-hover transition-[transform,background-color,box-shadow] duration-150 ease-spring shadow-lg shadow-primary/20 btn-pressable" %>
+                <% elsif !user_signed_in? && tt.available? %>
+                  <p class="text-xs text-muted mt-2">
+                    <%= link_to "Inicia sesión", new_user_session_path, class: "text-link hover:underline" %>
+                  </p>
+                <% end %>
+              </div>
+            </div>
           </div>
-          <div class="text-right">
-            <p class="text-sm text-gray-500">Precio</p>
-            <p class="text-2xl font-bold <%= @event.price > 0 ? "text-gray-900" : "text-green-600" %>">
-              <%= @event.price > 0 ? number_to_currency(@event.price, unit: "S/ ") : "Gratis" %>
-            </p>
-            <% if user_signed_in? && @event.available? %>
-              <%= link_to "Comprar entrada",
-                  new_event_booking_path(@event),
-                  class: "mt-2 inline-block px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95" %>
-            <% elsif !user_signed_in? && @event.available? %>
-              <p class="text-xs text-gray-400 mt-2">
-                <%= link_to "Inicia sesión", new_user_session_path, class: "text-blue-600 hover:underline" %> para comprar entradas
-              </p>
-            <% end %>
-          </div>
-        </div>
-        <%# ponytail: capacity bar is purely visual, no calculation overhead %>
-        <% unless @event.sold_out? || @event.max_capacity.nil? || @event.max_capacity == 0 %>
-          <div class="mt-4 w-full bg-blue-200 rounded-full h-2.5">
-            <% pct = [(@event.bookings.active.sum(:quantity).to_f / @event.max_capacity * 100), 100].min %>
-            <div class="bg-blue-600 h-2.5 rounded-full transition-all" style="width: <%= pct %>%"></div>
+        <% end %>
+        <% if @event.max_capacity.present? %>
+          <div class="mt-2 flex items-center justify-end gap-2 text-xs text-body-tertiary">
+            <span>Capacidad total del evento: <%= @event.max_capacity %></span>
           </div>
         <% end %>
       </div>
@@ -224,7 +226,7 @@
 
       <%# Description %>
       <div class="mt-8">
-        <h2 class="text-lg font-semibold text-gray-900 mb-3">Descripción</h2>
+        <h2 class="text-lg font-semibold text-heading mb-3">Descripción</h2>
         <div class="prose prose-gray max-w-none">
           <%= simple_format @event.description %>
         </div>
@@ -233,8 +235,8 @@
       <%# Map %>
       <% if @event.latitude.present? && @event.longitude.present? %>
         <div class="mt-8">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">Ubicación en mapa</h2>
-          <div id="event-map" class="h-[300px] rounded-xl border border-gray-200 overflow-hidden"
+          <h2 class="text-lg font-semibold text-heading mb-3">Ubicación en mapa</h2>
+          <div id="event-map" class="h-[300px] rounded-badge border border-border overflow-hidden"
                data-lat="<%= @event.latitude %>" data-lng="<%= @event.longitude %>" data-controller="event-detail">
           </div>
         </div>
@@ -243,8 +245,8 @@
   </div>
 
   <%# Comments Section %>
-  <div class="mt-8 bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-    <h2 class="text-xl font-bold text-gray-900 mb-6">
+  <div class="mt-8 bg-white rounded-badge border border-border p-6 md:p-8">
+    <h2 class="text-xl font-bold text-heading mb-6">
       Comentarios (<%= @comments.count %>)
     </h2>
 
@@ -252,19 +254,19 @@
     <% if user_signed_in? %>
       <% if @comments.none? { |c| c.user_id == current_user.id } %>
         <div data-controller="event-detail" data-event-detail-target="commentForm">
-          <%= form_with model: [@event, @comment], local: true, class: "mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200" do |f| %>
-            <h3 class="font-semibold text-gray-900 mb-3">Deja tu comentario</h3>
+          <%= form_with model: [@event, @comment], local: true, class: "mb-8 p-4 bg-surface-secondary rounded-badge border border-border" do |f| %>
+            <h3 class="font-semibold text-heading mb-3">Deja tu comentario</h3>
 
             <%# Star Rating %>
             <div class="mb-4" data-controller="event-detail" data-event-detail-target="starsContainer">
-              <p class="text-sm font-medium text-gray-700 mb-2">Tu valoración</p>
+              <p class="text-sm font-medium text-body mb-2">Tu valoración</p>
               <div class="flex gap-1">
                 <% 5.times do |i| %>
                   <button type="button"
                           data-action="click->event-detail#rate mouseenter->event-detail#highlightStars mouseleave->event-detail#resetStars"
                           data-event-detail-target="star"
                           data-event-detail-rating-param="<%= i + 1 %>"
-                          class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors">
+                          class="text-2xl text-muted hover:text-yellow-400 transition-colors">
                     ★
                   </button>
                 <% end %>
@@ -276,17 +278,17 @@
             <div class="mb-4">
               <%= f.text_area :content, rows: 3,
                   placeholder: "Comparte tu experiencia... (mín. 10 caracteres)",
-                  class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+                  class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
             </div>
 
             <%= f.submit "Publicar comentario",
-                class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+                class: "px-6 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
           <% end %>
         </div>
       <% end %>
     <% else %>
-      <div class="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200 text-center">
-        <p class="text-gray-600"><%= link_to "Inicia sesión", new_user_session_path, class: "text-blue-600 hover:underline" %> para dejar un comentario.</p>
+      <div class="mb-8 p-4 bg-surface-secondary rounded-badge border border-border text-center">
+        <p class="text-body-secondary"><%= link_to "Inicia sesión", new_user_session_path, class: "text-link hover:underline" %> para dejar un comentario.</p>
       </div>
     <% end %>
 
@@ -296,7 +298,7 @@
         <%= render partial: "comments/comment", collection: @comments, as: :comment %>
       </div>
     <% else %>
-      <p class="text-center text-gray-500 py-8">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+      <p class="text-center text-body-tertiary py-8">No hay comentarios aún. ¡Sé el primero en comentar!</p>
     <% end %>
   </div>
 </div>

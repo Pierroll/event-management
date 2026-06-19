@@ -1,9 +1,12 @@
 class CommentsController < ApplicationController
+  include EventScoping
+
   before_action :authenticate_user!
 
   def create
-    @event = Event.find(params[:event_id])
+    set_event(id_key: :event_id)
     @comment = Comments::CreateService.call(current_user, @event, comment_params)
+    authorize @comment
 
     if @comment.persisted?
       redirect_to event_path(@event), notice: "Comentario publicado exitosamente."

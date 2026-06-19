@@ -3,14 +3,17 @@ class ProfilesController < ApplicationController
 
   def show
     @user = current_user
+    authorize @user, policy_class: ProfilePolicy
   end
 
   def edit
     @user = current_user
+    authorize @user, policy_class: ProfilePolicy
   end
 
   def update
     @user = current_user
+    authorize @user, policy_class: ProfilePolicy
     if @user.update(profile_params)
       redirect_to profile_path, notice: "Perfil actualizado exitosamente."
     else

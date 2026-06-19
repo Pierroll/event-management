@@ -21,7 +21,6 @@ RSpec.describe "Home and Search Integration", type: :request do
       address: "Av. Larco 123",
       start_date: 2.days.from_now,
       end_date: 3.days.from_now,
-      price: 150.00,
       currency: "PEN",
       category: category1,
       organizer: organizer,
@@ -41,7 +40,6 @@ RSpec.describe "Home and Search Integration", type: :request do
       address: "Plaza de Armas S/N",
       start_date: 5.days.from_now,
       end_date: 5.days.from_now + 4.hours,
-      price: 50.00,
       currency: "PEN",
       category: category2,
       organizer: organizer,
@@ -60,7 +58,6 @@ RSpec.describe "Home and Search Integration", type: :request do
       address: "Calle Mercaderes 456",
       start_date: 10.days.from_now,
       end_date: 11.days.from_now,
-      price: 0.00,
       currency: "PEN",
       category: category1,
       organizer: organizer,
@@ -75,7 +72,7 @@ RSpec.describe "Home and Search Integration", type: :request do
     it "renders the landing page successfully and loads categories and cities" do
       get root_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("Descubrí eventos")
+      expect(response.body).to include("Descubre eventos")
       expect(response.body).to include("Tecnología")
       expect(response.body).to include("Música")
       

@@ -2,26 +2,23 @@
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">Editar evento</h1>
-      <p class="text-sm text-gray-500 mt-1">Administración completa · <%= @event.organizer.name %></p>
+      <h1 class="text-2xl font-bold text-heading">Editar evento</h1>
+      <p class="text-sm text-body-tertiary mt-1">Administración completa · <%= @event.organizer.name %></p>
     </div>
-    <%= link_to "← Volver", admin_event_path(@event), class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
+    <%= link_to "← Volver", admin_event_path(@event), class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+  <div class="bg-white rounded-badge border border-border p-6 md:p-8">
     <%= form_with model: [:admin, @event], local: true, html: { multipart: true },
-        data: { controller: "event-form", action: "submit->event-form#validate" }, class: "space-y-6" do |f| %>
-
-      <%# Validation errors container %>
-      <div data-event-form-target="errorContainer"></div>
+        data: { controller: "event-form" }, class: "space-y-6" do |f| %>
 
       <%# Rails validation errors %>
       <% if @event.errors.any? %>
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 class="text-sm font-medium text-red-800">
+        <div class="bg-error/10 border border-error/30 rounded-card p-4">
+          <h3 class="text-sm font-medium text-error">
             <%= pluralize(@event.errors.count, "error") %> impidieron guardar:
           </h3>
-          <ul class="mt-2 list-disc list-inside text-sm text-red-600">
+          <ul class="mt-2 list-disc list-inside text-sm text-error">
             <% @event.errors.full_messages.each do |msg| %>
               <li><%= msg %></li>
             <% end %>
@@ -30,114 +27,177 @@
       <% end %>
 
       <%# Organizer Info (read-only) %>
-      <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <p class="text-sm text-gray-500">Organizador</p>
-        <p class="font-medium text-gray-900"><%= @event.organizer.name %> (<%= @event.organizer.email %>)</p>
+      <div class="p-4 bg-surface-secondary rounded-card border border-border">
+        <p class="text-sm text-body-tertiary">Organizador</p>
+        <p class="font-medium text-heading"><%= @event.organizer.name %> (<%= @event.organizer.email %>)</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <%# Name %>
         <div class="md:col-span-2">
-          <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :name, "Nombre del evento", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_field :name,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Description %>
         <div class="md:col-span-2">
-          <%= f.label :description, "Descripción", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :description, "Descripción", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_area :description, rows: 5,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Category %>
         <div>
-          <%= f.label :category_id, "Categoría", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.collection_select :category_id, @categories, :id, :name,
+          <%= f.label :category_id, "Categoría", class: "block text-sm font-medium text-body mb-1" %>
+          <%= f.collection_select :category_id, navbar_categories, :id, :name,
               { prompt: "Seleccionar categoría" },
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Status %>
         <div>
-          <%= f.label :status, "Estado", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :status, "Estado", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.select :status, Event.statuses.keys.map { |s| [s.humanize, s] }, {},
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# City %>
         <div>
-          <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :city, "Ciudad", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_field :city,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Address %>
         <div>
-          <%= f.label :address, "Dirección", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :address, "Dirección", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_field :address,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Start Date %>
         <div>
-          <%= f.label :start_date, "Fecha de inicio", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :start_date, "Fecha de inicio", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.datetime_field :start_date,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# End Date %>
         <div>
-          <%= f.label :end_date, "Fecha de fin", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :end_date, "Fecha de fin", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.datetime_field :end_date,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-        </div>
-
-        <%# Price %>
-        <div>
-          <%= f.label :price, "Precio", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">S/</span>
-            <%= f.number_field :price, step: 0.01, min: 0,
-                class: "w-full pl-8 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-          </div>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Currency %>
         <div>
-          <%= f.label :currency, "Moneda", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :currency, "Moneda de los precios", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.select :currency, [["PEN (Soles)", "PEN"], ["USD (Dólares)", "USD"]], {},
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Max Capacity %>
         <div>
-          <%= f.label :max_capacity, "Capacidad máxima", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :max_capacity, "Capacidad máxima", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.number_field :max_capacity, min: 1,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+        </div>
+
+        <%# ─── Tipos de entrada ─────────────────────────────────────────── %>
+        <div class="md:col-span-2 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-bold text-body">Tipos de entrada</label>
+            <span class="text-xs text-muted">Definí al menos uno</span>
+          </div>
+
+          <div data-controller="ticket-types" class="space-y-3">
+            <template data-ticket-types-target="template">
+              <div class="flex gap-3 items-start p-3 bg-surface-secondary rounded-badge border border-border" data-ticket-types-target="row">
+                <div class="flex-1 space-y-2">
+                  <input type="text" name="event[ticket_types_attributes][__INDEX__][name]"
+                         placeholder="Ej: General, VIP, Estudiantil"
+                         class="w-full border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                  <div class="flex gap-2">
+                    <input type="number" name="event[ticket_types_attributes][__INDEX__][price]"
+                           step="0.01" min="0" placeholder="Precio"
+                           class="w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                    <input type="number" name="event[ticket_types_attributes][__INDEX__][quantity]"
+                           min="0" placeholder="Cantidad"
+                           class="w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                    <input type="text" name="event[ticket_types_attributes][__INDEX__][description]"
+                           placeholder="Descripción (opcional)"
+                           class="flex-1 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+                  </div>
+                </div>
+                <button type="button" data-action="ticket-types#remove"
+                        class="shrink-0 mt-1 w-8 h-8 bg-error/10 hover:bg-error/20 text-error rounded-card flex items-center justify-center transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </template>
+
+            <div data-ticket-types-target="rows">
+              <% if f.object.persisted? %>
+                <%= f.fields_for :ticket_types do |tt| %>
+                  <div class="flex gap-3 items-start p-3 bg-surface-secondary rounded-badge border border-border">
+                    <div class="flex-1 space-y-2">
+                      <%= tt.text_field :name, placeholder: "Ej: General, VIP, Estudiantil",
+                          class: "w-full border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                      <div class="flex gap-2">
+                        <%= tt.number_field :price, step: 0.01, min: 0, placeholder: "Precio",
+                            class: "w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                        <%= tt.number_field :quantity, min: 0, placeholder: "Cantidad",
+                            class: "w-32 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                        <%= tt.text_field :description, placeholder: "Descripción (opcional)",
+                            class: "flex-1 border border-border-input rounded-input px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
+                      </div>
+                    </div>
+                    <%= tt.check_box :_destroy, class: "hidden" %>
+                    <button type="button" data-action="ticket-types#remove"
+                            class="shrink-0 mt-1 w-8 h-8 bg-error/10 hover:bg-error/20 text-error rounded-card flex items-center justify-center transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+
+            <button type="button" data-action="ticket-types#add"
+                    class="text-sm font-bold text-link hover:text-link-hover transition-colors flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Agregar tipo de entrada
+            </button>
+          </div>
         </div>
 
         <%# Latitude %>
         <div>
-          <%= f.label :latitude, "Latitud", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :latitude, "Latitud", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_field :latitude, step: 0.00000001,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
 
         <%# Longitude %>
         <div>
-          <%= f.label :longitude, "Longitud", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.label :longitude, "Longitud", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.text_field :longitude, step: 0.00000001,
-              class: "w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+              class: "w-full border border-border-input rounded-input px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
       </div>
 
       <%# Submit %>
-      <div class="flex items-center gap-3 pt-4 border-t border-gray-200">
+      <div class="flex items-center gap-3 pt-4 border-t border-border">
         <%= f.submit "Guardar cambios",
-            class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+            class: "px-6 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
         <%= link_to "Cancelar", admin_event_path(@event),
-            class: "px-6 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors" %>
+            class: "px-6 py-2 border border-border-input text-body text-sm font-medium rounded-card hover:bg-surface-secondary transition-colors" %>
       </div>
     <% end %>
   </div>

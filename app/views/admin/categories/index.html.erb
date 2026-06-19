@@ -2,42 +2,42 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">Categorías</h1>
-      <p class="mt-1 text-gray-500">Gestiona las categorías de eventos</p>
+      <h1 class="text-3xl font-bold text-heading">Categorías</h1>
+      <p class="mt-1 text-body-tertiary">Gestiona las categorías de eventos</p>
     </div>
     <div class="flex items-center gap-3">
-      <%= link_to "← Dashboard", admin_dashboard_path, class: "text-sm text-gray-500 hover:text-gray-700 transition-colors" %>
-      <%= link_to "Nueva categoría", new_admin_category_path, class: "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+      <%= link_to "← Dashboard", admin_dashboard_path, class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
+      <%= link_to "Nueva categoría", new_admin_category_path, class: "px-4 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <div class="bg-white rounded-badge border border-border overflow-hidden">
     <table class="w-full">
       <thead>
-        <tr class="bg-gray-50 border-b border-gray-200">
-          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-          <th class="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+        <tr class="bg-surface-secondary border-b border-border">
+          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Nombre</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Slug</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Descripción</th>
+          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Estado</th>
+          <th class="text-right px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Acciones</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">
         <% @categories.each do |category| %>
-          <tr class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= category.name %></td>
-            <td class="px-6 py-4 text-sm text-gray-500"><%= category.slug %></td>
-            <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate"><%= category.description || "—" %></td>
+          <tr class="hover:bg-surface-secondary transition-colors">
+            <td class="px-6 py-4 text-sm font-medium text-heading"><%= category.name %></td>
+            <td class="px-6 py-4 text-sm text-body-tertiary"><%= category.slug %></td>
+            <td class="px-6 py-4 text-sm text-body-tertiary max-w-xs truncate"><%= category.description || "—" %></td>
             <td class="px-6 py-4">
-              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= category.active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800" %>">
+              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= category.active ? "bg-success/10 text-success" : "bg-error/10 text-error" %>">
                 <%= category.active ? "Activo" : "Inactivo" %>
               </span>
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex items-center justify-end gap-2">
-                <%= link_to "Editar", edit_admin_category_path(category), class: "px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors" %>
+                <%= link_to "Editar", edit_admin_category_path(category), class: "px-3 py-1.5 text-xs font-medium bg-primary/20 text-link-hover rounded-card hover:bg-primary/30 transition-colors" %>
                 <%= button_to "Eliminar", admin_category_path(category), method: :delete,
-                    class: "px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors",
+                    class: "px-3 py-1.5 text-xs font-medium bg-error/10 text-error rounded-card hover:bg-error/20 transition-colors",
                     data: { turbo_confirm: "¿Eliminar la categoría '#{category.name}'?" } %>
               </div>
             </td>

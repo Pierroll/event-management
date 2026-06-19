@@ -22,13 +22,13 @@ class EventPolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
       if user.nil?
-        scope.published_only
+        scope.published
       elsif user.admin?
         scope.all
       elsif user.organizer?
-        scope.published_only.or(scope.where(organizer_id: user.id))
+        scope.published.or(scope.where(organizer_id: user.id))
       else
-        scope.published_only
+        scope.published
       end
     end
   end

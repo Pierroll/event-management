@@ -56,6 +56,11 @@ Sistema de gestión de eventos desarrollado con Ruby on Rails 8, diseñado para 
 - **RSpec 8.0** - Framework de testing
 - **Capybara + Selenium** - Testing de sistema
 
+### Pagos
+- **Culqi** - Pasarela de pagos (API v4)
+- **PaymentGateway** - Patrón Gateway abstracto (MockGateway + CulqiGateway)
+- **Solid Queue recurring jobs** - Expiración automática de reservas
+
 ### Desarrollo
 - **Letter Opener** - Vista previa de emails en desarrollo
 - **Web Console** - Consola interactiva en páginas de error
@@ -92,6 +97,23 @@ Lógica de negocio compleja encapsulada en servicios:
 - `Events::CreateService` - Creación de eventos con imágenes (Active Storage + URL legacy)
 - `Events::UpdateService` - Actualización de eventos con reemplazo de imágenes
 - `Comments::CreateService` - Creación de comentarios con validación
+- `ExpireBookingsJob` (recurring via Solid Queue cada 5 min):
+  - Expira reservas `pending` cuyo `expires_at` venció
+  - Excluye reservas con un Payment en estado `pending` (protege pagos en curso)
+  - Usa `update_all` atómico (única sentencia SQL)
+- `BookingService` - Creación de reservas con control de capacidad:
+  - Bloqueo pesimista (`lock!`) sobre evento y ticket_type
+  - Verifica `#available?` y `#remaining_capacity`
+  - Transacción atómica
+- `PaymentGateway` (Module + Base Class) — Patrón Gateway abstracto:
+  - `Base#charge(amount_cents:, currency_code:, description:, email:, source_id:)` — interfaz
+  - `instance` — singleton resuelto via `ENV["PAYMENT_GATEWAY"]`
+  - `MockGateway` — para dev/test, simula aprobado/declinado según prefijo de tarjeta
+- `Payments::ChargeService` — Procesamiento de pago:
+  - Bloqueo pesimista (`with_lock`) sobre booking (previene doble cobro)
+  - Monto recalculado del lado servidor (`quantity * unit_price * 100`)
+  - Re-chequea `expired_unpaid?` y `confirmed?` dentro del lock
+  - Crea Payment y actualiza Booking status atómicamente
 
 #### Query Objects
 Consultas complejas encapsuladas:
@@ -113,6 +135,7 @@ User (Devise + Omniauth)
 ├── has_many :roles, through: :user_roles
 ├── has_many :organized_events (as: organizer)
 ├── has_many :comments
+├── has_many :bookings
 ├── confirmation_code (SHA256 hashed)
 ├── confirmation_sent_at
 ├── confirmation_attempts
@@ -134,7 +157,39 @@ Event
 ├── belongs_to :organizer (User)
 ├── belongs_to :category
 ├── has_many :event_images
-└── has_many :comments
+├── has_many :comments
+├── has_many :ticket_types
+├── has_many :bookings
+└── enum status: draft(0), published(1), canceled(2), finished(3)
+
+TicketType
+├── belongs_to :event
+├── has_many :bookings
+├── price, quantity_total, max_per_order
+├── sales_start_at / sales_end_at
+└── #available? / #remaining_capacity
+
+Booking
+├── belongs_to :user
+├── belongs_to :event
+├── belongs_to :ticket_type
+├── has_one :payment, dependent: :destroy
+├── quantity, unit_price
+├── booked_at, expires_at
+├── enum status: pending(0), confirmed(1), cancelled(2), expired(3)
+├── before_create :set_booked_at
+├── before_create :set_expiration (15 min, if pending)
+└── #expired_unpaid?
+
+Payment
+├── belongs_to :booking
+├── provider (MockGateway / CulqiGateway, etc.)
+├── provider_charge_id (unique, nullable)
+├── status enum: pending(0), approved(1), declined(2), refunded(3)
+├── raw_response (JSONB)
+├── UNIQUE index on booking_id (protege doble cobro)
+├── UNIQUE partial index on provider_charge_id WHERE NOT NULL
+└── State machine: ALLOWED_TRANSITIONS con #can_transition_to?
 
 EventImage
 ├── belongs_to :event
@@ -173,6 +228,34 @@ enum status: {
   canceled: 2,     # Cancelado
   finished: 3     # Finalizado
 }
+```
+
+### Estatus de Bookings
+
+```ruby
+enum status: {
+  pending: 0,      # Esperando pago
+  confirmed: 1,    # Pagado / confirmado
+  cancelled: 2,    # Cancelado por usuario o sistema
+  expired: 3       # Expiró antes de pagar
+}
+```
+
+### Estatus de Payments (Máquina de Estados)
+
+```ruby
+enum status: {
+  pending: 0,      # Pago iniciado (procesando)
+  approved: 1,     # Pago aprobado
+  declined: 2,     # Pago rechazado
+  refunded: 3      # Reembolsado
+}
+
+# Transiciones permitidas (protege contra webhooks out-of-order):
+#   pending  → approved, declined
+#   approved → declined, refunded
+#   declined → (ninguna — terminal)
+#   refunded → (ninguna — terminal)
 ```
 
 ---
@@ -366,6 +449,10 @@ MAILER_SENDER=SGE <noreply@tudominio.com>
 APP_HOST=localhost:3000
 APP_PROTOCOL=http
 
+# Pagos (Culqi)
+CULQI_PUBLIC_KEY=pk_test_tu_public_key
+PAYMENT_GATEWAY=MockGateway    # Cambiar a CulqiGateway para integración real
+
 # Production (opcional)
 EVENT_MANAGEMENT_DATABASE_PASSWORD=tu_password_production
 ```
@@ -533,6 +620,25 @@ Los mapas interactivos se renderizan en la página de detalle del evento usando 
 |--------|------|-------------|--------|-------------|
 | POST | `/events/:event_id/comments` | `comments#create` | Crear comentario | Comentar en evento |
 | DELETE | `/comments/:id` | `comments#destroy` | Eliminar comentario | Borrar comentario propio |
+
+### Bookings y Pagos (Requiere autenticación)
+
+| Método | Ruta | Controlador | Acción | Descripción |
+|--------|------|-------------|--------|-------------|
+| GET | `/events/:event_id/bookings/new` | `bookings#new` | Nueva reserva | Formulario de reserva |
+| POST | `/events/:event_id/bookings` | `bookings#create` | Crear reserva | Crear reserva con lock pesimista |
+| GET | `/bookings` | `bookings#index` | Mis reservas | Listado de reservas del usuario |
+| GET | `/bookings/:id` | `bookings#show` | Ver reserva | Detalle de reserva |
+| GET | `/bookings/:booking_id/payments/new` | `payments#new` | Checkout | Página de pago con Culqi |
+| POST | `/bookings/:booking_id/payments` | `payments#create` | Procesar pago | Cobro con lock + validación |
+
+### Webhooks (Sin autenticación — callback del proveedor de pagos)
+
+| Método | Ruta | Controlador | Acción | Descripción |
+|--------|------|-------------|--------|-------------|
+| POST | `/webhooks/payments/receive` | `webhooks/payments#receive` | Webhook | Recibe eventos del proveedor de pagos |
+
+El endpoint de webhook valida transiciones de estado vía máquina de estados (`ALLOWED_TRANSITIONS`) para ignorar eventos out-of-order (ej. "approved" que llega después de "refunded").
 
 ### Organizer (Requiere rol organizer o admin)
 
@@ -714,6 +820,18 @@ Event.create!(name: "Mi Evento", description: "Descripción", city: "Lima",
               category: Category.first, organizer: User.first)
 ```
 
+### Cobertura Actual
+
+**265 tests** — 0 failures — Modelos, requests, servicios, jobs, policies y mailers.
+
+### Recurring Jobs (Solid Queue)
+
+Configurados en `config/recurring.yml`:
+
+| Job | Schedule | Descripción |
+|-----|----------|-------------|
+| `ExpireBookingsJob` | Cada 5 minutos | Expira reservas pending cuyo timer venció (excluye con pagos en curso) |
+
 ### Testing
 
 #### Ejecutar todos los tests
@@ -859,14 +977,22 @@ spec/
 ├── models/                     # Tests de modelos
 │   ├── user_spec.rb
 │   ├── event_spec.rb
+│   ├── booking_spec.rb
+│   ├── payment_spec.rb
 │   ├── comment_spec.rb
 │   ├── category_spec.rb
 │   ├── event_image_spec.rb
 │   ├── event_map_spec.rb
 │   ├── role_spec.rb
+│   ├── ticket_type_spec.rb
 │   └── user_role_spec.rb
 ├── requests/                   # Tests de requests
 │   ├── events_spec.rb
+│   ├── bookings_spec.rb
+│   ├── payments/
+│   │   └── payments_spec.rb
+│   ├── webhooks/
+│   │   └── payments_spec.rb
 │   ├── omniauth_callbacks_spec.rb
 │   ├── confirmations_spec.rb
 │   ├── home_spec.rb
@@ -876,9 +1002,15 @@ spec/
 │   ├── event_policy_spec.rb
 │   ├── user_policy_spec.rb
 │   ├── category_policy_spec.rb
+│   ├── booking_policy_spec.rb
 │   └── comment_policy_spec.rb
 ├── services/                   # Tests de servicios
-│   └── confirmation_code_service_spec.rb
+│   ├── confirmation_code_service_spec.rb
+│   ├── payment_gateway_spec.rb
+│   └── payments/
+│       └── charge_service_spec.rb
+├── jobs/                       # Tests de jobs
+│   └── expire_bookings_job_spec.rb
 ├── mailers/                    # Tests de mailers
 │   └── user_mailer_spec.rb
 ├── support/                    # Soporte para tests
@@ -927,11 +1059,15 @@ event-management/
 │   │   ├── users/          # Devise overrides + Omniauth
 │   │   │   ├── omniauth_callbacks_controller.rb
 │   │   │   └── registrations_controller.rb
+│   │   ├── webhooks/       # Webhooks de proveedores externos
+│   │   │   └── payments_controller.rb
 │   │   ├── application_controller.rb
+│   │   ├── bookings_controller.rb
 │   │   ├── confirmations_controller.rb
 │   │   ├── events_controller.rb
 │   │   ├── comments_controller.rb
 │   │   ├── home_controller.rb
+│   │   ├── payments_controller.rb
 │   │   └── profiles_controller.rb
 │   ├── helpers/            # View helpers
 │   ├── javascript/        # JavaScript (Stimulus controllers)
@@ -950,6 +1086,8 @@ event-management/
 │   │   │   └── organizer_dashboard_controller.js
 │   │   └── application.js
 │   ├── jobs/               # Active Job jobs
+│   │   ├── application_job.rb
+│   │   └── expire_bookings_job.rb  # Recurre cada 5 min vía Solid Queue
 │   ├── mailers/            # Mailers
 │   │   └── user_mailer.rb
 │   ├── models/             # Modelos ActiveRecord
@@ -960,7 +1098,10 @@ event-management/
 │   │   ├── category.rb
 │   │   ├── event.rb
 │   │   ├── event_image.rb
-│   │   └── comment.rb
+│   │   ├── comment.rb
+│   │   ├── ticket_type.rb
+│   │   ├── booking.rb
+│   │   └── payment.rb
 │   ├── policies/           # Pundit policies
 │   │   ├── application_policy.rb
 │   │   ├── event_policy.rb
@@ -971,7 +1112,13 @@ event-management/
 │   │   └── events/
 │   │       └── search_query.rb
 │   ├── services/           # Service objects
+│   │   ├── booking_service.rb
 │   │   ├── confirmation_code_service.rb
+│   │   ├── payment_gateway.rb           # Module + Base class
+│   │   ├── payment_gateway/
+│   │   │   └── mock_gateway.rb          # Mock para dev/test
+│   │   ├── payments/
+│   │   │   └── charge_service.rb        # Cobro con lock pesimista
 │   │   ├── events/
 │   │   │   ├── create_service.rb
 │   │   │   └── update_service.rb
@@ -985,6 +1132,8 @@ event-management/
 │       ├── devise/
 │       ├── confirmations/
 │       ├── profiles/
+│       ├── payments/
+│       │   └── new.html.erb     # Checkout con Culqi + timer
 │       └── shared/
 ├── bin/                    # Ejecutables Rails
 │   ├── rails
@@ -1047,6 +1196,7 @@ El proyecto usa los siguientes controladores Stimulus:
 | `carousel_controller.js` | Carrusel de imágenes de evento |
 | `location_controller.js` | Selección de ubicación con autocompletado |
 | `navbar_controller.js` | Comportamiento de la barra de navegación |
+| `checkout_timer_controller.js` | Cuenta regresiva en checkout de pago (15 min) |
 
 ---
 

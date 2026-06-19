@@ -1,0 +1,45 @@
+<h1>¡Compra confirmada!</h1>
+
+<p>Gracias por tu compra, <strong><%= @booking.user.name %></strong>.</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+  <tr>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Evento</td>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-weight: bold;"><%= @event.name %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Tipo de entrada</td>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb;"><%= @ticket_type.name %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Cantidad</td>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb;"><%= @booking.quantity %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Total pagado</td>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #059669;">
+      S/ <%= number_to_currency @total, unit: "" %>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Fecha del evento</td>
+    <td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb;"><%= l @event.start_date, format: :long %></td>
+  </tr>
+</table>
+
+<div style="text-align: center; margin: 32px 0;">
+  <a href="<%= booking_url(@booking) %>"
+     style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">
+    Ver mis entradas
+  </a>
+</div>
+
+<p style="color: #6b7280; font-size: 13px;">
+  Presentá el código QR de tu entrada en la puerta del evento para ingresar.
+</p>
+
+<hr>
+
+<p style="color: #6b7280; font-size: 12px;">
+  SGE — Sistema de Gestión de Eventos
+</p>

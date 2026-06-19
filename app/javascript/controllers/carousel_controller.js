@@ -97,9 +97,9 @@ export default class extends Controller {
       this.thumbTargets.forEach((thumb, i) => {
         if (i === index) {
           thumb.classList.remove("border-transparent", "opacity-60")
-          thumb.classList.add("border-blue-500", "opacity-100")
+          thumb.classList.add("border-primary", "opacity-100")
         } else {
-          thumb.classList.remove("border-blue-500", "opacity-100")
+          thumb.classList.remove("border-primary", "opacity-100")
           thumb.classList.add("border-transparent", "opacity-60")
         }
       })

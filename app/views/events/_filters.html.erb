@@ -1,15 +1,15 @@
 <%# Search and Filter Partial %>
-<div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+<div class="bg-white rounded-badge border border-border p-6 mb-8">
   <%= form_tag events_path, method: :get, data: { controller: "explore", explore_target: "form" }, class: "space-y-4" do %>
     <%# Search Input %>
     <div class="relative">
-      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-muted">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </span>
       <%= text_field_tag :query, params[:query], placeholder: "Buscar eventos por nombre o descripción...",
-          class: "w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm",
+          class: "w-full pl-10 pr-4 py-2.5 border border-border-input rounded-input focus:ring-2 focus:ring-primary focus:border-primary text-sm",
           data: { explore_target: "searchInput", action: "input->explore#search" } %>
     </div>
 
@@ -17,34 +17,34 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <%# Category Filter %>
       <div>
-        <%= label_tag :category_id, "Categoría", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :category_id, "Categoría", class: "block text-sm font-medium text-body mb-1" %>
         <%= select_tag :category_id,
-            options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
+            options_from_collection_for_select(navbar_categories, :id, :name, params[:category_id]),
             prompt: "Todas las categorías",
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "categorySelect", action: "change->explore#filterChange" } %>
       </div>
 
       <%# City Filter %>
       <div>
-        <%= label_tag :city, "Ciudad", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :city, "Ciudad", class: "block text-sm font-medium text-body mb-1" %>
         <%= text_field_tag :city, params[:city], placeholder: "Ej: Lima, Cusco...",
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "cityInput", action: "input->explore#search" } %>
       </div>
 
       <%# Date Filters %>
       <div>
-        <%= label_tag :start_date, "Desde", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :start_date, "Desde", class: "block text-sm font-medium text-body mb-1" %>
         <%= date_field_tag :start_date, params[:start_date],
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "dateStart", action: "change->explore#filterChange" } %>
       </div>
 
       <div>
-        <%= label_tag :end_date, "Hasta", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :end_date, "Hasta", class: "block text-sm font-medium text-body mb-1" %>
         <%= date_field_tag :end_date, params[:end_date],
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "dateEnd", action: "change->explore#filterChange" } %>
       </div>
     </div>
@@ -52,15 +52,15 @@
     <%# Price Range Row %>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= label_tag :price_min, "Precio mínimo", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :price_min, "Precio mínimo", class: "block text-sm font-medium text-body mb-1" %>
         <%= number_field_tag :price_min, params[:price_min], placeholder: "S/ 0",
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "priceMin", action: "change->explore#filterChange" }, min: 0, step: 0.01 %>
       </div>
       <div>
-        <%= label_tag :price_max, "Precio máximo", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= label_tag :price_max, "Precio máximo", class: "block text-sm font-medium text-body mb-1" %>
         <%= number_field_tag :price_max, params[:price_max], placeholder: "S/ 9999",
-            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
             data: { explore_target: "priceMax", action: "change->explore#filterChange" }, min: 0, step: 0.01 %>
       </div>
     </div>
@@ -69,7 +69,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
       <div class="flex items-center gap-3">
         <button type="button" data-action="click->explore#activateProximity"
-                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-body bg-surface-secondary rounded-card hover:bg-surface-tertiary transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -78,11 +78,11 @@
         </button>
 
         <% if params.except(:controller, :action).to_unsafe_h.any? { |k, v| v.present? } %>
-          <%= link_to "Limpiar filtros", events_path, class: "text-sm text-red-600 hover:text-red-800 transition-colors" %>
+          <%= link_to "Limpiar filtros", events_path, class: "text-sm text-error hover:text-error transition-colors" %>
         <% end %>
       </div>
 
-      <%= submit_tag "Buscar", class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" %>
+      <%= submit_tag "Buscar", class: "px-6 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
     </div>
   <% end %>
 </div>

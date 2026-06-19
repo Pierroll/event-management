@@ -17,7 +17,7 @@ RSpec.describe UserMailer, type: :mailer do
     it "renders the headers" do
       expect(mail.subject).to eq("Código de verificación — SGE")
       expect(mail.to).to eq([user.email])
-      expect(mail.from).to eq(["from@example.com"])
+      expect(mail.from).to eq(["kodexworks@gmail.com"])
     end
 
     it "renders the code in the body" do
