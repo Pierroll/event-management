@@ -191,3 +191,42 @@ input[type="submit"]:active,
   }
 }
 
+/* ==========================================================================
+   TURBO PROGRESS BAR & PAGE TRANSITIONS
+   Custom premium visual loaders and micro-animations for page navigation.
+   ========================================================================== */
+
+/* Custom premium progress bar for Turbo */
+.turbo-progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-brand-coral) 50%,
+    var(--color-accent) 100%
+  );
+  height: 3px;
+  box-shadow: 0 0 8px rgba(54, 89, 227, 0.4);
+  transition: height var(--duration-fast) var(--ease-spring);
+}
+
+/* Page fade-in transitions */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main {
+  animation: pageFadeIn var(--duration-slow) var(--ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main {
+    animation: none !important;
+  }
+}

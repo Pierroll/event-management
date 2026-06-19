@@ -1,5 +1,5 @@
 <%# Admin Categories List %>
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-3xl font-bold text-heading">Categorías</h1>
@@ -12,39 +12,46 @@
   </div>
 
   <div class="bg-white rounded-badge border border-border overflow-hidden">
-    <table class="w-full">
-      <thead>
-        <tr class="bg-surface-secondary border-b border-border">
-          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Nombre</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Slug</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Descripción</th>
-          <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Estado</th>
-          <th class="text-right px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider">Acciones</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <% @categories.each do |category| %>
-          <tr class="hover:bg-surface-secondary transition-colors">
-            <td class="px-6 py-4 text-sm font-medium text-heading"><%= category.name %></td>
-            <td class="px-6 py-4 text-sm text-body-tertiary"><%= category.slug %></td>
-            <td class="px-6 py-4 text-sm text-body-tertiary max-w-xs truncate"><%= category.description || "—" %></td>
-            <td class="px-6 py-4">
-              <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= category.active ? "bg-success/10 text-success" : "bg-error/10 text-error" %>">
-                <%= category.active ? "Activo" : "Inactivo" %>
-              </span>
-            </td>
-            <td class="px-6 py-4 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <%= link_to "Editar", edit_admin_category_path(category), class: "px-3 py-1.5 text-xs font-medium bg-primary/20 text-link-hover rounded-card hover:bg-primary/30 transition-colors" %>
-                <%= button_to "Eliminar", admin_category_path(category), method: :delete,
-                    class: "px-3 py-1.5 text-xs font-medium bg-error/10 text-error rounded-card hover:bg-error/20 transition-colors",
-                    data: { turbo_confirm: "¿Eliminar la categoría '#{category.name}'?" } %>
-              </div>
-            </td>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-full divide-y divide-border">
+        <thead>
+          <tr class="bg-surface-secondary border-b border-border">
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider whitespace-nowrap">Nombre</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider whitespace-nowrap">Slug</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider whitespace-nowrap">Descripción</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider whitespace-nowrap">Estado</th>
+            <th class="text-right px-6 py-3 text-xs font-medium text-body-tertiary uppercase tracking-wider whitespace-nowrap">Acciones</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody class="divide-y divide-border">
+          <% @categories.each do |category| %>
+            <tr class="hover:bg-surface-secondary transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-heading whitespace-nowrap"><%= category.name %></td>
+              <td class="px-6 py-4 text-sm text-body-tertiary whitespace-nowrap"><%= category.slug %></td>
+              <td class="px-6 py-4 text-sm text-body-tertiary">
+                <div class="max-w-[200px] truncate" title="<%= category.description %>">
+                  <%= category.description.presence || "—" %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-0.5 text-xs font-medium rounded-full <%= category.active ? "bg-success/10 text-success" : "bg-error/10 text-error" %>">
+                  <%= category.active ? "Activo" : "Inactivo" %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2">
+                  <%= link_to "Editar", edit_admin_category_path(category), class: "px-3 py-1.5 text-xs font-medium bg-primary/20 text-link-hover rounded-card hover:bg-primary/30 transition-colors whitespace-nowrap" %>
+                  <%= button_to "Eliminar", admin_category_path(category), method: :delete,
+                      class: "px-3 py-1.5 text-xs font-medium bg-error/10 text-error rounded-card hover:bg-error/20 transition-colors whitespace-nowrap",
+                      form: { class: "inline-block" },
+                      data: { turbo_confirm: "¿Eliminar la categoría '#{category.name}'?" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <% if @categories.total_pages > 1 %>
