@@ -64,8 +64,10 @@ Rails.application.configure do
     protocol: ENV.fetch("APP_PROTOCOL", "https")
   }
 
-  # Configure outgoing SMTP server (Gmail, SendGrid, etc.).
-  # SMTP_PORT=587 (STARTTLS) or 465 (SSL/TLS)
+  # Configure outgoing SMTP server (SendGrid, etc.).
+  # Render blocks ports 25/465/587 — use port 2525 for SendGrid.
+  # SMTP_PORT=587 (STARTTLS, non-Render) or 2525 (SendGrid, Render-compatible)
+  # For SendGrid: SMTP_USERNAME=apikey, SMTP_PASSWORD=<your-api-key>
   if ENV["SMTP_ADDRESS"].present? && ENV["SMTP_PASSWORD"].present?
     config.action_mailer.smtp_settings = {
       address:              ENV.fetch("SMTP_ADDRESS"),
