@@ -74,7 +74,7 @@ gem "rspec-rails", "~> 8.0", :groups => [:development, :test]
 
 gem "dotenv-rails", "~> 3.2"
 
-gem "tailwindcss-rails", "~> 4.4"
+gem "tailwindcss-rails", "~> 4.6"
 
 gem "pundit", "~> 2.5"
 
