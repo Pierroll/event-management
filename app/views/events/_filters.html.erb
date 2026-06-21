@@ -1,88 +1,246 @@
-<%# Search and Filter Partial %>
-<div class="bg-white rounded-badge border border-border p-6 mb-8">
-  <%= form_tag events_path, method: :get, data: { controller: "explore", explore_target: "form" }, class: "space-y-4" do %>
+<%# Vertical Search and Filter Sidebar - Premium borderless design %>
+<div class="space-y-8 pr-2">
+  <%= form_tag events_path, method: :get, data: { explore_target: "form" }, class: "space-y-8" do %>
+    
+    <%# Preserve active state options %>
+    <%= hidden_field_tag :start_date, params[:start_date], data: { explore_target: "startDateInput" } %>
+    <%= hidden_field_tag :end_date, params[:end_date], data: { explore_target: "endDateInput" } %>
+    <%= hidden_field_tag :price_min, params[:price_min], data: { explore_target: "priceMinInput" } %>
+    <%= hidden_field_tag :price_max, params[:price_max], data: { explore_target: "priceMaxInput" } %>
+
     <%# Search Input %>
-    <div class="relative">
-      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-muted">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </span>
-      <%= text_field_tag :query, params[:query], placeholder: "Buscar eventos por nombre o descripción...",
-          class: "w-full pl-10 pr-4 py-2.5 border border-border-input rounded-input focus:ring-2 focus:ring-primary focus:border-primary text-sm",
-          data: { explore_target: "searchInput", action: "input->explore#search" } %>
-    </div>
-
-    <%# Filter Row %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <%# Category Filter %>
-      <div>
-        <%= label_tag :category_id, "Categoría", class: "block text-sm font-medium text-body mb-1" %>
-        <%= select_tag :category_id,
-            options_from_collection_for_select(navbar_categories, :id, :name, params[:category_id]),
-            prompt: "Todas las categorías",
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "categorySelect", action: "change->explore#filterChange" } %>
-      </div>
-
-      <%# City Filter %>
-      <div>
-        <%= label_tag :city, "Ciudad", class: "block text-sm font-medium text-body mb-1" %>
-        <%= text_field_tag :city, params[:city], placeholder: "Ej: Lima, Cusco...",
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "cityInput", action: "input->explore#search" } %>
-      </div>
-
-      <%# Date Filters %>
-      <div>
-        <%= label_tag :start_date, "Desde", class: "block text-sm font-medium text-body mb-1" %>
-        <%= date_field_tag :start_date, params[:start_date],
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "dateStart", action: "change->explore#filterChange" } %>
-      </div>
-
-      <div>
-        <%= label_tag :end_date, "Hasta", class: "block text-sm font-medium text-body mb-1" %>
-        <%= date_field_tag :end_date, params[:end_date],
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "dateEnd", action: "change->explore#filterChange" } %>
+    <div class="space-y-3">
+      <label class="block text-xs font-bold text-heading uppercase tracking-wider">Búsqueda</label>
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted">
+          <svg class="w-4.5 h-4.5 text-body-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </span>
+        <%= text_field_tag :query, params[:query], placeholder: "Buscar eventos...",
+            class: "w-full pl-10 pr-4 py-2.5 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-semibold shadow-sm transition-all placeholder:text-body-tertiary",
+            data: { explore_target: "searchInput", action: "input->explore#search" } %>
       </div>
     </div>
 
-    <%# Price Range Row %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <%= label_tag :price_min, "Precio mínimo", class: "block text-sm font-medium text-body mb-1" %>
-        <%= number_field_tag :price_min, params[:price_min], placeholder: "S/ 0",
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "priceMin", action: "change->explore#filterChange" }, min: 0, step: 0.01 %>
-      </div>
-      <div>
-        <%= label_tag :price_max, "Precio máximo", class: "block text-sm font-medium text-body mb-1" %>
-        <%= number_field_tag :price_max, params[:price_max], placeholder: "S/ 9999",
-            class: "w-full border border-border-input rounded-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary",
-            data: { explore_target: "priceMax", action: "change->explore#filterChange" }, min: 0, step: 0.01 %>
-      </div>
-    </div>
+    <hr class="border-border/60">
 
-    <%# Action Buttons %>
-    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-      <div class="flex items-center gap-3">
+    <%# City Filter %>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <label class="block text-xs font-bold text-heading uppercase tracking-wider">Ciudad</label>
         <button type="button" data-action="click->explore#activateProximity"
-                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-body bg-surface-secondary rounded-card hover:bg-surface-tertiary transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           Cerca de mí
         </button>
+      </div>
+      <div class="space-y-1">
+        <% active_city = params[:city].presence || cookies[:selected_city].presence || "all" %>
+        
+        <label class="flex items-center justify-between cursor-pointer py-2 px-3 rounded-xl hover:bg-surface-secondary text-sm font-semibold transition-all group <%= active_city == "all" ? 'bg-primary/5 text-primary' : 'text-body-secondary' %>">
+          <%= radio_button_tag :city, "all", active_city == "all", class: "sr-only", data: { action: "change->explore#filterChange" } %>
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 <%= active_city == 'all' ? 'text-primary' : 'text-body-tertiary group-hover:text-heading' %> transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h2m-4-3h9M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span>Todas las ciudades</span>
+          </div>
+          <% if active_city == "all" %>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+          <% end %>
+        </label>
 
-        <% if params.except(:controller, :action).to_unsafe_h.any? { |k, v| v.present? } %>
-          <%= link_to "Limpiar filtros", events_path, class: "text-sm text-error hover:text-error transition-colors" %>
+        <% navbar_cities.each do |city_name| %>
+          <% is_active = active_city.to_s.downcase == city_name.to_s.downcase %>
+          <label class="flex items-center justify-between cursor-pointer py-2 px-3 rounded-xl hover:bg-surface-secondary text-sm font-semibold transition-all group <%= is_active ? 'bg-primary/5 text-primary' : 'text-body-secondary' %>">
+            <%= radio_button_tag :city, city_name, is_active, class: "sr-only", data: { action: "change->explore#filterChange" } %>
+            <div class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 <%= is_active ? 'text-primary' : 'text-body-tertiary group-hover:text-heading' %> transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span><%= city_name %></span>
+            </div>
+            <% if is_active %>
+              <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            <% end %>
+          </label>
         <% end %>
       </div>
+    </div>
 
-      <%= submit_tag "Buscar", class: "px-6 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
+    <hr class="border-border/60">
+
+    <%# Category Filter %>
+    <div class="space-y-4">
+      <label class="block text-xs font-bold text-heading uppercase tracking-wider">Categoría</label>
+      <div class="space-y-1">
+        <% is_all_cat = params[:category_id].blank? %>
+        <label class="flex items-center justify-between cursor-pointer py-2 px-3 rounded-xl hover:bg-surface-secondary text-sm font-semibold transition-all group <%= is_all_cat ? 'bg-primary/5 text-primary' : 'text-body-secondary' %>">
+          <%= radio_button_tag :category_id, "", is_all_cat, class: "sr-only", data: { action: "change->explore#filterChange" } %>
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 <%= is_all_cat ? 'text-primary' : 'text-body-tertiary group-hover:text-heading' %> transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            <span>Todas las categorías</span>
+          </div>
+          <% if is_all_cat %>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+          <% end %>
+        </label>
+
+        <% navbar_categories.each do |cat| %>
+          <% is_active = params[:category_id].to_s == cat.id.to_s %>
+          <%# Determine Category Icon %>
+          <% 
+            icon_svg = case cat.name.downcase
+            when /música/
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>'
+            when /deportes/
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8.25v-1.5m0 1.5c-1.355 0-2.5-.396-2.5-.9v-1.5c0-.504 1.145-.9 2.5-.9s2.5.396 2.5.9v1.5c0 .504-1.355.9-2.5.9zm0 0v6.75m0 0c-1.355 0-2.5-.396-2.5-.9V9.75c0-.504 1.145-.9 2.5-.9s2.5.396 2.5.9v4.5c0 .504-1.355.9-2.5.9zm-2.5-5.85C6.145 9.15 5 9.546 5 10.05v4.5c0 .504 1.145.9 2.5.9m5 0c1.355 0 2.5-.396 2.5-.9v-4.5c0-.504-1.145-.9-2.5-.9"></path>'
+            when /gastronomía/
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>'
+            when /arte/
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>'
+            when /tecnología/
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>'
+            else
+              '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>'
+            end
+          %>
+          <label class="flex items-center justify-between cursor-pointer py-2 px-3 rounded-xl hover:bg-surface-secondary text-sm font-semibold transition-all group <%= is_active ? 'bg-primary/5 text-primary' : 'text-body-secondary' %>">
+            <%= radio_button_tag :category_id, cat.id, is_active, class: "sr-only", data: { action: "change->explore#filterChange" } %>
+            <div class="flex items-center gap-2.5">
+              <svg class="w-4.5 h-4.5 <%= is_active ? 'text-primary' : 'text-body-tertiary group-hover:text-heading' %> transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <%= icon_svg.html_safe %>
+              </svg>
+              <span><%= cat.name %></span>
+            </div>
+            <% if is_active %>
+              <div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+            <% end %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <hr class="border-border/60">
+
+    <%# Date Filters %>
+    <div class="space-y-4">
+      <label class="block text-xs font-bold text-heading uppercase tracking-wider">Fecha</label>
+      <div class="space-y-2">
+        <% active_date_opt = params[:date_option].presence || "all" %>
+        
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :date_option, "all", active_date_opt == "all", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#dateOptionChanged" } %>
+          <span>Cualquier fecha</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :date_option, "today", active_date_opt == "today", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#dateOptionChanged" } %>
+          <span>Hoy</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :date_option, "tomorrow", active_date_opt == "tomorrow", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#dateOptionChanged" } %>
+          <span>Mañana</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :date_option, "weekend", active_date_opt == "weekend", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#dateOptionChanged" } %>
+          <span>Este fin de semana</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :date_option, "custom", active_date_opt == "custom", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#dateOptionChanged", explore_target: "customDateRadio" } %>
+          <span>Elegir fecha...</span>
+        </label>
+      </div>
+
+      <%# Custom Date Inputs %>
+      <div data-explore-target="customDateContainer" class="<%= active_date_opt == 'custom' ? '' : 'hidden' %> pt-2 space-y-3">
+        <div class="relative">
+          <label class="block text-xs font-bold text-body-tertiary mb-1">Desde</label>
+          <%= date_field_tag :custom_start_date, params[:start_date],
+              class: "w-full border border-border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary font-semibold shadow-sm",
+              data: { explore_target: "customStart", action: "change->explore#customDateChanged" } %>
+        </div>
+        <div class="relative">
+          <label class="block text-xs font-bold text-body-tertiary mb-1">Hasta</label>
+          <%= date_field_tag :custom_end_date, params[:end_date],
+              class: "w-full border border-border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary font-semibold shadow-sm",
+              data: { explore_target: "customEnd", action: "change->explore#customDateChanged" } %>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-border/60">
+
+    <%# Price Filter %>
+    <div class="space-y-4">
+      <label class="block text-xs font-bold text-heading uppercase tracking-wider">Precio</label>
+      <div class="space-y-2">
+        <% active_price_opt = params[:price_option].presence || "all" %>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :price_option, "all", active_price_opt == "all", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#priceOptionChanged" } %>
+          <span>Cualquier precio</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :price_option, "free", active_price_opt == "free", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#priceOptionChanged" } %>
+          <span>Gratis</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :price_option, "paid", active_price_opt == "paid", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#priceOptionChanged" } %>
+          <span>De pago</span>
+        </label>
+
+        <label class="flex items-center gap-3 cursor-pointer text-sm font-semibold text-body-secondary hover:text-heading transition-colors">
+          <%= radio_button_tag :price_option, "custom", active_price_opt == "custom", 
+              class: "w-4 h-4 text-primary focus:ring-primary/20 border-border", 
+              data: { action: "change->explore#priceOptionChanged", explore_target: "customPriceRadio" } %>
+          <span>Rango personalizado...</span>
+        </label>
+      </div>
+
+      <%# Custom Price Inputs %>
+      <div data-explore-target="customPriceContainer" class="<%= active_price_opt == 'custom' ? '' : 'hidden' %> pt-2 grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="block text-xs font-bold text-body-tertiary mb-1">Mínimo (S/)</label>
+          <%= number_field_tag :custom_price_min, params[:price_min], placeholder: "0",
+              class: "w-full border border-border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary font-semibold shadow-sm",
+              data: { explore_target: "customPriceMin", action: "input->explore#customPriceChanged" }, min: 0, step: 0.01 %>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-body-tertiary mb-1">Máximo (S/)</label>
+          <%= number_field_tag :custom_price_max, params[:price_max], placeholder: "9999",
+              class: "w-full border border-border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary font-semibold shadow-sm",
+              data: { explore_target: "customPriceMax", action: "input->explore#customPriceChanged" }, min: 0, step: 0.01 %>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>

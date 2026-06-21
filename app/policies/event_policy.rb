@@ -3,6 +3,10 @@ class EventPolicy < ApplicationPolicy
     true
   end
 
+  def create_alert?
+    true
+  end
+
   def show?
     record.published? || (user.present? && (user.admin? || record.organizer_id == user.id))
   end

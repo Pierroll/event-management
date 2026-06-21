@@ -1,97 +1,121 @@
 <%# Home Page - Landing %>
-<div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white relative overflow-hidden">
-  <%# Premium background blur blobs %>
-  <div class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
-  <div class="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
-    <div class="max-w-4xl">
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-none tracking-tight">
-        Descubre eventos <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">increíbles</span>
-      </h1>
-      <p class="mt-4 text-base md:text-lg text-muted max-w-2xl leading-relaxed">
-        Explora conciertos, conferencias, talleres y más. Encuentra tu próximo evento favorito de la manera más fácil.
-      </p>
-
-      <%# Premium Floating Search Bar Container %>
-      <div class="bg-white/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-4 md:p-5 mt-10 text-body transform transition-all duration-300 hover:shadow-primary/[0.05]">
-        <%= form_tag events_path, method: :get, class: "grid grid-cols-1 md:grid-cols-12 gap-3" do %>
+<% if @hero_events.any? %>
+  <%# Contenedor del Hero Dinámico %>
+  <div class="relative">
+    <%# Carrusel %>
+    <div data-controller="carousel" data-carousel-autoplay-interval-value="5000" class="relative w-full h-[450px] md:h-[550px] lg:h-[650px] overflow-hidden bg-slate-950">
+      <% @hero_events.each_with_index do |event, index| %>
+        <div data-carousel-target="slide" 
+             class="absolute inset-0 w-full h-full transition-all duration-700 ease-in-out opacity-0 z-0"
+             style="<%= index == 0 ? 'opacity: 1; z-index: 10;' : 'pointer-events: none;' %>">
           
-          <%# 1. Palabra Clave (4 Cols) %>
-          <div class="relative md:col-span-4">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </span>
-            <%= text_field_tag :query, params[:query], 
-                placeholder: "¿Qué querés hacer? (Ej: música)",
-                class: "w-full pl-10 pr-3 py-3.5 bg-surface-secondary border border-border/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all text-sm font-semibold text-heading placeholder-muted shadow-inner" %>
+          <%# Imagen de fondo %>
+          <div class="absolute inset-0 w-full h-full">
+            <% if event.primary_image.present? %>
+              <%= image_tag event.primary_image.image_url, 
+                            alt: event.name, 
+                            class: "w-full h-full object-cover object-center", 
+                            fetchpriority: (index == 0 ? "high" : "low"),
+                            loading: (index == 0 ? "eager" : "lazy") %>
+            <% end %>
+            <%# Degradados overlay para asegurar legibilidad %>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-900/20"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
           </div>
 
-          <%# 2. Categoría Dropdown (3 Cols) %>
-          <div class="relative md:col-span-3">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </span>
-            <%= select_tag :category_id,
-                options_from_collection_for_select(navbar_categories, :id, :name, params[:category_id]),
-                prompt: "Todas las categorías",
-                class: "w-full pl-10 pr-8 py-3.5 bg-surface-secondary border border-border/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all text-sm font-semibold text-heading placeholder-muted shadow-inner appearance-none cursor-pointer" %>
-            <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-muted">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </span>
+          <%# Contenido de la diapositiva %>
+          <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center">
+            <div class="max-w-3xl text-white">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/20 text-blue-300 border border-primary/30 backdrop-blur-md mb-4 uppercase tracking-wider">
+                <%= event.category.name %>
+              </span>
+              <h2 class="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-4 drop-shadow-sm">
+                <%= event.name %>
+              </h2>
+              <p class="text-sm md:text-base text-gray-300 max-w-2xl mb-6 line-clamp-2 drop-shadow-sm">
+                <%= event.description %>
+              </p>
+              
+              <div class="flex flex-wrap items-center gap-4 text-xs md:text-sm text-gray-300 font-semibold mb-6">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <%= l(event.start_date, format: :long) %>
+                </span>
+                <span class="opacity-30">•</span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <%= event.city %>, <%= event.address %>
+                </span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <%= link_to new_event_booking_path(event), class: "inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 gap-2" do %>
+                  <span>Comprar Entradas</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                  </svg>
+                <% end %>
+                <%= link_to "Ver detalles", event_path(event), class: "inline-flex items-center justify-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-2xl transition-all backdrop-blur-sm active:scale-95" %>
+              </div>
+            </div>
           </div>
+        </div>
+      <% end %>
 
-          <%# 3. Ciudad Input con Datalist Suggestions (3 Cols) %>
-          <div class="relative md:col-span-3">
-            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </span>
-            <%= text_field_tag :city, params[:city], 
-                placeholder: "¿Dónde? (Ej: Lima)",
-                list: "hero-cities-list",
-                class: "w-full pl-10 pr-3 py-3.5 bg-surface-secondary border border-border/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all text-sm font-semibold text-heading placeholder-muted shadow-inner" %>
-            <datalist id="hero-cities-list">
-              <% @cities.each do |city| %>
-                <option value="<%= city %>"></option>
-              <% end %>
-            </datalist>
-          </div>
+      <%# Flechas de navegación (ocultas en mobile, visibles hover en desktop) %>
+      <button data-action="click->carousel#prev" class="absolute left-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-12 h-12 rounded-2xl bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm border border-white/10 transition-all active:scale-90" aria-label="Anterior">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button data-action="click->carousel#next" class="absolute right-4 top-1/2 -translate-y-1/2 z-30 hidden md:flex items-center justify-center w-12 h-12 rounded-2xl bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm border border-white/10 transition-all active:scale-90" aria-label="Siguiente">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
 
-          <%# 4. Botón de Búsqueda (2 Cols) %>
-          <button type="submit" class="md:col-span-2 w-full py-3.5 px-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-2xl hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all active:scale-95 shadow-lg shadow-primary/20 hover:shadow-primary/30 flex items-center justify-center gap-2">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span>Buscar</span>
-          </button>
-
+      <%# Dots indicadores %>
+      <div class="absolute bottom-6 left-0 right-0 z-30 flex justify-center gap-2">
+        <% @hero_events.each_with_index do |_, index| %>
+          <button data-carousel-target="dot" 
+                  data-action="click->carousel#jump" 
+                  data-index="<%= index %>" 
+                  class="w-2.5 h-2.5 rounded-full bg-white transition-all duration-300"
+                  style="<%= index == 0 ? 'opacity: 1; transform: scale(1.25);' : 'opacity: 0.4; transform: scale(1);' %>"
+                  aria-label="Ir a diapositiva <%= index + 1 %>"></button>
         <% end %>
       </div>
-
-      <%# Sugerencias rápidas %>
-      <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted font-semibold px-2">
-        <span>Búsquedas populares:</span>
-        <%= link_to "Conciertos", events_path(query: "concierto"), class: "text-link hover:text-link/30 hover:underline transition-colors" %>
-        <span class="opacity-30">•</span>
-        <%= link_to "Tecnología", events_path(query: "tecnología"), class: "text-link hover:text-link/30 hover:underline transition-colors" %>
-        <% if @cities.any? %>
-          <span class="opacity-30">•</span>
-          <%= link_to @cities.first, events_path(city: @cities.first), class: "text-link hover:text-link/30 hover:underline transition-colors" %>
-        <% end %>
-      </div>
-
     </div>
   </div>
-</div>
+
+<% else %>
+  <%# Fallback: Hero clásico sin imágenes %>
+  <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white relative overflow-hidden">
+    <%# Premium background blur blobs %>
+    <div class="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative z-10">
+      <div class="max-w-4xl">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-none tracking-tight">
+          Descubre eventos <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">increíbles</span>
+        </h1>
+        <p class="mt-4 text-base md:text-lg text-muted max-w-2xl leading-relaxed">
+          Explora conciertos, conferencias, talleres y más. Encuentra tu próximo evento favorito de la manera más fácil.
+        </p>
+
+        <div class="mt-8">
+          <%= link_to "Explorar eventos", events_path, class: "inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 gap-2" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
 
 <%# Upcoming Events Section %>
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

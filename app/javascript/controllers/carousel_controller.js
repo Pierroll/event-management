@@ -84,7 +84,7 @@ export default class extends Controller {
     })
 
     // Dots
-    if (this.hasDotTargets) {
+    if (this.hasDotTarget) {
       this.dotTargets.forEach((dot, i) => {
         const isActive = i === index
         dot.style.opacity = isActive ? "1" : "0.4"
@@ -93,7 +93,7 @@ export default class extends Controller {
     }
 
     // Thumbnails
-    if (this.hasThumbTargets) {
+    if (this.hasThumbTarget) {
       this.thumbTargets.forEach((thumb, i) => {
         if (i === index) {
           thumb.classList.remove("border-transparent", "opacity-60")

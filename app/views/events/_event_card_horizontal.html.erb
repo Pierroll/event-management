@@ -1,0 +1,82 @@
+<%# Horizontal Event Card Partial %>
+<div class="bg-white rounded-badge border border-border overflow-hidden card-pressable hover:shadow-lg hover:border-primary/30 flex flex-col sm:flex-row"
+     data-event-id="<%= event.id %>"
+     data-event-lat="<%= event.latitude %>"
+     data-event-lng="<%= event.longitude %>"
+     data-event-name="<%= event.name %>"
+     data-event-city="<%= event.city %>"
+     data-event-price="<%= (range = event.price_range) ? (range.is_a?(Range) ? range.first : range) : 0 %>"
+     data-event-date="<%= event.start_date.strftime("%d/%m/%Y") if event.start_date %>">
+  
+  <%# Event Image %>
+  <%= link_to event_path(event), class: "block w-full sm:w-48 md:w-56 shrink-0 aspect-video sm:aspect-square bg-surface-secondary overflow-hidden group/img" do %>
+    <% if event.event_images.any? %>
+      <%= image_tag event.event_images.first.image_url, class: "w-full h-full object-cover transition-transform duration-300 ease-out group-hover/img:scale-105", alt: event.name %>
+    <% else %>
+      <div class="w-full h-full flex items-center justify-center text-muted">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%# Event Info %>
+  <div class="p-5 flex-1 flex flex-col justify-between">
+    <div>
+      <div class="flex items-start justify-between gap-2 mb-1.5">
+        <span class="text-xs font-bold uppercase tracking-wider text-primary"><%= event.category.name %></span>
+        <% unless event.published? %>
+          <%= event_status_badge(event, classes: "shrink-0 px-2 py-0.5") %>
+        <% end %>
+      </div>
+
+      <%= link_to event_path(event), class: "block group" do %>
+        <h3 class="font-bold text-heading text-lg sm:text-xl line-clamp-2 group-hover:text-primary transition-colors leading-tight mb-2">
+          <%= event.name %>
+        </h3>
+      <% end %>
+
+      <div class="space-y-1.5 mt-2">
+        <p class="text-sm text-body-tertiary flex items-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="font-medium"><%= event.city %></span>
+          <span class="text-muted text-xs">•</span>
+          <span class="text-xs text-body-tertiary truncate"><%= event.address %></span>
+        </p>
+        <p class="text-sm text-body-tertiary flex items-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="font-medium text-heading"><%= l(event.start_date, format: :long) if event.start_date %></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-border flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <% if event.average_rating > 0 %>
+          <div class="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md text-xs font-semibold text-yellow-700">
+            <svg class="w-3.5 h-3.5 text-yellow-400 fill-current" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span><%= event.average_rating %></span>
+          </div>
+        <% end %>
+        <% price_range = event.price_range %>
+        <% min_price = price_range.is_a?(Range) ? price_range.first : price_range %>
+        <span class="text-base font-bold <%= min_price && min_price > 0 ? "text-heading" : "text-success" %>">
+          <% if min_price %>
+            <%= min_price > 0 ? number_to_currency(min_price, unit: "S/") : "Gratis" %>
+          <% else %>
+            —
+          <% end %>
+        </span>
+      </div>
+      <%= link_to "Ver detalle", event_path(event), class: "px-4 py-2 bg-surface-secondary text-heading text-sm font-semibold rounded-card hover:bg-surface-tertiary transition-colors" %>
+    </div>
+  </div>
+</div>

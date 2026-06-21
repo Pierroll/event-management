@@ -72,11 +72,11 @@ RSpec.describe "Home and Search Integration", type: :request do
     it "renders the landing page successfully and loads categories and cities" do
       get root_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("Descubre eventos")
+      expect(response.body).to include("Conferencia de React 2026")
       expect(response.body).to include("Tecnología")
       expect(response.body).to include("Música")
       
-      # Debe incluir Lima y Cusco en el datalist (ciudades de eventos publicados)
+      # Debe incluir Lima y Cusco en el datalist o badges (ciudades de eventos publicados)
       expect(response.body).to include("Lima")
       expect(response.body).to include("Cusco")
       
@@ -88,8 +88,6 @@ RSpec.describe "Home and Search Integration", type: :request do
       get root_path
       expect(response.body).to include('action="/events"')
       expect(response.body).to include('name="query"')
-      expect(response.body).to include('name="category_id"')
-      expect(response.body).to include('name="city"')
     end
   end
 
@@ -116,6 +114,30 @@ RSpec.describe "Home and Search Integration", type: :request do
       get events_path, params: { query: "Rock", city: "Cusco", category_id: category2.id }
       expect(response.body).to include("Festival de Rock Independiente")
       expect(response.body).not_to include("Conferencia de React 2026")
+    end
+  end
+
+  describe "Booking checkout authentication flow" do
+    let(:user) { User.create!(name: "Cliente Test", email: "client@test.com", password: "password123", confirmed_at: Time.current) }
+    
+    before do
+      # Asegurar que el rol por defecto exista
+      Role.find_or_create_by!(name: "registered_user")
+    end
+
+    it "redirects user to login first, preserves target, and redirects back to booking path after sign in" do
+      # Intentar acceder a compra de entradas sin loguearse
+      get new_event_booking_path(published_event1)
+      expect(response).to redirect_to(new_user_session_path)
+      
+      # Devise debe guardar el target path en la sesión
+      expect(session["user_return_to"]).to eq(new_event_booking_path(published_event1))
+      
+      # Iniciar sesión
+      post user_session_path, params: { user: { email: user.email, password: user.password } }
+      
+      # after_sign_in_path_for debe redirigir al target path (compra de entradas)
+      expect(response).to redirect_to(new_event_booking_path(published_event1))
     end
   end
 end

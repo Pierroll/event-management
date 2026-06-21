@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   # Public pages
   root "home#index"
   resources :events, only: [:index, :show] do
+    post :create_alert, on: :collection
     resources :comments, only: [:create, :destroy]
     resources :bookings, only: [:new, :create]
   end

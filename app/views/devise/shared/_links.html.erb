@@ -9,7 +9,13 @@
   <%- if devise_mapping.registerable? && controller_name != 'registrations' %>
     <p class="text-sm text-body-tertiary">
       ¿No tienes cuenta?
-      <%= link_to "Regístrate", new_registration_path(resource_name), class: "text-link hover:text-link font-medium" %>
+      <% 
+        reg_params = {}
+        if session["user_return_to"]&.include?("/bookings")
+          reg_params[:role] = 'registered_user'
+        end
+      %>
+      <%= link_to "Regístrate", new_registration_path(resource_name, reg_params), class: "text-link hover:text-link font-medium" %>
     </p>
   <% end %>
 

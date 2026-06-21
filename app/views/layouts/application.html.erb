@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "SGE - Sistema de Gestión de Eventos" %></title>
+    <title><%= content_for(:title) || "Actify - Sistema de Gestión de Eventos" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="SGE">
+    <meta name="application-name" content="Actify">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%= favicon_link_tag 'favicon.png', type: 'image/png' %>
+    <%= favicon_link_tag '/icon2.png', rel: 'icon', type: 'image/png' %>
 
-    <link rel="apple-touch-icon" href="<%= asset_path 'apple-touch-icon.png' %>">
+    <link rel="apple-touch-icon" href="/icon2.png">
 
     <%# Fonts: Plus Jakarta Sans %>
     <link rel="preconnect" href="https://fonts.googleapis.com">

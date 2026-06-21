@@ -26,6 +26,9 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_in_path_for(resource)
+    stored_location = stored_location_for(resource)
+    return stored_location if stored_location.present?
+
     if resource.admin?
       admin_dashboard_path
     elsif resource.organizer?

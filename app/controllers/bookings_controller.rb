@@ -19,7 +19,7 @@ class BookingsController < ApplicationController
   end
 
   def show
-    @booking = Booking.includes(event: [:category, :event_images], :tickets).find(params[:id])
+    @booking = Booking.includes(:tickets, event: [:category, :event_images]).find(params[:id])
     authorize @booking
   end
 
