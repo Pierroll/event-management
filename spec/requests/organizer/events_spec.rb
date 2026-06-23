@@ -192,4 +192,43 @@ RSpec.describe "Organizer::Events", type: :request do
       end
     end
   end
+
+  describe "PATCH /organizer/events/:id/cancel" do
+    let(:other_organizer) do
+      User.create!(name: 'Otro Organizador', email: 'other_org_cancel@eventos.com', password: 'password123', password_confirmation: 'password123', selected_role: 'organizer', confirmed_at: Time.current)
+    end
+
+    context "when authenticated as the event organizer" do
+      before { sign_in user }
+
+      it "transitions event to canceled, enqueues CancelEventJob, and redirects" do
+        ActiveJob::Base.queue_adapter = :test
+        expect {
+          patch cancel_organizer_event_path(published_event)
+        }.to have_enqueued_job(CancelEventJob).with(published_event)
+
+        expect(response).to redirect_to(organizer_event_path(published_event))
+        expect(flash[:notice]).to include("El evento ha sido cancelado")
+        expect(published_event.reload.status).to eq("canceled")
+      end
+    end
+
+    context "when authenticated as another organizer" do
+      before { sign_in other_organizer }
+
+      it "returns not found (scoped to own events)" do
+        patch cancel_organizer_event_path(published_event)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when not authenticated" do
+      before { sign_out user }
+
+      it "redirects to login" do
+        patch cancel_organizer_event_path(published_event)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

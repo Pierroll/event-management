@@ -67,5 +67,32 @@ module PaymentGateway
         }.to_json
       }
     end
+
+    def refund(charge_id:, amount_cents:, reason:)
+      amount_cents = amount_cents.to_i
+      if amount_cents <= 0
+        raise ChargeError, "El monto a reembolsar debe ser mayor a 0"
+      end
+
+      # Simular fallo de reembolso si el charge_id tiene un prefijo de falla
+      if charge_id.to_s.include?("fail")
+        raise ChargeError, "Error simulado de reembolso fallido en MockGateway"
+      end
+
+      refund_id = "mock_ref_#{SecureRandom.hex(12)}"
+      {
+        success: true,
+        refund_id: refund_id,
+        raw_response: {
+          id: refund_id,
+          object: "refund",
+          charge_id: charge_id,
+          amount: amount_cents,
+          reason: reason,
+          status: "refunded",
+          creation_date: Time.current.to_i * 1000
+        }.to_json
+      }
+    end
   end
 end

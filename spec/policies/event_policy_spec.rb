@@ -132,12 +132,46 @@ RSpec.describe EventPolicy, type: :policy do
   end
 
   permissions :destroy? do
-    it "allows admin" do
+    it "allows admin on draft event without bookings" do
+      expect(subject).to permit(admin, draft_event)
+    end
+
+    it "allows the event organizer on draft event without bookings" do
+      expect(subject).to permit(other_organizer, draft_event)
+    end
+
+    it "denies admin on published event" do
+      expect(subject).not_to permit(admin, published_event)
+    end
+
+    it "denies the event organizer on published event" do
+      expect(subject).not_to permit(organizer, published_event)
+    end
+
+    it "denies another organizer" do
+      expect(subject).not_to permit(organizer, draft_event)
+    end
+
+    it "denies regular users" do
+      expect(subject).not_to permit(regular_user, draft_event)
+    end
+
+    it "denies guests" do
+      expect(subject).not_to permit(guest, draft_event)
+    end
+  end
+
+  permissions :cancel? do
+    it "allows admin on published event" do
       expect(subject).to permit(admin, published_event)
     end
 
-    it "allows the event organizer" do
+    it "allows the event organizer on published event" do
       expect(subject).to permit(organizer, published_event)
+    end
+
+    it "denies admin on draft event" do
+      expect(subject).not_to permit(admin, draft_event)
     end
 
     it "denies another organizer" do

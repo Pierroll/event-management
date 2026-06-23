@@ -2,7 +2,7 @@ module Organizer
   class EventsController < BaseController
     include EventScoping
 
-    before_action -> { set_event(scope: :organizer) }, only: [:show, :edit, :update, :destroy, :attendees]
+    before_action -> { set_event(scope: :organizer) }, only: [:show, :edit, :update, :destroy, :attendees, :cancel]
 
     def index
       authorize Event
@@ -21,6 +21,17 @@ module Organizer
       @tickets = @event.tickets
                        .includes(:booking => [:user, :ticket_type])
                        .order("tickets.created_at DESC")
+    end
+
+    def cancel
+      authorize @event, :cancel?
+      
+      if @event.update(status: :canceled)
+        CancelEventJob.perform_later(@event)
+        redirect_to organizer_event_path(@event), notice: "El evento ha sido cancelado y los reembolsos se están procesando en segundo plano."
+      else
+        redirect_to organizer_event_path(@event), alert: "No se pudo cancelar el evento."
+      end
     end
 
     def new

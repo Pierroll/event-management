@@ -20,7 +20,11 @@ class EventPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user.present? && (user.admin? || record.organizer_id == user.id)
+    user.present? && (user.admin? || record.organizer_id == user.id) && record.draft? && record.bookings.none?
+  end
+
+  def cancel?
+    user.present? && (user.admin? || record.organizer_id == user.id) && record.published?
   end
 
   def attendees?

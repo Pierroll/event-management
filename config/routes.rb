@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   namespace :organizer do
     resources :events do
       get :attendees, on: :member
+      patch :cancel, on: :member
       resource :check_in, only: [:show, :create], controller: "check_ins" do
         get :search
       end

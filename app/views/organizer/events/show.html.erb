@@ -1,21 +1,35 @@
 <%# Organizer Event Detail %>
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <%= link_to "← Mis eventos", organizer_events_path, class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
-    <div class="flex items-center gap-2">
-      <% if @event.check_in_enabled? %>
-        <%= link_to "Ir al Check-in", organizer_event_check_in_path(@event), class: "px-4 py-2 bg-success text-white text-sm font-medium rounded-card hover:bg-success/90 transition-colors" %>
-        <%= button_to "Cerrar Check-in", organizer_event_path(@event), method: :patch, params: { event: { check_in_enabled: false } },
-            class: "px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-card hover:bg-amber-700 transition-colors" %>
-      <% else %>
-        <%= button_to "Abrir Check-in", organizer_event_path(@event), method: :patch, params: { event: { check_in_enabled: true } },
-            class: "px-4 py-2 bg-success/20 text-success border border-success/40 text-sm font-medium rounded-card hover:bg-success/30 transition-colors" %>
+    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+      <% if @event.published? %>
+        <% if @event.check_in_enabled? %>
+          <%= link_to "Ir al Check-in", organizer_event_check_in_path(@event), class: "px-4 py-2 bg-success text-white text-sm font-medium rounded-card hover:bg-success/90 transition-colors" %>
+          <%= button_to "Cerrar Check-in", organizer_event_path(@event), method: :patch, params: { event: { check_in_enabled: false } },
+              class: "px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-card hover:bg-amber-700 transition-colors" %>
+        <% else %>
+          <%= button_to "Abrir Check-in", organizer_event_path(@event), method: :patch, params: { event: { check_in_enabled: true } },
+              class: "px-4 py-2 bg-success/20 text-success border border-success/40 text-sm font-medium rounded-card hover:bg-success/30 transition-colors" %>
+        <% end %>
+        <%= link_to "Asistentes", attendees_organizer_event_path(@event), class: "px-4 py-2 bg-surface-secondary border border-border text-body text-sm font-medium rounded-card hover:bg-surface-tertiary transition-colors" %>
       <% end %>
-      <%= link_to "Asistentes", attendees_organizer_event_path(@event), class: "px-4 py-2 bg-surface-secondary border border-border text-body text-sm font-medium rounded-card hover:bg-surface-tertiary transition-colors" %>
-      <%= link_to "Editar", edit_organizer_event_path(@event), class: "px-4 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
-      <%= button_to "Eliminar", organizer_event_path(@event), method: :delete,
-          class: "px-4 py-2 bg-error text-white text-sm font-medium rounded-card hover:bg-error transition-colors",
-          data: { turbo_confirm: "¿Eliminar este evento? Esta acción no se puede deshacer." } %>
+      
+      <% if policy(@event).edit? %>
+        <%= link_to "Editar", edit_organizer_event_path(@event), class: "px-4 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
+      <% end %>
+
+      <% if policy(@event).cancel? %>
+        <%= button_to "Cancelar Evento", cancel_organizer_event_path(@event), method: :patch,
+            class: "px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-card hover:bg-amber-700 transition-colors",
+            data: { turbo_confirm: "¿Seguro que querés cancelar este evento? Esta acción es irreversible y reembolsará automáticamente a #{@event.bookings.where(status: :confirmed).count} asistentes que ya pagaron." } %>
+      <% end %>
+
+      <% if policy(@event).destroy? %>
+        <%= button_to "Eliminar", organizer_event_path(@event), method: :delete,
+            class: "px-4 py-2 bg-error text-white text-sm font-medium rounded-card hover:bg-error transition-colors",
+            data: { turbo_confirm: "¿Eliminar este evento? Esta acción no se puede deshacer." } %>
+      <% end %>
     </div>
   </div>
 

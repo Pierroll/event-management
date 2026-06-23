@@ -59,33 +59,53 @@
 <%# ponytail: direct script tag for Culqi CDN, swap to importmap if Culqi provides an ES module %>
 <script src="https://checkout.culqi.com/js/v4"></script>
 <script>
-  document.getElementById('pay-button').addEventListener('click', function() {
-    Culqi.publicKey = '<%= ENV["CULQI_PUBLIC_KEY"] %>';
-    
-    const settings = {
-      title: '<%= j @booking.event.name %>',
-      currency: 'PEN',
-      description: '<%= j @booking.ticket_type.name %> x<%= @booking.quantity %>',
-      amount: <%= (@booking.total_price * 100).to_i %>
-    };
+  function initializeCulqi() {
+    const payButton = document.getElementById('pay-button');
+    if (!payButton) return;
 
-    <% if @order_id.present? %>
-      settings.order = '<%= @order_id %>';
-    <% end %>
+    // Remove existing event listener if any (by replacing the node or keeping it simple)
+    // To prevent duplicate listeners on turbo restores, we can use a flag or just clone and replace the button
+    const newPayButton = payButton.cloneNode(true);
+    payButton.parentNode.replaceChild(newPayButton, payButton);
 
-    Culqi.settings(settings);
+    newPayButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      Culqi.publicKey = '<%= ENV["CULQI_PUBLIC_KEY"] %>';
+      
+      const settings = {
+        title: '<%= j @booking.event.name %>',
+        currency: 'PEN',
+        description: '<%= j @booking.ticket_type.name %> x<%= @booking.quantity %>',
+        amount: <%= (@booking.total_price * 100).to_i %>
+      };
 
-    // Habilitar Tarjeta, Yape y Plin (billeteras móviles)
-    Culqi.options({
-      paymentMethods: {
-        tarjeta: true,
-        yape: true,
-        billetera: true
-      }
+      <% if @order_id.present? %>
+        settings.order = '<%= @order_id %>';
+      <% end %>
+
+      Culqi.settings(settings);
+
+      // Habilitar Tarjeta, Yape y Plin (billeteras móviles)
+      Culqi.options({
+        paymentMethods: {
+          tarjeta: true,
+          yape: true,
+          billetera: true
+        }
+      });
+
+      Culqi.open();
     });
+  }
 
-    Culqi.open();
-  });
+  // Bind to both standard load and Turbo load events
+  document.addEventListener('turbo:load', initializeCulqi);
+  if (document.readyState !== 'loading') {
+    initializeCulqi();
+  } else {
+    document.addEventListener('DOMContentLoaded', initializeCulqi);
+  }
 
   window.culqi = function() {
     if (Culqi.token) {

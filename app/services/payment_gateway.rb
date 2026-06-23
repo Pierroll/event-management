@@ -17,6 +17,10 @@ module PaymentGateway
     def get_order(order_id:)
       raise NotImplementedError, "#{self.class} must implement #get_order"
     end
+
+    def refund(charge_id:, amount_cents:, reason:)
+      raise NotImplementedError, "#{self.class} must implement #refund"
+    end
   end
 
   def self.instance

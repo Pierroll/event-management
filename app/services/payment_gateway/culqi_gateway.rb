@@ -151,5 +151,51 @@ module PaymentGateway
         raise ChargeError, "Error de conexión al consultar orden de pago: #{e.message}"
       end
     end
+
+    def refund(charge_id:, amount_cents:, reason:)
+      amount_cents = amount_cents.to_i
+      private_key = ENV["CULQI_PRIVATE_KEY"]
+      if private_key.blank?
+        raise ChargeError, "La llave privada de Culqi no está configurada (CULQI_PRIVATE_KEY)"
+      end
+
+      uri = URI("https://api.culqi.com/v2/refunds")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri.path)
+      request["Authorization"] = "Bearer #{private_key}"
+      request["Content-Type"] = "application/json"
+
+      payload = {
+        charge_id: charge_id,
+        reason: reason || "solicitud_comprador",
+        amount: amount_cents
+      }
+
+      request.body = payload.to_json
+
+      begin
+        response = http.request(request)
+        response_body = JSON.parse(response.body)
+
+        if response.code.to_i == 201
+          {
+            success: true,
+            refund_id: response_body["id"],
+            raw_response: response.body
+          }
+        else
+          error_message = response_body["user_message"] || response_body["merchant_message"] || "Error al procesar el reembolso con Culqi"
+          raise ChargeError, error_message
+        end
+      rescue JSON::ParserError
+        raise ChargeError, "Respuesta inválida del servidor de pagos"
+      rescue ChargeError => e
+        raise e
+      rescue StandardError => e
+        raise ChargeError, "Error de conexión con la pasarela de pagos: #{e.message}"
+      end
+    end
   end
 end
