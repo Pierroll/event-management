@@ -97,4 +97,35 @@ RSpec.describe Ticket, type: :model do
       expect { booking.destroy }.to change(Ticket, :count).by(-1)
     end
   end
+
+  describe "#check_in!" do
+    let!(:ticket) { booking.tickets.create!(status: :active) }
+
+    context "when ticket is active" do
+      it "returns true, sets status to used and records checked_in_at" do
+        expect(ticket.check_in!).to be true
+        expect(ticket.reload).to be_used
+        expect(ticket.checked_in_at).to be_within(1.second).of(Time.current)
+      end
+    end
+
+    context "when ticket is already used" do
+      before { ticket.update!(status: :used, checked_in_at: 10.minutes.ago) }
+
+      it "returns false and does not change checked_in_at" do
+        expect {
+          expect(ticket.check_in!).to be false
+        }.not_to change { ticket.reload.checked_in_at }
+      end
+    end
+
+    context "when ticket is canceled" do
+      before { ticket.update!(status: :canceled) }
+
+      it "returns false" do
+        expect(ticket.check_in!).to be false
+        expect(ticket.reload).to be_canceled
+      end
+    end
+  end
 end

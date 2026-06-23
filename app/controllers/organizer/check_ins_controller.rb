@@ -17,6 +17,10 @@ module Organizer
     def create
       authorize @event, policy_class: CheckInPolicy
 
+      unless @event.check_in_enabled?
+        return render json: { error: "El check-in no está activado para este evento" }, status: :forbidden
+      end
+
       @ticket = Ticket.find_by(qr_code: params[:qr_code])
 
       if @ticket.nil?
@@ -31,20 +35,50 @@ module Organizer
         return render json: { error: "Este ticket ya fue usado" }, status: :conflict
       end
 
-      # Atomic check-in: single SQL UPDATE with WHERE condition.
-      # If two organizers scan the same ticket simultaneously, PostgreSQL
-      # serializes the writes — only the first one succeeds (updated == 1).
-      updated = Ticket.where(id: @ticket.id, status: :active)
-                      .update_all(status: :used, checked_in_at: Time.current)
-
-      if updated == 1
+      if @ticket.check_in!
         render json: {
           success: true,
           attendee_name: @ticket.attendee_name,
-          ticket_id: @ticket.id
+          ticket_id: @ticket.id,
+          stats: {
+            used: @event.tickets.used.count,
+            total: @event.tickets.where(status: [:active, :used]).count
+          }
         }
       else
         render json: { error: "Este ticket ya fue usado" }, status: :conflict
+      end
+    end
+
+    # GET /organizer/events/:event_id/check_in/search
+    def search
+      authorize @event, policy_class: CheckInPolicy
+
+      unless @event.check_in_enabled?
+        return render json: { error: "El check-in no está activado para este evento" }, status: :forbidden
+      end
+
+      query = params[:query].to_s.strip
+      if query.length >= 2
+        tickets = @event.tickets
+                        .joins(:booking)
+                        .joins("LEFT JOIN users ON bookings.user_id = users.id")
+                        .where(
+                          "tickets.attendee_name ILIKE :q OR tickets.attendee_email ILIKE :q OR users.name ILIKE :q OR users.email ILIKE :q",
+                          q: "%#{query}%"
+                        )
+                        .limit(10)
+
+        render json: tickets.map { |t|
+          {
+            id: t.id,
+            attendee_name: t.attendee_name.presence || t.booking.user.name,
+            qr_code: t.qr_code,
+            status: t.status
+          }
+        }
+      else
+        render json: []
       end
     end
 

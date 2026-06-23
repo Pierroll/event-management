@@ -11,4 +11,8 @@ class CheckInPolicy < ApplicationPolicy
   def create?
     user.present? && (user.admin? || (user.organizer? && record.organizer == user))
   end
+
+  def search?
+    create?
+  end
 end

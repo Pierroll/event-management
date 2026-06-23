@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_18_091321) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_23_052513) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_18_091321) do
     t.string "address", null: false
     t.decimal "average_rating", precision: 3, scale: 2, default: "0.0", null: false
     t.bigint "category_id", null: false
+    t.boolean "check_in_enabled", default: false, null: false
     t.string "city", null: false
     t.datetime "created_at", null: false
     t.string "currency", limit: 3, default: "PEN", null: false

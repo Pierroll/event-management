@@ -1,105 +1,87 @@
-<% content_for :title, "Check-in — #{@event.name}" %>
+<% if @event.check_in_enabled? %>
+  <% content_for :title, "Check-in — #{@event.name}" %>
 
-<div class="max-w-lg mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold text-heading mb-2">Check-in</h1>
-  <p class="text-body-tertiary mb-6">Escané o ingresá el código QR de la entrada para registrar el ingreso.</p>
-
-  <%# ─── Cámara (principal) ────────────────────────────────────────────── %>
-  <div class="bg-white rounded-2xl shadow-raised border border-border p-4 mb-6">
-    <div id="qr-reader" class="w-full aspect-square bg-surface-secondary rounded-badge overflow-hidden flex items-center justify-center text-muted text-sm">
-      Inicializando cámara…
+  <div class="max-w-lg mx-auto px-4 py-8" 
+       data-controller="check-in-scanner"
+       data-check-in-scanner-url-value="<%= organizer_event_check_in_path(@event) %>">
+    
+    <div class="flex items-center justify-between mb-6">
+      <%= link_to "← Evento", organizer_event_path(@event), class: "text-sm text-body-tertiary hover:text-body transition-colors" %>
+      <span class="text-xs font-black uppercase tracking-widest text-success bg-success/10 px-3 py-1 rounded-badge">Check-in Abierto</span>
     </div>
-    <p class="text-xs text-muted text-center mt-2">Posicioná el código QR frente a la cámara</p>
+
+    <h1 class="text-2xl font-bold text-heading mb-2">Escanear Entradas</h1>
+    <p class="text-body-tertiary mb-6">Apuntá la cámara al código QR de la entrada o buscala por nombre.</p>
+
+    <%# ─── Estadísticas de Asistencia ─────────────────────────────────────── %>
+    <div class="bg-white rounded-2xl shadow-raised border border-border p-5 mb-6 text-center">
+      <span class="text-[10px] font-black uppercase tracking-widest text-muted block mb-1">Asistencia en tiempo real</span>
+      <div class="flex items-center justify-center gap-1.5 text-heading font-black text-3xl">
+        <span data-check-in-scanner-target="statsUsed"><%= @event.tickets.used.count %></span>
+        <span class="text-muted font-normal text-2xl">/</span>
+        <span data-check-in-scanner-target="statsTotal"><%= @event.tickets.where(status: [:active, :used]).count %></span>
+      </div>
+      <span class="text-[10px] font-bold text-muted uppercase tracking-wider block mt-1">Asistentes Registrados</span>
+    </div>
+
+    <%# ─── Cámara (principal) ────────────────────────────────────────────── %>
+    <div class="bg-white rounded-2xl shadow-raised border border-border p-4 mb-6">
+      <div id="qr-reader" 
+           data-check-in-scanner-target="reader"
+           class="w-full aspect-square bg-surface-secondary rounded-badge overflow-hidden flex items-center justify-center text-muted text-sm border border-border-light shadow-inner relative">
+        <div class="absolute inset-0 border-4 border-primary/20 rounded-badge pointer-events-none animate-pulse"></div>
+        Inicializando cámara…
+      </div>
+      <p class="text-xs text-muted text-center mt-3">Posicioná el código QR dentro del marco</p>
+    </div>
+
+    <%# ─── Búsqueda Manual / Código QR Fallback ───────────────────────────── %>
+    <div class="bg-white rounded-2xl shadow-raised border border-border p-5 mb-6 relative">
+      <label for="manual_qr" class="block text-[10px] font-black uppercase tracking-widest text-muted mb-2">
+        Búsqueda manual o código
+      </label>
+      <div class="flex gap-2">
+        <input type="text" id="manual_qr"
+               data-check-in-scanner-target="manualInput"
+               data-action="input->check-in-scanner#search keydown->check-in-scanner#manualKeydown"
+               placeholder="Buscar por nombre, email o ingresar código QR..."
+               class="flex-1 px-4 py-2.5 bg-surface-secondary border border-border-input rounded-badge text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+        <button type="button" 
+                data-action="click->check-in-scanner#manualCheckin"
+                class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-badge hover:bg-primary-hover active:scale-[0.97] transition-all shrink-0">
+          Ingresar
+        </button>
+      </div>
+
+      <%# Resultados de la búsqueda autocomplete %>
+      <div data-check-in-scanner-target="searchResults"
+           class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-high border border-border max-h-60 overflow-y-auto z-30 divide-y divide-border-light">
+      </div>
+    </div>
+
+    <%# ─── Bloque de Resultado Flash ──────────────────────────────────────── %>
+    <div id="checkin-result" 
+         data-check-in-scanner-target="result"
+         class="hidden transition-all duration-300"></div>
   </div>
 
-  <%# ─── Input manual (fallback) ───────────────────────────────────────── %>
-  <div class="bg-white rounded-2xl shadow-raised border border-border p-4 mb-6">
-    <label for="manual_qr" class="block text-sm font-medium text-body mb-2">
-      O ingresá el código manualmente
-    </label>
-    <div class="flex gap-2">
-      <input type="text" id="manual_qr"
-             placeholder="Código QR"
-             class="flex-1 px-4 py-2.5 border border-border-input rounded-badge text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none">
-      <button type="button" id="manual-checkin-btn"
-              class="px-5 py-2.5 bg-primary text-white text-sm font-semibold rounded-badge hover:bg-primary-hover transition-colors">
-        Verificar
-      </button>
+  <%# ponytail: html5-qrcode vía CDN %>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<% else %>
+  <% content_for :title, "Check-in Cerrado — #{@event.name}" %>
+
+  <div class="max-w-lg mx-auto px-4 py-8">
+    <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-badge p-6 text-center space-y-4 shadow-raised">
+      <div class="mx-auto w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h1 class="text-xl font-bold text-heading">Check-in Desactivado</h1>
+      <p class="text-sm text-body-tertiary">El check-in no está activado para este evento. Habilítalo primero en la pantalla de administración del evento para iniciar el escaneo.</p>
+      <div class="pt-2">
+        <%= link_to "Volver al evento", organizer_event_path(@event), class: "px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-badge hover:bg-primary-hover transition-colors inline-block" %>
+      </div>
     </div>
   </div>
-
-  <%# ─── Resultado ─────────────────────────────────────────────────────── %>
-  <div id="checkin-result" class="hidden"></div>
-</div>
-
-<%# ponytail: html5-qrcode vía CDN, mismo approach que Culqi JS en payments/new %>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script>
-  (function() {
-    const resultDiv = document.getElementById('checkin-result');
-    const manualInput = document.getElementById('manual_qr');
-    const manualBtn = document.getElementById('manual-checkin-btn');
-
-    function showResult(payload) {
-      resultDiv.classList.remove('hidden');
-      if (payload.success) {
-        resultDiv.className = 'bg-success/5 border border-success/30 rounded-2xl p-4 text-center';
-        resultDiv.innerHTML = '<p class="text-success font-semibold text-lg">✅ Ingreso registrado</p>' +
-          (payload.attendee_name ? '<p class="text-success text-sm mt-1">' + payload.attendee_name + '</p>' : '');
-      } else {
-        resultDiv.className = 'bg-error/10 border border-error/30 rounded-2xl p-4 text-center';
-        resultDiv.innerHTML = '<p class="text-error font-semibold">❌ ' + (payload.error || 'Error') + '</p>';
-      }
-      // Auto-hide after 5 seconds
-      setTimeout(function() { resultDiv.classList.add('hidden'); }, 5000);
-    }
-
-    function processQR(code) {
-      fetch('<%= organizer_event_check_in_path(@event) %>', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': '<%= form_authenticity_token %>' },
-        body: JSON.stringify({ qr_code: code })
-      })
-      .then(function(r) { return r.json(); })
-      .then(showResult)
-      .catch(function(err) { showResult({ error: 'Error de conexión' }); });
-    }
-
-    // ── Camera scanner ──
-    if (typeof Html5Qrcode !== 'undefined') {
-      var scanner = new Html5Qrcode('qr-reader');
-      Html5Qrcode.getCameras().then(function(cameras) {
-        if (cameras && cameras.length) {
-          scanner.start(
-            { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            function(decodedText) {
-              scanner.stop().catch(function(){});
-              processQR(decodedText);
-            },
-            function() { /* no-op — scanning in progress */ }
-          ).catch(function(err) {
-            document.getElementById('qr-reader').innerHTML = '<p class="text-error text-sm">No se pudo acceder a la cámara. Usá el ingreso manual.</p>';
-          });
-        } else {
-          document.getElementById('qr-reader').innerHTML = '<p class="text-muted text-sm">No se detectó cámara. Usá el ingreso manual.</p>';
-        }
-      }).catch(function() {
-        document.getElementById('qr-reader').innerHTML = '<p class="text-muted text-sm">Permiso de cámara denegado. Usá el ingreso manual.</p>';
-      });
-    }
-
-    // ── Manual input ──
-    function manualCheckin() {
-      var code = manualInput.value.trim();
-      if (!code) return;
-      processQR(code);
-      manualInput.value = '';
-    }
-
-    manualBtn.addEventListener('click', manualCheckin);
-    manualInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') manualCheckin();
-    });
-  })();
-</script>
+<% end %>

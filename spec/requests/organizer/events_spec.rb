@@ -144,4 +144,52 @@ RSpec.describe "Organizer::Events", type: :request do
       expect(draft_event.event_images.pluck(:display_order)).to match_array([0, 1])
     end
   end
+
+  describe "GET /organizer/events/:id/attendees" do
+    let(:other_organizer) do
+      User.create!(name: 'Otro Organizador', email: 'other_org@eventos.com', password: 'password123', password_confirmation: 'password123', selected_role: 'organizer', confirmed_at: Time.current)
+    end
+    let(:admin) do
+      User.create!(name: 'Admin User', email: 'admin_test@eventos.com', password: 'password123', password_confirmation: 'password123', selected_role: 'admin', confirmed_at: Time.current).tap do |u|
+        u.roles << Role.find_or_create_by!(name: 'admin')
+      end
+    end
+
+    context "when authenticated as the event organizer" do
+      before { sign_in user }
+
+      it "returns 200 OK and shows attendees" do
+        get attendees_organizer_event_path(published_event)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Listado de Asistentes")
+      end
+    end
+
+    context "when authenticated as an admin" do
+      before { sign_in admin }
+
+      it "returns 200 OK" do
+        get attendees_organizer_event_path(published_event)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "when authenticated as another organizer" do
+      before { sign_in other_organizer }
+
+      it "returns not found (scoped to own events)" do
+        get attendees_organizer_event_path(published_event)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when not authenticated" do
+      before { sign_out user }
+
+      it "redirects to login" do
+        get attendees_organizer_event_path(published_event)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

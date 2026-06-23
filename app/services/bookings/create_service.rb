@@ -30,14 +30,22 @@ module Bookings
           raise CapacityExceededError, "El evento alcanzó su aforo máximo"
         end
 
-        @user.bookings.create!(
+        is_free = @ticket_type.price == 0
+
+        booking = @user.bookings.create!(
           event: @event,
           ticket_type: @ticket_type,
           quantity: @quantity,
           unit_price: @ticket_type.price,
-          status: :pending,
+          status: is_free ? :confirmed : :pending,
           booked_at: Time.current
         )
+
+        if is_free
+          Tickets::GenerateService.call(booking)
+        end
+
+        booking
       end
     end
   end

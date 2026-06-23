@@ -23,6 +23,10 @@ class EventPolicy < ApplicationPolicy
     user.present? && (user.admin? || record.organizer_id == user.id)
   end
 
+  def attendees?
+    user.present? && (user.admin? || record.organizer_id == user.id)
+  end
+
   class Scope < ApplicationPolicy::Scope
     def resolve
       if user.nil?

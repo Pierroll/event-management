@@ -27,13 +27,18 @@ Rails.application.routes.draw do
     resources :payments, only: [:new, :create]
   end
 
+  resources :tickets, only: [:update]
+
   # User profile
   resource :profile, only: [:show, :edit, :update]
 
   # Organizer namespace
   namespace :organizer do
     resources :events do
-      resource :check_in, only: [:show, :create], controller: "check_ins"
+      get :attendees, on: :member
+      resource :check_in, only: [:show, :create], controller: "check_ins" do
+        get :search
+      end
     end
   end
 

@@ -32,6 +32,9 @@ class Event < ApplicationRecord
   has_many :bookings,
            dependent: :destroy
 
+  has_many :tickets,
+           through: :bookings
+
   has_many :ticket_types,
            dependent: :restrict_with_error
 
@@ -133,6 +136,11 @@ class Event < ApplicationRecord
     return min if min == max
 
     min..max
+  end
+
+  def finished_more_than_48_hours_ago?
+    return false if end_date.blank?
+    end_date < 48.hours.ago
   end
 
   private

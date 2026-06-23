@@ -22,6 +22,14 @@ RSpec.describe PaymentGateway do
   end
 
   describe ".gateway_class" do
+    around do |example|
+      old_val = ENV["PAYMENT_GATEWAY"]
+      ENV["PAYMENT_GATEWAY"] = "MockGateway"
+      example.run
+    ensure
+      ENV["PAYMENT_GATEWAY"] = old_val
+    end
+
     it "resolves MockGateway" do
       expect(described_class.gateway_class).to eq(PaymentGateway::MockGateway)
     end

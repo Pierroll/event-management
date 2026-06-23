@@ -26,7 +26,8 @@ RSpec.describe "Organizer::CheckIns", type: :request do
       description: "Test event for check-in.",
       city: "Lima", address: "Av. Test",
       start_date: 1.day.from_now, end_date: 1.day.from_now + 2.hours,
-      currency: "PEN", category: category, organizer: organizer, status: :published
+      currency: "PEN", category: category, organizer: organizer, status: :published,
+      check_in_enabled: true
     )
     e.event_images.build(display_order: 0, image: "https://example.com/chk.jpg")
     e.ticket_types.build(name: "General", price: 50, quantity_total: 100)
@@ -39,7 +40,8 @@ RSpec.describe "Organizer::CheckIns", type: :request do
       description: "Another event for cross-event check-in test.",
       city: "Lima", address: "Av. Other",
       start_date: 1.day.from_now, end_date: 1.day.from_now + 2.hours,
-      currency: "PEN", category: category, organizer: organizer, status: :published
+      currency: "PEN", category: category, organizer: organizer, status: :published,
+      check_in_enabled: true
     )
     e.event_images.build(display_order: 0, image: "https://example.com/oth.jpg")
     e.ticket_types.build(name: "General", price: 30, quantity_total: 50)
@@ -86,6 +88,18 @@ RSpec.describe "Organizer::CheckIns", type: :request do
     context "when authenticated as organizer" do
       before { sign_in organizer }
 
+      context "when check-in is disabled for the event" do
+        before { event.update!(check_in_enabled: false) }
+
+        it "returns forbidden with error message" do
+          post organizer_event_check_in_path(event),
+               params: { qr_code: ticket.qr_code }.to_json,
+               headers: { "CONTENT_TYPE" => "application/json" }
+          expect(response).to have_http_status(:forbidden)
+          expect(response.parsed_body["error"]).to eq("El check-in no está activado para este evento")
+        end
+      end
+
       it "marks a valid ticket as used" do
         expect {
           post organizer_event_check_in_path(event),
@@ -101,12 +115,14 @@ RSpec.describe "Organizer::CheckIns", type: :request do
         expect(ticket.reload.checked_in_at).to be_present
       end
 
-      it "returns success JSON" do
+      it "returns success JSON with attendance stats" do
         post organizer_event_check_in_path(event),
              params: { qr_code: ticket.qr_code }.to_json,
              headers: { "CONTENT_TYPE" => "application/json" }
         expect(response).to have_http_status(:ok)
         expect(response.parsed_body["success"]).to be true
+        expect(response.parsed_body["stats"]["used"]).to eq(1)
+        expect(response.parsed_body["stats"]["total"]).to eq(1)
       end
 
       context "with already used ticket" do
@@ -156,7 +172,8 @@ RSpec.describe "Organizer::CheckIns", type: :request do
             description: "Event for other organizer check-in test.",
             city: "Lima", address: "Av. Other",
             start_date: 1.day.from_now, end_date: 1.day.from_now + 2.hours,
-            currency: "PEN", category: category, organizer: other_organizer, status: :published
+            currency: "PEN", category: category, organizer: other_organizer, status: :published,
+            check_in_enabled: true
           )
           e.event_images.build(display_order: 0, image: "https://example.com/ajeno.jpg")
           e.ticket_types.build(name: "General", price: 40, quantity_total: 50)
@@ -191,6 +208,37 @@ RSpec.describe "Organizer::CheckIns", type: :request do
              params: { qr_code: ticket.qr_code }.to_json,
              headers: { "CONTENT_TYPE" => "application/json" }
         expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
+  describe "GET /organizer/events/:event_id/check_in/search" do
+    context "when authenticated as organizer" do
+      before { sign_in organizer }
+
+      context "when check-in is enabled" do
+        it "returns matching tickets for the query" do
+          # Set attendee_name to be sure of match
+          ticket.update!(attendee_name: "Asistente Especial")
+          get search_organizer_event_check_in_path(event, query: "Especial")
+          expect(response).to have_http_status(:ok)
+          expect(response.parsed_body.first["qr_code"]).to eq(ticket.qr_code)
+        end
+
+        it "returns empty array if query is too short" do
+          get search_organizer_event_check_in_path(event, query: "a")
+          expect(response).to have_http_status(:ok)
+          expect(response.parsed_body).to eq([])
+        end
+      end
+
+      context "when check-in is disabled" do
+        before { event.update!(check_in_enabled: false) }
+
+        it "returns forbidden" do
+          get search_organizer_event_check_in_path(event, query: "test")
+          expect(response).to have_http_status(:forbidden)
+        end
       end
     end
   end

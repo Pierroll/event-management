@@ -2,7 +2,7 @@ module Organizer
   class EventsController < BaseController
     include EventScoping
 
-    before_action :set_event, only: [:show, :edit, :update, :destroy]
+    before_action -> { set_event(scope: :organizer) }, only: [:show, :edit, :update, :destroy, :attendees]
 
     def index
       authorize Event
@@ -14,6 +14,13 @@ module Organizer
 
     def show
       authorize @event
+    end
+
+    def attendees
+      authorize @event
+      @tickets = @event.tickets
+                       .includes(:booking => [:user, :ticket_type])
+                       .order("tickets.created_at DESC")
     end
 
     def new
@@ -61,7 +68,7 @@ module Organizer
     def event_params
       params.require(:event).permit(
         :name, :description, :city, :address, :start_date, :end_date,
-        :currency, :max_capacity, :status, :category_id,
+        :currency, :max_capacity, :status, :category_id, :check_in_enabled,
         :latitude, :longitude,
         :primary_image,
         images: [], remove_image_ids: [],

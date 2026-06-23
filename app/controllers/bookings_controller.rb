@@ -8,6 +8,7 @@ class BookingsController < ApplicationController
   before_action :set_ticket_type, only: [:new, :create]
 
   def index
+    authorize Booking
     # TODO(arquitectura): si el filtrado de bookings crece en
     # complejidad (más de 2-3 condiciones), extraer a
     # Bookings::SearchQuery siguiendo el patrón de Events::SearchQuery
@@ -35,7 +36,11 @@ class BookingsController < ApplicationController
 
     begin
       @booking = Bookings::CreateService.call(current_user, @ticket_type, quantity: booking_params[:quantity])
-      redirect_to @booking, notice: t("bookings.created")
+      if @booking.pending?
+        redirect_to new_booking_payment_path(@booking), notice: "Reserva creada. Completá el pago para confirmar tus entradas."
+      else
+        redirect_to @booking, notice: t("bookings.created")
+      end
     rescue Bookings::CreateService::CapacityExceededError => e
       redirect_to @event, alert: e.message
     end

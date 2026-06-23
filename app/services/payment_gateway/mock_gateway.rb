@@ -34,5 +34,38 @@ module PaymentGateway
         }.to_json
       }
     end
+
+    def create_order(amount_cents:, currency_code: "PEN", description:, email:, first_name:, last_name:, phone_number: nil, expires_at:)
+      amount_cents = amount_cents.to_i
+      if amount_cents <= 0
+        raise ChargeError, "El monto debe ser mayor a 0"
+      end
+
+      order_id = "mock_ord_#{SecureRandom.hex(12)}"
+      {
+        success: true,
+        order_id: order_id,
+        raw_response: {
+          id: order_id,
+          object: "order",
+          amount: amount_cents,
+          currency_code: currency_code,
+          state: "created"
+        }.to_json
+      }
+    end
+
+    def get_order(order_id:)
+      state = order_id.to_s.include?("fail") ? "expired" : "paid"
+      {
+        success: true,
+        state: state,
+        raw_response: {
+          id: order_id,
+          object: "order",
+          state: state
+        }.to_json
+      }
+    end
   end
 end

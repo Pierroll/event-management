@@ -21,6 +21,14 @@ class Ticket < ApplicationRecord
   scope :active, -> { where(status: :active) }
   scope :used,  -> { where(status: :used) }
 
+  # ── Check-in ──
+  def check_in!
+    return false unless active?
+
+    Ticket.where(id: id, status: :active)
+          .update_all(status: :used, checked_in_at: Time.current) == 1
+  end
+
   # ── Callbacks ──
   before_validation :generate_qr_code, on: :create
 

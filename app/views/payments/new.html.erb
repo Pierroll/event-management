@@ -38,6 +38,7 @@
                 id: "payment-form",
                 class: "space-y-4" do |f| %>
     <%= hidden_field_tag :culqi_token_id, nil, id: "culqi_token_id" %>
+    <%= hidden_field_tag :culqi_order_id, nil, id: "culqi_order_id" %>
 
     <div class="bg-white rounded-2xl shadow-raised border border-border p-6">
       <div id="culqi-checkout" class="min-h-[200px] flex items-center justify-center">
@@ -60,27 +61,46 @@
 <script>
   document.getElementById('pay-button').addEventListener('click', function() {
     Culqi.publicKey = '<%= ENV["CULQI_PUBLIC_KEY"] %>';
-    Culqi.settings({
+    
+    const settings = {
       title: '<%= j @booking.event.name %>',
       currency: 'PEN',
       description: '<%= j @booking.ticket_type.name %> x<%= @booking.quantity %>',
       amount: <%= (@booking.total_price * 100).to_i %>
+    };
+
+    <% if @order_id.present? %>
+      settings.order = '<%= @order_id %>';
+    <% end %>
+
+    Culqi.settings(settings);
+
+    // Habilitar Tarjeta, Yape y Plin (billeteras móviles)
+    Culqi.options({
+      paymentMethods: {
+        tarjeta: true,
+        yape: true,
+        billetera: true
+      }
     });
+
     Culqi.open();
   });
 
-  document.addEventListener('culqi_token', function(event) {
-    const token = event.detail;
-    document.getElementById('culqi_token_id').value = token.id;
-    document.getElementById('payment-form').submit();
-  });
-
-  document.addEventListener('culqi_close', function() {
-    console.log('Culqi checkout closed');
-  });
-
-  document.addEventListener('culqi_error', function(event) {
-    const error = event.detail;
-    alert('Error de pago: ' + error.user_message);
-  });
+  window.culqi = function() {
+    if (Culqi.token) {
+      const token = Culqi.token.id;
+      document.getElementById('culqi_token_id').value = token;
+      document.getElementById('payment-form').submit();
+    } else if (Culqi.order) {
+      const orderId = (Culqi.order && Culqi.order.id) || '<%= @order_id %>';
+      document.getElementById('culqi_order_id').value = orderId;
+      document.getElementById('payment-form').submit();
+    } else {
+      const error = Culqi.error;
+      if (error) {
+        alert('Error de pago: ' + error.user_message);
+      }
+    }
+  };
 </script>

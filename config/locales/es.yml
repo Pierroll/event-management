@@ -109,6 +109,7 @@ es:
       pending: "Pendiente de pago"
       confirmed: "Confirmada"
       canceled: "Cancelada"
+      expired: "Expirada"
     errors:
       capacity_exceeded: "Ya no hay suficientes lugares disponibles para este evento."
       not_available: "Este evento no tiene entradas disponibles."
