@@ -17,6 +17,9 @@ application.register("ticket-types", TicketTypesController)
 import ShareController from "controllers/share_controller"
 application.register("share", ShareController)
 
+import QrModalController from "controllers/qr_modal_controller"
+application.register("qr-modal", QrModalController)
+
 // Eager load all other controllers defined in this directory
 import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
 eagerLoadControllersFrom("controllers", application)

@@ -10,6 +10,7 @@ pin "controllers/confirm_controller", to: "controllers/confirm_controller.js"
 pin "controllers/navbar_controller", to: "controllers/navbar_controller.js"
 pin "controllers/ticket_types_controller", to: "controllers/ticket_types_controller.js"
 pin "controllers/share_controller", to: "controllers/share_controller.js"
+pin "controllers/qr_modal_controller", to: "controllers/qr_modal_controller.js"
 
 # Leaflet for maps
 pin "leaflet", to: "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.js"

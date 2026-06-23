@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["reader", "manualInput", "result", "statsUsed", "statsTotal", "searchResults"]
+  static targets = ["reader", "manualInput", "statsUsed", "statsTotal", "searchResults"]
   static values = { url: String }
 
   connect() {
+    this.processedQrs = new Set()
     this.initializeScanner()
   }
 
@@ -56,6 +57,19 @@ export default class extends Controller {
   }
 
   processQR(code) {
+    if (this.processedQrs.has(code)) {
+      console.log("Ignorando QR repetido en esta sesión:", code)
+      // Resume scanner immediately
+      setTimeout(() => {
+        if (this.scanner && typeof this.scanner.resume === 'function') {
+          try {
+            this.scanner.resume()
+          } catch(e) {}
+        }
+      }, 500)
+      return
+    }
+
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
 
     fetch(this.urlValue, {
@@ -74,6 +88,9 @@ export default class extends Controller {
       }
     })
     .then(payload => {
+      if (payload.success) {
+        this.processedQrs.add(code)
+      }
       this.showResult(payload)
     })
     .catch(err => {
@@ -83,16 +100,24 @@ export default class extends Controller {
   }
 
   showResult(payload) {
-    this.resultTarget.classList.remove('hidden')
-    this.resultTarget.classList.remove('bg-success/5', 'border-success/30', 'bg-error/10', 'border-error/30')
+    // Remove existing overlay if any
+    const existingOverlay = this.readerTarget.querySelector(".scanner-overlay")
+    if (existingOverlay) existingOverlay.remove()
 
-    const bodyEl = document.body
-
+    // Create the overlay container
+    const overlay = document.createElement("div")
+    overlay.className = "scanner-overlay absolute inset-0 z-50 flex flex-col items-center justify-center p-6 transition-all duration-300 opacity-0 scale-95 rounded-badge"
+    
     if (payload.success) {
-      this.resultTarget.classList.add('bg-success/5', 'border', 'border-success/30')
-      this.resultTarget.innerHTML = `
-        <p class="text-success font-semibold text-lg">✅ Ingreso registrado</p>
-        <p class="text-success text-sm mt-1">${payload.attendee_name || 'Asistente registrado'}</p>
+      overlay.classList.add("bg-emerald-500/90", "backdrop-blur-sm", "text-white")
+      overlay.innerHTML = `
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-black tracking-wide uppercase">Ingreso Registrado</h3>
+        <p class="text-xs font-bold text-emerald-100 mt-1 text-center truncate max-w-full">${payload.attendee_name || 'Asistente'}</p>
       `
 
       if (payload.stats) {
@@ -100,29 +125,49 @@ export default class extends Controller {
         if (this.hasStatsTotalTarget) this.statsTotalTarget.textContent = payload.stats.total
       }
 
-      // Flash green background
-      bodyEl.classList.add('flash-success')
-      setTimeout(() => bodyEl.classList.remove('flash-success'), 800)
-
+      // Flash body green
+      document.body.classList.add('flash-success')
+      setTimeout(() => document.body.classList.remove('flash-success'), 800)
     } else {
-      this.resultTarget.classList.add('bg-error/10', 'border', 'border-error/30')
-      this.resultTarget.innerHTML = `<p class="text-error font-semibold">❌ ${payload.error || 'Error'}</p>`
+      overlay.classList.add("bg-rose-600/90", "backdrop-blur-sm", "text-white")
+      overlay.innerHTML = `
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-black tracking-wide uppercase">Error de Ingreso</h3>
+        <p class="text-xs font-bold text-rose-100 mt-1 text-center max-w-full">${payload.error || 'Error'}</p>
+      `
 
-      // Flash red background
-      bodyEl.classList.add('flash-error')
-      setTimeout(() => bodyEl.classList.remove('flash-error'), 800)
+      // Flash body red
+      document.body.classList.add('flash-error')
+      setTimeout(() => document.body.classList.remove('flash-error'), 800)
     }
 
-    // Auto-resume scanner after 2 seconds
+    // Append overlay to the reader target (it's relative)
+    this.readerTarget.appendChild(overlay)
+
+    // Trigger reflow & transition in
+    overlay.offsetHeight
+    overlay.classList.remove("opacity-0", "scale-95")
+    overlay.classList.add("opacity-100", "scale-100")
+
+    // Auto-resume and fade out after 2 seconds
     setTimeout(() => {
-      this.resultTarget.classList.add('hidden')
-      if (this.scanner && typeof this.scanner.resume === 'function') {
-        try {
-          this.scanner.resume()
-        } catch(e) {
-          console.warn("Could not resume scanner state:", e)
+      overlay.classList.remove("opacity-100", "scale-100")
+      overlay.classList.add("opacity-0", "scale-95")
+
+      setTimeout(() => {
+        overlay.remove()
+        if (this.scanner && typeof this.scanner.resume === 'function') {
+          try {
+            this.scanner.resume()
+          } catch(e) {
+            console.warn("Could not resume scanner state:", e)
+          }
         }
-      }
+      }, 300)
     }, 2000)
   }
 
