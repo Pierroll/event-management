@@ -50,6 +50,10 @@ es:
           attributes:
             base:
               image_or_file_required: "Debe proporcionar una URL de imagen o adjuntar un archivo"
+        booking:
+          attributes:
+            quantity:
+              exceeds_max_per_order: "supera el límite permitido de %{max} entradas por persona para la categoría %{ticket_type} (ya tenés %{already_booked} registradas)"
 
   confirmations:
     sent: "Te hemos enviado un código de verificación a tu correo electrónico."

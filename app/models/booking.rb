@@ -57,10 +57,15 @@ class Booking < ApplicationRecord
 
   def quantity_within_max_per_order
     return unless ticket_type.max_per_order.present?
-    return if quantity <= ticket_type.max_per_order
 
-    errors.add(:quantity, :exceeds_max_per_order,
-               max: ticket_type.max_per_order,
-               ticket_type: ticket_type.name)
+    already_booked = user.bookings.where(ticket_type: ticket_type).occupying_capacity.where.not(id: id).sum(:quantity)
+    total_requested = already_booked + quantity
+
+    if total_requested > ticket_type.max_per_order
+      errors.add(:quantity, :exceeds_max_per_order,
+                 max: ticket_type.max_per_order,
+                 already_booked: already_booked,
+                 ticket_type: ticket_type.name)
+    end
   end
 end
