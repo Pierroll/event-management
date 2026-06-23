@@ -35,6 +35,13 @@ class Event < ApplicationRecord
   has_many :tickets,
            through: :bookings
 
+  has_many :favorites,
+           dependent: :destroy
+
+  has_many :favorited_by,
+           through: :favorites,
+           source: :user
+
   has_many :ticket_types,
            dependent: :restrict_with_error
 

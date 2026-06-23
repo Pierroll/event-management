@@ -1,4 +1,6 @@
 class EventsController < ApplicationController
+  before_action :authenticate_user!, only: [:favorite]
+
   def index
     authorize Event
     sync_selected_city
@@ -45,6 +47,27 @@ class EventsController < ApplicationController
     authorize @event
     @comments = @event.comments.includes(:user).order(created_at: :desc)
     @comment = Comment.new
+  end
+
+  def favorite
+    @event = Event.find(params[:id])
+    authorize @event
+
+    favorite = current_user.favorites.find_by(event: @event)
+    if favorite
+      favorite.destroy
+      @is_favorited = false
+      flash.now[:notice] = "Evento removido de tus favoritos."
+    else
+      current_user.favorites.create!(event: @event)
+      @is_favorited = true
+      flash.now[:success] = "¡Evento agregado a tus favoritos!"
+    end
+
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_back fallback_location: event_path(@event) }
+    end
   end
 
   def create_alert

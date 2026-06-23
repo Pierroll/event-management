@@ -1,0 +1,6 @@
+class Favorite < ApplicationRecord
+  belongs_to :user
+  belongs_to :event
+
+  validates :event_id, uniqueness: { scope: :user_id, message: "ya está en tus favoritos" }
+end

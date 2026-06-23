@@ -89,7 +89,10 @@
 </div>
 
 <%# 2. Main Content Layout %>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+     data-controller="share"
+     data-share-url-value="<%= event_url(@event) %>"
+     data-share-title-value="<%= @event.name %>">
   <%# Back Link %>
   <div class="mb-6">
     <%= link_to events_path, class: "inline-flex items-center gap-1.5 text-sm font-semibold text-body-tertiary hover:text-heading transition-colors" do %>
@@ -379,23 +382,111 @@
 
         <%# Secondary Share & Favorite Actions %>
         <div class="flex items-center justify-center gap-6 border-t border-border pt-4 select-none">
-          <button type="button" class="flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-primary transition-colors group">
+          <button type="button"
+                  data-action="click->share#share"
+                  class="flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-primary transition-colors group">
             <svg class="w-4.5 h-4.5 text-body-tertiary group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.828-2.414m0 5.344l-4.828-2.414m6.068-3.085a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0zm0 11a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z" />
             </svg>
             <span>Compartir</span>
           </button>
-          <button type="button" class="flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-error transition-colors group">
-            <svg class="w-4.5 h-4.5 text-body-tertiary group-hover:text-error transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span>Favorito</span>
-          </button>
+          
+          <%= turbo_frame_tag "event_#{@event.id}_favorite" do %>
+            <% if user_signed_in? %>
+              <% is_fav = current_user.favorites.exists?(event: @event) %>
+              <%= button_to favorite_event_path(@event),
+                            method: :post,
+                            class: "flex items-center gap-2 text-xs font-bold #{is_fav ? 'text-error' : 'text-body-secondary'} hover:text-error transition-colors group",
+                            data: { turbo_frame: "event_#{@event.id}_favorite" } do %>
+                <svg class="w-4.5 h-4.5 #{is_fav ? 'text-error fill-current animate-[heartbeat_0.3s_ease-in-out]' : 'text-body-tertiary group-hover:text-error group-hover:scale-110'} transition-all" fill="<%= is_fav ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span>Favorito</span>
+              <% end %>
+            <% else %>
+              <%= button_to favorite_event_path(@event),
+                            method: :post,
+                            class: "flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-error transition-colors group",
+                            data: { turbo: false } do %>
+                <svg class="w-4.5 h-4.5 text-body-tertiary group-hover:text-error group-hover:scale-110 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span>Favorito</span>
+              <% end %>
+            <% end %>
+          <% end %>
         </div>
 
       </div>
     </div>
 
+  </div>
+
+  <%# Share Modal Fallback %>
+  <div data-share-target="modal" 
+       class="hidden fixed inset-0 z-[200] items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 ease-out">
+    <div class="modal-content scale-95 opacity-0 bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transition-[transform,opacity] duration-300 ease-out">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-heading">Compartir evento</h3>
+          <button type="button" data-action="click->share#closeModal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-secondary text-muted hover:text-heading transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <p class="text-xs text-body-tertiary font-bold uppercase tracking-wider mb-3">Redes sociales</p>
+        <div class="grid grid-cols-3 gap-3 mb-6">
+          <%# WhatsApp %>
+          <a href="https://api.whatsapp.com/send?text=<%= url_encode("#{@event.name} #{event_url(@event)}") %>" 
+             target="_blank" rel="noopener"
+             class="flex flex-col items-center justify-center p-4 rounded-2xl border border-border hover:border-emerald-200 hover:bg-emerald-50/30 transition-all group">
+            <span class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-transform mb-2">
+              <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.45L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.45 5.467-.003 9.923-4.45 9.927-9.913.002-2.646-1.027-5.133-2.9-7.008C16.427 1.809 13.94.779 11.298.779 5.828.779 1.374 5.23 1.372 10.7c-.001 1.739.46 3.432 1.336 4.93l-.875 3.197 3.284-.861c1.47.8 2.923 1.188 4.93 1.188zm11.366-8.06c-.33-.165-1.951-.963-2.251-1.07-.3-.108-.518-.162-.737.165-.218.328-.844 1.07-.1.07-.15-.165-.18-.328-.51-.493-.3-.165-1.337-.492-2.546-1.57-1.01-.9-1.69-2.01-1.889-2.34-.198-.329-.021-.507.144-.672.148-.148.33-.384.495-.576.165-.192.219-.329.33-.548.11-.219.055-.411-.027-.575-.083-.165-.737-1.775-1.01-2.433-.267-.641-.539-.553-.737-.563-.19-.009-.41-.01-.628-.01-.22 0-.576.082-.878.411-.3.33-1.153 1.123-1.153 2.738 0 1.616 1.173 3.178 1.338 3.4.165.22 2.307 3.522 5.589 4.938.78.337 1.39.538 1.86.687.784.249 1.498.214 2.062.13.629-.094 1.951-.798 2.225-1.57.275-.772.275-1.436.193-1.571-.083-.136-.3-.22-.63-.385z"/>
+              </svg>
+            </span>
+            <span class="text-xs font-bold text-body-secondary group-hover:text-emerald-700">WhatsApp</span>
+          </a>
+          <%# Facebook %>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=<%= url_encode(event_url(@event)) %>" 
+             target="_blank" rel="noopener"
+             class="flex flex-col items-center justify-center p-4 rounded-2xl border border-border hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+            <span class="w-10 h-10 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-lg shadow-[#1877F2]/10 group-hover:scale-105 transition-transform mb-2">
+              <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </span>
+            <span class="text-xs font-bold text-body-secondary group-hover:text-blue-700">Facebook</span>
+          </a>
+          <%# X / Twitter %>
+          <a href="https://twitter.com/intent/tweet?text=<%= url_encode("¡No te pierdas este evento: #{@event.name}!") %>&url=<%= url_encode(event_url(@event)) %>" 
+             target="_blank" rel="noopener"
+             class="flex flex-col items-center justify-center p-4 rounded-2xl border border-border hover:border-gray-800 hover:bg-gray-50 transition-all group">
+            <span class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-lg shadow-black/10 group-hover:scale-105 transition-transform mb-2">
+              <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </span>
+            <span class="text-xs font-bold text-body-secondary group-hover:text-black">Twitter / X</span>
+          </a>
+        </div>
+        
+        <p class="text-xs text-body-tertiary font-bold uppercase tracking-wider mb-3">Enlace del evento</p>
+        <div class="flex gap-2">
+          <input type="text" readonly value="<%= event_url(@event) %>" 
+                 class="flex-1 bg-surface-secondary border border-border rounded-xl px-4 py-2.5 text-sm font-medium text-body-secondary select-all focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10">
+          <button type="button" data-share-target="copyButton" data-action="click->share#copy"
+                  class="px-5 py-2.5 bg-primary text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-primary-hover transition-all flex items-center justify-center border border-transparent shadow-md shadow-primary/10 active:scale-95 shrink-0">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 00-2 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+            </svg>
+            Copiar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 </div>

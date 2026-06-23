@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_23_052513) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_23_134655) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,6 +117,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_052513) do
     t.index ["status"], name: "index_events_on_status"
   end
 
+  create_table "favorites", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "event_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["event_id"], name: "index_favorites_on_event_id"
+    t.index ["user_id", "event_id"], name: "index_favorites_on_user_id_and_event_id", unique: true
+    t.index ["user_id"], name: "index_favorites_on_user_id"
+  end
+
   create_table "payments", force: :cascade do |t|
     t.bigint "booking_id", null: false
     t.datetime "created_at", null: false
@@ -209,6 +219,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_23_052513) do
   add_foreign_key "event_images", "events"
   add_foreign_key "events", "categories"
   add_foreign_key "events", "users", column: "organizer_id"
+  add_foreign_key "favorites", "events"
+  add_foreign_key "favorites", "users"
   add_foreign_key "payments", "bookings"
   add_foreign_key "ticket_types", "events"
   add_foreign_key "tickets", "bookings"

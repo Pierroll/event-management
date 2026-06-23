@@ -1,0 +1,18 @@
+<%= turbo_stream.replace "event_#{@event.id}_favorite" do %>
+  <% is_fav = @is_favorited %>
+  <%= button_to favorite_event_path(@event), 
+                method: :post,
+                class: "flex items-center gap-2 text-xs font-bold #{is_fav ? 'text-error' : 'text-body-secondary'} hover:text-error transition-colors group",
+                data: { turbo_frame: "event_#{@event.id}_favorite" } do %>
+    <svg class="w-4.5 h-4.5 #{is_fav ? 'text-error fill-current animate-[heartbeat_0.3s_ease-in-out]' : 'text-body-tertiary group-hover:text-error group-hover:scale-110'} transition-all" fill="<%= is_fav ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+    </svg>
+    <span>Favorito</span>
+  <% end %>
+<% end %>
+
+<% flash.each do |type, message| %>
+  <%= turbo_stream.append "flash-container" do %>
+    <%= render "shared/flash_message", type: type, message: message %>
+  <% end %>
+<% end %>

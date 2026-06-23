@@ -23,6 +23,8 @@ class User < ApplicationRecord
   has_many :comments, dependent: :destroy
 
   has_many :bookings, dependent: :destroy
+  has_many :favorites, dependent: :destroy
+  has_many :favorite_events, through: :favorites, source: :event
 
   # =========================
   # VALIDATIONS

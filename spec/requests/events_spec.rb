@@ -69,4 +69,47 @@ RSpec.describe "Public Events Details", type: :request do
       expect(response.body).not_to include('Ubicación en mapa')
     end
   end
+
+  describe "POST /events/:id/favorite" do
+    let(:user) { User.create!(name: "Regular User", email: "user.fav@test.com", password: "password123", confirmed_at: Time.current) }
+
+    context "when user is not signed in" do
+      it "redirects to the login page" do
+        post favorite_event_path(event_with_coordinates)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+
+    context "when user is signed in" do
+      before { sign_in user }
+
+      it "adds the event to favorites and responds with html redirect" do
+        expect {
+          post favorite_event_path(event_with_coordinates)
+        }.to change(user.favorites, :count).by(1)
+
+        expect(response).to redirect_to(event_path(event_with_coordinates))
+        expect(flash[:success]).to eq("¡Evento agregado a tus favoritos!")
+      end
+
+      it "removes the event from favorites when already favorited" do
+        user.favorites.create!(event: event_with_coordinates)
+
+        expect {
+          post favorite_event_path(event_with_coordinates)
+        }.to change(user.favorites, :count).by(-1)
+
+        expect(response).to redirect_to(event_path(event_with_coordinates))
+        expect(flash[:notice]).to eq("Evento removido de tus favoritos.")
+      end
+
+      it "responds to turbo_stream request with favorite button update" do
+        post favorite_event_path(event_with_coordinates), as: :turbo_stream
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include("event_#{event_with_coordinates.id}_favorite")
+        expect(response.body).to include("flash-container")
+      end
+    end
+  end
 end

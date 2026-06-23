@@ -29,7 +29,7 @@
             Explorar
           <% end %>
 
-          <% if user_signed_in? %>
+          <% if user_signed_in? && !current_user.organizer? %>
             <%= link_to bookings_path, class: "px-4 py-2 text-sm font-bold text-body-tertiary hover:text-heading hover:bg-surface-secondary rounded-badge transition-all" do %>
               Mis entradas
             <% end %>
@@ -274,7 +274,9 @@
 
       <% if user_signed_in? %>
         <div class="pt-6 mt-6 border-t border-border-light space-y-2">
-          <%= link_to "Mis entradas", bookings_path, class: "block px-4 py-3 text-base font-bold text-body hover:bg-primary/10 hover:text-link rounded-badge transition-all" %>
+          <% unless current_user.organizer? %>
+            <%= link_to "Mis entradas", bookings_path, class: "block px-4 py-3 text-base font-bold text-body hover:bg-primary/10 hover:text-link rounded-badge transition-all" %>
+          <% end %>
           <%= link_to "Mi Perfil", profile_path, class: "block px-4 py-3 text-base font-bold text-body hover:bg-primary/10 hover:text-link rounded-badge transition-all" %>
           <% if current_user.admin? %>
             <%= link_to "Dashboard Admin", admin_dashboard_path, class: "block px-4 py-3 text-base font-bold text-brand-plum hover:bg-brand-plum/10 rounded-badge transition-all" %>

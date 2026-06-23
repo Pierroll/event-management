@@ -1,5 +1,5 @@
 <%# Profile Show %>
-<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
   <div class="bg-white rounded-badge border border-border p-6 md:p-8">
     <div class="flex items-center gap-4 mb-6">
       <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
@@ -30,7 +30,35 @@
 
     <div class="mt-8 flex flex-wrap gap-3">
       <%= link_to "Editar perfil", edit_profile_path, class: "inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-card hover:bg-primary-hover transition-colors" %>
-      <%= link_to "Mis entradas", bookings_path, class: "inline-flex items-center px-4 py-2 border border-border-input text-body text-sm font-medium rounded-card hover:bg-surface-secondary transition-colors" %>
+      <% unless @user.organizer? %>
+        <%= link_to "Mis entradas", bookings_path, class: "inline-flex items-center px-4 py-2 border border-border-input text-body text-sm font-medium rounded-card hover:bg-surface-secondary transition-colors" %>
+      <% end %>
     </div>
+  </div>
+
+  <%# Favorites Section %>
+  <div class="space-y-4">
+    <h2 class="text-xl font-bold text-heading">Mis Eventos Favoritos</h2>
+    
+    <% if @favorite_events.any? %>
+      <div class="space-y-4">
+        <% @favorite_events.each do |event| %>
+          <%= render "events/event_card_horizontal", event: event %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-badge border border-border p-8 text-center space-y-4">
+        <div class="w-12 h-12 rounded-full bg-surface-secondary flex items-center justify-center mx-auto text-muted">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </div>
+        <div class="space-y-1">
+          <p class="font-bold text-heading">Aún no tenés favoritos</p>
+          <p class="text-sm text-body-tertiary">Explorá los eventos disponibles y guardá tus favoritos para verlos acá.</p>
+        </div>
+        <%= link_to "Explorar eventos", events_path, class: "inline-flex px-4 py-2 bg-primary text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-primary-hover transition-all shadow-md shadow-primary/10 active:scale-95" %>
+      </div>
+    <% end %>
   </div>
 </div>

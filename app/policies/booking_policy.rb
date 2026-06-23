@@ -1,6 +1,6 @@
 class BookingPolicy < ApplicationPolicy
   def index?
-    user.present?
+    user.present? && !user.organizer?
   end
 
   def show?

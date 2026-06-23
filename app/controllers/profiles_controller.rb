@@ -4,6 +4,7 @@ class ProfilesController < ApplicationController
   def show
     @user = current_user
     authorize @user, policy_class: ProfilePolicy
+    @favorite_events = @user.favorite_events.includes(:category, :event_images)
   end
 
   def edit

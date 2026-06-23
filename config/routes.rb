@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   root "home#index"
   resources :events, only: [:index, :show] do
     post :create_alert, on: :collection
+    post :favorite, on: :member
     resources :comments, only: [:create, :destroy]
     resources :bookings, only: [:new, :create]
   end

@@ -14,6 +14,9 @@ application.register("navbar", NavbarController)
 import TicketTypesController from "controllers/ticket_types_controller"
 application.register("ticket-types", TicketTypesController)
 
+import ShareController from "controllers/share_controller"
+application.register("share", ShareController)
+
 // Eager load all other controllers defined in this directory
 import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
 eagerLoadControllersFrom("controllers", application)
