@@ -43,6 +43,9 @@ config/master.key
 
 .atl/
 
-.agents
+.agents/
+.kaddo/
+.opencode/
+skills-lock.json
 .atl.kilocode
 .opencodeclient_secret*.json
