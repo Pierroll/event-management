@@ -16,6 +16,14 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  def after_sign_in_path_for(resource)
+    if resource.is_a?(User) && resource.dev?
+      developers_portal_path
+    else
+      super
+    end
+  end
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:name, :selected_role])
     devise_parameter_sanitizer.permit(:account_update, keys: [:name])

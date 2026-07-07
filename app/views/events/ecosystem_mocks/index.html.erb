@@ -1,0 +1,61 @@
+<turbo-frame id="ecosystem_mocks">
+  <div class="space-y-8">
+    
+    <!-- Alerta Informativa de PoC -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+      <svg class="w-6 h-6 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <div class="w-full">
+        <div class="flex justify-between items-start">
+          <h4 class="text-sm font-bold text-blue-900">Demostración: Arquitectura Federada</h4>
+          <button data-controller="event-detail" data-action="click->event-detail#showEcosystem" class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+            Proyectar en el Mapa
+          </button>
+        </div>
+        <p class="text-sm text-blue-800 mt-2">
+          Los siguientes servicios son maquetas generadas por nuestro controlador de mocks. Simulan las respuestas JSON que entregarían las plataformas del ecosistema tras consultar disponibilidad en la ubicación del evento: <strong><%= @event.city %></strong>.
+        </p>
+      </div>
+    </div>
+
+    <!-- HOTELES -->
+    <div>
+      <h3 class="text-lg font-bold text-heading flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        Hoteles Cercanos (Plataforma 2)
+      </h3>
+      <div class="flex gap-4 overflow-x-auto pb-4 snap-x">
+        <% @hotels.each do |hotel| %>
+          <%= render "hotel_card", hotel: hotel %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- RESTAURANTES -->
+    <div>
+      <h3 class="text-lg font-bold text-heading flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"></path></svg>
+        Gastronomía Local (Plataforma 4)
+      </h3>
+      <div class="flex gap-4 overflow-x-auto pb-4 snap-x">
+        <% @restaurants.each do |restaurant| %>
+          <%= render "restaurant_card", restaurant: restaurant %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- VEHICULOS (SUCURSALES) -->
+    <div>
+      <h3 class="text-lg font-bold text-heading flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+        Sucursales de Rent-a-Car (Plataforma 3)
+      </h3>
+      <div class="flex gap-4 overflow-x-auto pb-4 snap-x">
+        <% @branches.each do |branch| %>
+          <%= render "branch_card", branch: branch %>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</turbo-frame>

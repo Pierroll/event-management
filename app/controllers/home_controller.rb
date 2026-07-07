@@ -8,7 +8,7 @@ class HomeController < ApplicationController
       end
     end
 
-    @upcoming_events = Event.upcoming.includes(:ticket_types).limit(6)
+    @upcoming_events = Event.upcoming.includes(:ticket_types).page(params[:page]).per(6)
     @cities = Event.published.distinct.pluck(:city).compact_blank.sort
 
     # Cargar eventos destacados con imágenes para el Hero
@@ -20,5 +20,10 @@ class HomeController < ApplicationController
                            .limit(10)
                            .to_a
     @hero_events = hero_candidates.shuffle(random: Random.new(Time.current.hour)).first(5)
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
   end
 end

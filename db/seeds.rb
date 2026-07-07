@@ -14,9 +14,10 @@ puts "═" * 60
 # 1. ROLES
 # ──────────────────────────────────────────────
 puts "\n→ Roles..."
-roles = %w[admin organizer registered_user].map do |role_name|
-  Role.find_or_create_by!(name: role_name) do |r|
-    r.description = "Rol de #{role_name.humanize}"
+roles = ['admin', 'organizer', 'registered_user', 'dev']
+roles.each do |role_name|
+  Role.find_or_create_by!(name: role_name) do |role|
+    role.description = "Role for #{role_name}"
   end
 end
 puts "  ✓ #{roles.size} roles listos"
@@ -375,6 +376,95 @@ events_data.each do |e_data|
       Comment.create!(event: event, user: user, content: content, rating: rand(4..5))
     end
   end
+end
+
+# ──────────────────────────────────────────────
+# 5. GENERADOR DINÁMICO DE TINGO MARÍA (24 Eventos)
+# ──────────────────────────────────────────────
+puts "\n→ Generando 24 eventos de Tingo María..."
+tingo_titles = [
+  "Fiesta de San Juan Tingo María", "Expo Cacao Tingalés", "Maratón Bella Durmiente", 
+  "Festival del Tacacho", "Trekking Cueva de las Lechuzas", "Cata de Café Especial", 
+  "Concierto de Cumbia Amazónica", "Feria Gastronómica de la Selva", "Ruta de las Cascadas", 
+  "Aniversario de Tingo María", "Carnavales Tingaleses", "Feria de Emprendedores Agrícolas",
+  "Fiesta de la Cerveza Artesanal", "Canotaje en el Río Huallaga", "Congreso de Turismo Sostenible",
+  "Taller de Fotografía de la Naturaleza", "Exposición de Arte Amazónico", "Festival de la Orquídea",
+  "Concurso de Danzas Típicas", "Simposio de Agricultura Ecológica", "Competencia de Motocross",
+  "Noche de Mitos y Leyendas", "Feria de Artesanía Local", "Retiro de Yoga en la Selva"
+]
+
+category_map = {
+  "Fiesta de San Juan Tingo María" => { slug: "arte-y-cultura", img: :festival },
+  "Expo Cacao Tingalés" => { slug: "gastronomia", img: :food },
+  "Maratón Bella Durmiente" => { slug: "deportes", img: :sports },
+  "Festival del Tacacho" => { slug: "gastronomia", img: :food },
+  "Trekking Cueva de las Lechuzas" => { slug: "deportes", img: :sports },
+  "Cata de Café Especial" => { slug: "gastronomia", img: :food },
+  "Concierto de Cumbia Amazónica" => { slug: "musica", img: :concert },
+  "Feria Gastronómica de la Selva" => { slug: "gastronomia", img: :food },
+  "Ruta de las Cascadas" => { slug: "deportes", img: :sports },
+  "Aniversario de Tingo María" => { slug: "arte-y-cultura", img: :festival },
+  "Carnavales Tingaleses" => { slug: "arte-y-cultura", img: :festival },
+  "Feria de Emprendedores Agrícolas" => { slug: "tecnologia", img: :workshop },
+  "Fiesta de la Cerveza Artesanal" => { slug: "gastronomia", img: :food },
+  "Canotaje en el Río Huallaga" => { slug: "deportes", img: :sports },
+  "Congreso de Turismo Sostenible" => { slug: "tecnologia", img: :conference },
+  "Taller de Fotografía de la Naturaleza" => { slug: "arte-y-cultura", img: :art },
+  "Exposición de Arte Amazónico" => { slug: "arte-y-cultura", img: :art },
+  "Festival de la Orquídea" => { slug: "arte-y-cultura", img: :festival },
+  "Concurso de Danzas Típicas" => { slug: "arte-y-cultura", img: :festival },
+  "Simposio de Agricultura Ecológica" => { slug: "tecnologia", img: :conference },
+  "Competencia de Motocross" => { slug: "deportes", img: :sports },
+  "Noche de Mitos y Leyendas" => { slug: "arte-y-cultura", img: :art },
+  "Feria de Artesanía Local" => { slug: "arte-y-cultura", img: :art },
+  "Retiro de Yoga en la Selva" => { slug: "deportes", img: :workshop }
+}
+
+tingo_organizer = User.find_by(email: "organizer@eventos.com")
+
+tingo_titles.each_with_index do |title, index|
+  event = Event.find_or_initialize_by(name: title)
+  
+  cat_info = category_map[title] || { slug: "arte-y-cultura", img: :festival }
+  days_offset = (index + 1) * 3 # Desde 3 hasta 72 días en el futuro
+  
+  event.assign_attributes(
+    description: "Únete a nosotros en Tingo María para '#{title}'. Una experiencia inolvidable en la Puerta de la Amazonía Peruana. ¡Descubre la magia de la selva con nosotros!",
+    city: "Tingo María",
+    address: "Plaza de Armas de Tingo María, Huánuco, Perú",
+    start_date: days_offset.days.from_now,
+    end_date: days_offset.days.from_now + 1.day,
+    currency: "PEN",
+    max_capacity: 500,
+    status: :published,
+    category: Category.find_by(slug: cat_info[:slug]),
+    organizer: tingo_organizer
+  )
+  
+  images = IMAGES[cat_info[:img]]
+  if event.new_record?
+    images.each_with_index do |img_url, idx|
+      event.event_images.build(image: img_url, display_order: idx)
+    end
+    event.save!
+    puts "  + Creado TM: #{event.name}"
+  else
+    event.save! if event.changed?
+    images.each_with_index do |img_url, idx|
+      unless event.event_images.exists?(image: img_url)
+        event.event_images.create!(image: img_url, display_order: idx)
+      end
+    end
+  end
+
+  # Ticket Types idempotentes
+  tt = event.ticket_types.find_or_initialize_by(name: "Entrada General")
+  tt.assign_attributes(price: 20.00, quantity_total: 400, max_per_order: 5, position: 0)
+  tt.save! if tt.new_record? || tt.changed?
+  
+  tt2 = event.ticket_types.find_or_initialize_by(name: "Pase VIP")
+  tt2.assign_attributes(price: 80.00, quantity_total: 100, max_per_order: 2, position: 1)
+  tt2.save! if tt2.new_record? || tt2.changed?
 end
 
 puts "\n═" * 60

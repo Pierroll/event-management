@@ -279,6 +279,18 @@
               </svg>
             </button>
           </div>
+          <% if user_signed_in? %>
+            <div class="flex flex-col sm:flex-row gap-3 mt-3">
+              <button type="button" data-action="click->event-detail#showUserRoute" class="flex-1 flex justify-center items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl font-bold hover:bg-primary-dark transition-colors shadow-sm text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                Mostrar mi distancia al evento
+              </button>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=<%= @event.latitude %>,<%= @event.longitude %>" target="_blank" rel="noopener noreferrer" class="flex-1 flex justify-center items-center gap-2 bg-surface border border-border text-heading px-4 py-2 rounded-xl font-bold hover:bg-surface-secondary transition-colors shadow-sm text-sm">
+                <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C7.58 0 4 3.58 4 8c0 5.25 8 16 8 16s8-10.75 8-16c0-4.42-3.58-8-8-8zm0 11.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 4.5 12 4.5 15.5 6.07 15.5 8 13.93 11.5 12 11.5z"/></svg>
+                Navegación en Google Maps
+              </a>
+            </div>
+          <% end %>
         </div>
         <hr class="border-border/60">
       <% end %>
@@ -390,9 +402,9 @@
         <div class="flex items-center justify-center gap-6 border-t border-border pt-4 select-none">
           <button type="button"
                   data-action="click->share#share"
-                  class="flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-primary transition-colors group">
-            <svg class="w-4.5 h-4.5 text-body-tertiary group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.828-2.414m0 5.344l-4.828-2.414m6.068-3.085a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0zm0 11a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z" />
+                  class="flex items-center gap-2 text-sm font-bold text-body-secondary hover:text-primary transition-colors group">
+            <svg class="w-5 h-5 text-body-tertiary group-hover:text-primary transition-colors" viewBox="0 0 24 24" fill="currentColor">
+              <path fill-rule="evenodd" d="M15.75 4.5a3 3 0 11.825 2.066l-8.421 4.679a3.002 3.002 0 010 1.51l8.421 4.679a3 3 0 11-.729 1.31l-8.421-4.678a3 3 0 110-4.132l8.421-4.679a3 3 0 01-.096-.755z" clip-rule="evenodd" />
             </svg>
             <span>Compartir</span>
           </button>
@@ -402,9 +414,9 @@
               <% is_fav = current_user.favorites.exists?(event: @event) %>
               <%= button_to favorite_event_path(@event),
                             method: :post,
-                            class: "flex items-center gap-2 text-xs font-bold #{is_fav ? 'text-error' : 'text-body-secondary'} hover:text-error transition-colors group",
+                            class: "flex items-center gap-2 text-sm font-bold #{is_fav ? 'text-error' : 'text-body-secondary'} hover:text-error transition-colors group",
                             data: { turbo_frame: "event_#{@event.id}_favorite" } do %>
-                <svg class="w-4.5 h-4.5 #{is_fav ? 'text-error fill-current animate-[heartbeat_0.3s_ease-in-out]' : 'text-body-tertiary group-hover:text-error group-hover:scale-110'} transition-all" fill="<%= is_fav ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 #{is_fav ? 'text-error fill-current animate-[heartbeat_0.3s_ease-in-out]' : 'text-body-tertiary group-hover:text-error group-hover:scale-110'} transition-all" fill="<%= is_fav ? 'currentColor' : 'none' %>" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
                 <span>Favorito</span>
@@ -412,9 +424,9 @@
             <% else %>
               <%= button_to favorite_event_path(@event),
                             method: :post,
-                            class: "flex items-center gap-2 text-xs font-bold text-body-secondary hover:text-error transition-colors group",
+                            class: "flex items-center gap-2 text-sm font-bold text-body-secondary hover:text-error transition-colors group",
                             data: { turbo: false } do %>
-                <svg class="w-4.5 h-4.5 text-body-tertiary group-hover:text-error group-hover:scale-110 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-body-tertiary group-hover:text-error group-hover:scale-110 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
                 <span>Favorito</span>
@@ -424,8 +436,39 @@
         </div>
 
       </div>
+
+      <%# PoC Ecosistema Widget %>
+      <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-badge border border-indigo-400 p-6 shadow-lg relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 text-white/20 group-hover:scale-110 transition-transform duration-500">
+          <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <div class="relative z-10">
+          <h4 class="text-white font-bold mb-1">Arma tu viaje completo</h4>
+          <p class="text-indigo-100 text-xs mb-4">Descubre hoteles y autos cerca del evento con Actify Travel.</p>
+          <a href="#ecosystem_mocks" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded-lg backdrop-blur-sm transition-colors border border-white/20">
+            Ver 5 opciones de viaje
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+          </a>
+        </div>
+      </div>
     </div>
 
+  </div>
+
+  <%# Ecosistema (Mocks PoC) %>
+  <div class="mt-16 pt-16 border-t border-border w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h2 class="text-2xl font-bold text-heading">Planifica tu Viaje (Integraciones)</h2>
+      <p class="text-body-secondary mt-2">Prueba de Concepto: Mocks de Plataformas del Ecosistema Turístico (Hoteles, Autos, Restaurantes)</p>
+    </div>
+    
+    <turbo-frame id="ecosystem_mocks" src="<%= event_ecosystem_mocks_path(@event) %>" loading="lazy">
+      <div class="animate-pulse flex gap-4 overflow-x-auto pb-4">
+        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+      </div>
+    </turbo-frame>
   </div>
 
   <%# Share Modal Fallback %>

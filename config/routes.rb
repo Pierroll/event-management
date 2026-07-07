@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   resources :events, only: [:index, :show] do
     post :create_alert, on: :collection
     post :favorite, on: :member
+    resources :ecosystem_mocks, only: [:index], module: :events
     resources :comments, only: [:create, :destroy]
     resources :bookings, only: [:new, :create]
   end
@@ -32,6 +33,13 @@ Rails.application.routes.draw do
 
   # User profile
   resource :profile, only: [:show, :edit, :update]
+
+  # Developer Portal
+  namespace :developers do
+    resource :portal, only: [:show] do
+      post :regenerate_api_token, on: :collection
+    end
+  end
 
   # Organizer namespace
   namespace :organizer do
@@ -56,6 +64,13 @@ Rails.application.routes.draw do
   namespace :webhooks do
     resources :payments, only: [], controller: :payments do
       post :receive, on: :collection
+    end
+  end
+
+  # API B2B
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      resources :events, only: [:index, :show]
     end
   end
 

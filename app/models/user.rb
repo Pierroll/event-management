@@ -26,6 +26,8 @@ class User < ApplicationRecord
   has_many :favorites, dependent: :destroy
   has_many :favorite_events, through: :favorites, source: :event
 
+  has_secure_token :api_token
+
   # =========================
   # VALIDATIONS
   # =========================
@@ -93,6 +95,10 @@ class User < ApplicationRecord
 
   def registered_user?
     role?('registered_user')
+  end
+
+  def dev?
+    role?('dev')
   end
 
   private

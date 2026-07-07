@@ -2,6 +2,12 @@ class ProfilesController < ApplicationController
   before_action :authenticate_user!
 
   def show
+    if current_user.dev?
+      skip_authorization
+      redirect_to developers_portal_path
+      return
+    end
+
     @user = current_user
     authorize @user, policy_class: ProfilePolicy
     @favorite_events = @user.favorite_events.includes(:category, :event_images)

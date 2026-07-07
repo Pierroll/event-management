@@ -1,0 +1,27 @@
+<div class="snap-start shrink-0 w-72 bg-surface border border-border rounded-2xl overflow-hidden group hover:shadow-lg transition-all">
+  <div class="h-32 w-full overflow-hidden bg-gray-100 flex items-center justify-center p-4">
+    <img src="<%= branch[:image] %>" alt="<%= branch[:name] %>" class="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500">
+  </div>
+  <div class="p-4">
+    <div class="flex justify-between items-start mb-2">
+      <h4 class="font-bold text-heading text-sm line-clamp-1"><%= branch[:name] %></h4>
+    </div>
+    <p class="text-xs text-body-tertiary mb-1 flex items-center gap-1">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+      <%= branch[:location] %>
+    </p>
+    <p class="text-[10px] text-body-tertiary mb-3 flex items-center gap-1">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+      <%= branch[:fleet_size] %> modelos disponibles
+    </p>
+    <div class="flex items-center justify-between mt-4 pt-4 border-t border-border">
+      <div>
+        <span class="text-[10px] text-body-tertiary uppercase font-bold tracking-wider">Flota desde</span>
+        <p class="text-sm font-bold text-heading">S/ <%= branch[:price_from] %> <span class="text-xs font-normal text-body-tertiary">/ día</span></p>
+      </div>
+      <button onclick="alert('PoC Arquitectura: Event Management envía al usuario a la URL de la sucursal de <%= branch[:name] %>, inyectando las fechas del evento por parámetros GET para que solo deba elegir el auto.')" class="px-4 py-2 bg-surface-secondary text-primary text-xs font-bold rounded-lg hover:bg-primary hover:text-white transition-colors">
+        Ver Flota
+      </button>
+    </div>
+  </div>
+</div>

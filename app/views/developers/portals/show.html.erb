@@ -1,0 +1,174 @@
+<div class="flex flex-col md:flex-row min-h-screen">
+  <%# Sidebar Izquierdo (Navegación) %>
+  <aside class="w-full md:w-64 lg:w-72 border-r border-border-light bg-surface flex-shrink-0 hidden md:block">
+    <div class="p-6 sticky top-20">
+      <h3 class="text-[10px] font-black uppercase tracking-widest text-muted mb-4">AUTENTICACIÓN</h3>
+      <nav class="space-y-1 mb-8">
+        <a href="#api-key" class="block px-3 py-2.5 text-sm font-bold text-body-tertiary hover:bg-surface-secondary hover:text-body rounded-lg transition-colors">Credenciales (API Key)</a>
+      </nav>
+
+      <h3 class="text-[10px] font-black uppercase tracking-widest text-muted mb-4">ENDPOINTS B2B</h3>
+      <nav class="space-y-1">
+        <a href="#consulta-eventos" class="block px-3 py-2.5 text-sm font-bold text-link bg-primary/5 rounded-lg transition-colors">Consulta Eventos</a>
+        <a href="#aforo" class="block px-3 py-2.5 text-sm font-bold text-body-tertiary hover:bg-surface-secondary hover:text-body rounded-lg transition-colors">Disponibilidad y Aforo</a>
+        <a href="#" class="block px-3 py-2.5 text-sm font-bold text-muted cursor-not-allowed rounded-lg opacity-70">Directorio Organizadores (Próximamente)</a>
+      </nav>
+    </div>
+  </aside>
+
+  <%# Columna Central (Contenido Principal) %>
+  <main class="flex-1 px-4 sm:px-8 lg:px-16 xl:px-24 py-10 pb-32 overflow-x-hidden max-w-4xl mx-auto md:mx-0 md:max-w-none">
+    
+    <div class="mb-12">
+      <h1 class="text-3xl lg:text-4xl font-display font-black text-heading tracking-tight">Documentación de la API</h1>
+      <p class="text-body-secondary mt-3 text-lg max-w-2xl">Integra el catálogo global de eventos de Actify en tu sistema mediante nuestra API RESTful pública, segura y rápida.</p>
+    </div>
+    
+    <%# 1. API Key Section %>
+    <section id="api-key" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Autenticación (API Key)</h2>
+      <p class="text-body mb-6">Tu llave maestra para acceder a los endpoints. Debes enviarla en el header <code class="bg-surface-secondary px-1.5 py-0.5 rounded text-xs font-mono">Authorization</code> en cada petición.</p>
+      
+      <div class="bg-surface border border-border-light rounded-2xl p-6 shadow-sm">
+        <label class="block text-sm font-bold text-heading mb-3">Tu Llave de Acceso Única</label>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative flex-1">
+            <input type="text" readonly value="<%= current_user.api_token || 'Token no generado aún' %>" 
+                   class="w-full bg-surface-sunken border border-border/50 rounded-xl px-4 py-3 font-mono text-sm text-body-primary font-medium focus:outline-none focus:ring-2 focus:ring-primary/20" onclick="this.select();" />
+          </div>
+          <%= button_to "Regenerar Key", regenerate_api_token_developers_portal_path, method: :post, 
+              data: { turbo_confirm: "¡ATENCIÓN! Cualquier aplicación que use tu llave actual dejará de funcionar inmediatamente. ¿Estás seguro de continuar?" },
+              class: "btn-secondary py-3 flex-shrink-0 whitespace-nowrap" %>
+        </div>
+        <p class="text-xs text-error font-medium mt-3 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          Mantén esta llave en secreto. No la compartas públicamente.
+        </p>
+      </div>
+    </section>
+
+    <%# 2. Consideraciones Generales %>
+    <section id="consideraciones" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Consideraciones</h2>
+      <ul class="space-y-3 list-disc list-inside text-body marker:text-primary">
+        <li>Todos los endpoints retornan respuestas en formato <code class="bg-surface-secondary px-1.5 py-0.5 rounded text-xs font-mono">application/json</code>.</li>
+        <li>La API implementa <strong>Rate Limiting</strong> restringido a 100 peticiones por minuto por dirección IP.</li>
+        <li>Los eventos devueltos corresponden al catálogo global público, excluyendo borradores o eventos cancelados.</li>
+      </ul>
+    </section>
+
+    <%# 3. Consulta Eventos %>
+    <section id="consulta-eventos" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Consulta Eventos</h2>
+      <p class="text-body mb-6">Obtén el listado completo y paginado de eventos de la plataforma.</p>
+      
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
+        <span class="px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-100 rounded-md inline-flex self-start">GET</span>
+        <div class="bg-surface-sunken border border-border/50 px-3 py-1.5 rounded-lg flex-1 overflow-x-auto flex items-center justify-between group">
+          <code class="text-sm font-mono text-body-secondary"><span class="text-muted">https://actify.com</span>/api/v1/events</code>
+          <button class="text-muted hover:text-link transition-colors opacity-0 group-hover:opacity-100" onclick="navigator.clipboard.writeText('https://actify.com/api/v1/events')">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <h3 id="headers" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Headers Requeridos</h3>
+      <div class="overflow-x-auto border border-border-light rounded-xl mb-8">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-secondary border-b border-border-light">
+            <tr>
+              <th class="px-4 py-3 font-black text-body-secondary">Name</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Type</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Description</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-light">
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">Accept</td>
+              <td class="px-4 py-3 text-body-tertiary">String</td>
+              <td class="px-4 py-3 text-body">application/json</td>
+            </tr>
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">Authorization</td>
+              <td class="px-4 py-3 text-body-tertiary">String</td>
+              <td class="px-4 py-3 text-body">Bearer &lt;tu_api_key&gt;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="aforo" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Respuesta: Datos de Aforo</h3>
+      <p class="text-body mb-4 text-sm">La respuesta JSON incluye un bloque especial para consultar la disponibilidad en tiempo real, lo que responde a las necesidades de saber entradas confirmadas vs libres:</p>
+      
+      <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50 mb-12">
+        <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700/50 bg-[#181825]">
+          <span class="text-xs font-mono font-bold text-gray-400">Response (200 OK)</span>
+        </div>
+        <div class="p-4 overflow-x-auto custom-scrollbar">
+          <pre class="text-xs font-mono leading-relaxed"><code>{
+  <span class="text-[#89ddff]">"capacity"</span>: {
+    <span class="text-[#89ddff]">"max_capacity"</span>: <span class="text-[#f78c6c]">2500</span>,
+    <span class="text-[#89ddff]">"sold_tickets"</span>: <span class="text-[#f78c6c]">1840</span>,
+    <span class="text-[#89ddff]">"available_spots"</span>: <span class="text-[#f78c6c]">660</span>,
+    <span class="text-[#89ddff]">"is_sold_out"</span>: <span class="text-[#89ddff]">false</span>
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <h3 id="ejemplos" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Ejemplos de Uso</h3>
+      
+      <%# Bloque cURL %>
+      <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50 mb-6">
+        <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700/50 bg-[#181825]">
+          <span class="text-xs font-black tracking-widest text-[#89ddff]">BASH (cURL)</span>
+        </div>
+        <div class="p-4 overflow-x-auto custom-scrollbar">
+          <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET http://localhost:3000/api/v1/events \
+  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span> \
+  -H <span class="text-[#c3e88d]">"Accept: application/json"</span></code></pre>
+        </div>
+      </div>
+
+      <%# Bloque PHP %>
+      <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
+        <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700/50 bg-[#181825]">
+          <span class="text-xs font-black tracking-widest text-[#f78c6c]">PHP</span>
+        </div>
+        <div class="p-4 overflow-x-auto custom-scrollbar">
+          <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">$curl</span> = <span class="text-[#82aaff]">curl_init</span>();
+<span class="text-[#82aaff]">curl_setopt_array</span>(<span class="text-[#c792ea]">$curl</span>, <span class="text-[#c792ea]">array</span>(
+  <span class="text-[#c3e88d]">CURLOPT_URL</span> => <span class="text-[#c3e88d]">"https://actify.com/api/v1/events"</span>,
+  <span class="text-[#c3e88d]">CURLOPT_RETURNTRANSFER</span> => <span class="text-[#ff5370]">true</span>,
+  <span class="text-[#c3e88d]">CURLOPT_HTTPHEADER</span> => <span class="text-[#c792ea]">array</span>(
+    <span class="text-[#c3e88d]">"Accept: application/json"</span>,
+    <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span>
+  ),
+));
+<span class="text-[#c792ea]">$response</span> = <span class="text-[#82aaff]">curl_exec</span>(<span class="text-[#c792ea]">$curl</span>);
+<span class="text-[#82aaff]">curl_close</span>(<span class="text-[#c792ea]">$curl</span>);
+<span class="text-[#89ddff]">echo</span> <span class="text-[#c792ea]">$response</span>;</code></pre>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <%# Sidebar Derecho (Tabla de Contenidos) %>
+  <aside class="hidden xl:block w-64 border-l border-border-light flex-shrink-0 pt-12 px-6">
+    <div class="sticky top-28">
+      <h4 class="text-[10px] font-black uppercase tracking-widest text-heading mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+        EN ESTA PÁGINA
+      </h4>
+      <nav class="space-y-3 text-sm font-bold">
+        <a href="#api-key" class="block text-body-tertiary hover:text-link transition-colors">Autenticación (API Key)</a>
+        <a href="#consideraciones" class="block text-body-tertiary hover:text-link transition-colors">Consideraciones Generales</a>
+        <a href="#consulta-eventos" class="block text-body-tertiary hover:text-link transition-colors">Consulta Eventos</a>
+        <a href="#headers" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Headers Requeridos</a>
+        <a href="#aforo" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Datos de Aforo</a>
+        <a href="#ejemplos" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Ejemplos de Uso</a>
+      </nav>
+    </div>
+  </aside>
+</div>

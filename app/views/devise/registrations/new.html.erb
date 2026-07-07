@@ -28,13 +28,29 @@
             <%# Organizar %>
             <%= f.label :selected_role, value: "organizer", class: "relative flex flex-col items-center gap-2 p-4 border-2 border-border-light rounded-badge cursor-pointer hover:bg-surface-secondary transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-raised group" do %>
               <%= f.radio_button :selected_role, "organizer", class: "role-radio sr-only" %>
-              <div class="w-10 h-10 bg-surface-secondary rounded-card flex items-center justify-center text-muted group-has-[:checked]:bg-primary group-has-[:checked]:text-white transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <span class="text-sm font-bold tracking-wider text-body">Organizar</span>
-              <p class="text-[11px] text-muted text-center leading-snug">Crear y vender tickets para tus propios eventos</p>
+              <span class="text-sm font-medium text-body-primary text-center">
+                Organizador<br>
+                <span class="text-xs text-body-tertiary font-normal">Crear eventos</span>
+              </span>
+            <% end %>
+
+            <!-- Developer Option -->
+            <%= f.label :selected_role, value: "dev", class: "relative flex flex-col items-center gap-2 p-4 border-2 border-border-light rounded-badge cursor-pointer hover:bg-surface-secondary transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-raised group" do %>
+              <%= f.radio_button :selected_role, "dev", class: "role-radio sr-only" %>
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+              </div>
+              <span class="text-sm font-medium text-body-primary text-center">
+                Desarrollador<br>
+                <span class="text-xs text-body-tertiary font-normal">API & Datos</span>
+              </span>
             <% end %>
           </div>
           <p class="text-xs text-error mt-2 hidden" id="role-error">Seleccioná un tipo de cuenta para continuar</p>

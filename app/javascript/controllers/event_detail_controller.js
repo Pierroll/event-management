@@ -60,6 +60,76 @@ export default class extends Controller {
     }, 200)
   }
 
+  // PoC: Integración Ecosistema (Mocks de Pines)
+  showEcosystem() {
+    if (!this.mapInstance) return
+    const lat = parseFloat(this.element.dataset.lat)
+    const lng = parseFloat(this.element.dataset.lng)
+    
+    // Custom Icons (Using Emojis for simplicity in PoC)
+    const hotelIcon = L.divIcon({ html: '<div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">🏨</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+    const foodIcon = L.divIcon({ html: '<div class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">🍽️</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+
+    // Hoteles simulados
+    L.marker([lat + 0.003, lng + 0.002], { icon: hotelIcon }).bindPopup('<b class="text-indigo-600">Grand Hotel</b><br>S/ 120 / noche<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Ver ofertas</a>').addTo(this.mapInstance)
+    L.marker([lat - 0.004, lng - 0.003], { icon: hotelIcon }).bindPopup('<b class="text-indigo-600">Boutique Stay</b><br>S/ 85 / noche<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Ver ofertas</a>').addTo(this.mapInstance)
+    
+    // Restaurantes simulados
+    L.marker([lat + 0.002, lng - 0.004], { icon: foodIcon }).bindPopup('<b class="text-orange-600">La Trattoria</b><br>Italiana - 4.9⭐<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Reservar mesa</a>').addTo(this.mapInstance)
+    L.marker([lat - 0.002, lng + 0.003], { icon: foodIcon }).bindPopup('<b class="text-orange-600">Sushi Central</b><br>Japonesa - 4.7⭐<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Reservar mesa</a>').addTo(this.mapInstance)
+
+    // Ajustar zoom para ver los pines
+    this.mapInstance.setView([lat, lng], 14, { animate: true })
+    
+    // Alerta explicativa de la PoC
+    alert("PoC Arquitectura: Event Management consumió las APIs de Restaurantes y Hoteles (filtrando por coordenadas) e inyectó los resultados nativamente en el mapa del usuario.")
+  }
+
+  // Trazado de ruta geolocalizada
+  showUserRoute() {
+    if (!navigator.geolocation) {
+      alert("Tu navegador no soporta geolocalización.")
+      return
+    }
+
+    // Cambiar texto de botón para indicar carga (opcional, por UX)
+    const btn = event.currentTarget
+    const originalContent = btn.innerHTML
+    btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Ubicando...'
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        btn.innerHTML = originalContent
+        if (!this.mapInstance) return
+        
+        const userLat = position.coords.latitude
+        const userLng = position.coords.longitude
+        const eventLat = parseFloat(this.element.dataset.lat)
+        const eventLng = parseFloat(this.element.dataset.lng)
+
+        // Custom marker para el usuario
+        const userIcon = L.divIcon({ html: '<div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white text-xs font-bold">Tú</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+        
+        L.marker([userLat, userLng], { icon: userIcon }).bindPopup('<b class="text-blue-600">Tu ubicación actual</b>').addTo(this.mapInstance)
+
+        // Línea punteada hacia el evento
+        const latlngs = [
+          [userLat, userLng],
+          [eventLat, eventLng]
+        ]
+        const polyline = L.polyline(latlngs, { color: '#2563EB', dashArray: '8, 8', weight: 3, opacity: 0.8 }).addTo(this.mapInstance)
+
+        // Hacer zoom para que entren ambos puntos
+        this.mapInstance.fitBounds(polyline.getBounds(), { padding: [50, 50], animate: true })
+      },
+      (error) => {
+        btn.innerHTML = originalContent
+        console.error("Geolocalización denegada o fallida", error)
+        alert("No pudimos obtener tu ubicación. Por favor, asegúrate de permitir el acceso en tu navegador.")
+      }
+    )
+  }
+
   toggleFullscreen(event) {
     if (event) event.preventDefault()
 

@@ -88,3 +88,5 @@ gem "omniauth-google-oauth2", "~> 1.2"
 
 # QR code generation for individual tickets (SVG inline, no external services)
 gem "rqrcode", "~> 2.2"
+
+gem "rack-attack", "~> 6.8"
