@@ -28,6 +28,7 @@
 
     <%# JavaScript %>
     <%= javascript_importmap_tags %>
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
   </head>
 
   <body class="bg-background text-heading antialiased" data-controller="confirm">

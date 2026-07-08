@@ -90,3 +90,6 @@ gem "omniauth-google-oauth2", "~> 1.2"
 gem "rqrcode", "~> 2.2"
 
 gem "rack-attack", "~> 6.8"
+
+gem "sentry-ruby", "~> 6.6"
+gem "sentry-rails", "~> 6.6"
