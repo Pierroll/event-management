@@ -7,7 +7,7 @@
     </div>
 
     <div class="bg-white rounded-badge border border-border shadow-raised p-6 md:p-8">
-      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5", data: { turbo: false } }) do |f| %>
         <div>
           <%= f.label :email, "Correo electrónico", class: "block text-sm font-medium text-body mb-1" %>
           <%= f.email_field :email, autofocus: true, autocomplete: "email",
