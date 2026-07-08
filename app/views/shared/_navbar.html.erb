@@ -165,8 +165,9 @@
               </div>
             <% end %>
 
-            <%= link_to destroy_user_session_path, data: { turbo_method: :delete },
-                class: "p-2.5 text-muted hover:text-error hover:bg-error/10 rounded-badge transition-all" do %>
+            <%= button_to destroy_user_session_path, method: :delete,
+                class: "p-2.5 text-muted hover:text-error hover:bg-error/10 rounded-badge transition-all",
+                form_class: "inline-block", data: { turbo: false } do %>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
               </svg>
@@ -285,7 +286,7 @@
           <% elsif current_user.organizer? %>
             <%= link_to "Mis Eventos", organizer_events_path, class: "block px-4 py-3 text-base font-bold text-link hover:bg-primary/10 rounded-badge transition-all" %>
           <% end %>
-          <%= link_to "Cerrar sesión", destroy_user_session_path, data: { turbo_method: :delete }, class: "block w-full text-left px-4 py-3 text-base font-bold text-error hover:bg-error/10 rounded-badge transition-all" %>
+          <%= button_to "Cerrar sesión", destroy_user_session_path, method: :delete, class: "block w-full text-left px-4 py-3 text-base font-bold text-error hover:bg-error/10 rounded-badge transition-all", form_class: "w-full", data: { turbo: false } %>
         </div>
       <% else %>
         <div class="pt-6 mt-6 border-t border-border-light flex flex-col gap-3 px-2">

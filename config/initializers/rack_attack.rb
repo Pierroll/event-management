@@ -17,7 +17,7 @@ class Rack::Attack
   end
 
   # Rate Limit Response
-  self.throttled_response = lambda do |env|
+  self.throttled_responder = lambda do |request|
     [ 429,  # status
       {'Content-Type' => 'application/json'},   # headers
       [{ error: "Rate limit exceeded. Please wait before making more requests." }.to_json] # body
