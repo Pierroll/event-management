@@ -143,9 +143,21 @@
         </div>
       </div>
 
-      <%# Caso 3: Paginación %>
+      <%# Caso 3: Filtro por Ubicación (Geolocalización) %>
       <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">3. Paginación Dinámica (Infinite Scroll)</p>
+        <p class="text-sm font-bold text-body-secondary mb-2">3. Filtrar por Ubicación (Ej. Eventos cerca de Madrid)</p>
+        <p class="text-xs text-body-tertiary mb-3">Busca eventos en un radio específico (por defecto 50km). Puedes usar <code>city</code> para coincidencia de texto, o <code>location</code> + <code>radius</code> para coordenadas/dirección exacta.</p>
+        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
+          <div class="p-4 overflow-x-auto custom-scrollbar">
+            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET <span class="text-[#c3e88d]">"https://actify.qd.je/api/v1/events?location=Madrid&radius=25"</span> \
+  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <%# Caso 4: Paginación %>
+      <div class="mb-6">
+        <p class="text-sm font-bold text-body-secondary mb-2">4. Paginación Dinámica (Infinite Scroll)</p>
         <p class="text-xs text-body-tertiary mb-3">Solicita eventos en lotes para no saturar la memoria de dispositivos móviles.</p>
         <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
           <div class="p-4 overflow-x-auto custom-scrollbar">
@@ -155,9 +167,9 @@
         </div>
       </div>
 
-      <%# Caso 4: Detalle de Evento %>
+      <%# Caso 5: Detalle de Evento %>
       <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">4. Consultar Aforo en Vivo (Detalle de Evento)</p>
+        <p class="text-sm font-bold text-body-secondary mb-2">5. Consultar Aforo en Vivo (Detalle de Evento)</p>
         <p class="text-xs text-body-tertiary mb-3">Úsalo cuando el usuario entra a ver los detalles de un evento para saber si hay entradas (sold_out).</p>
         <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
           <div class="p-4 overflow-x-auto custom-scrollbar">
