@@ -146,15 +146,20 @@
       </div>
 
       <%# Right Side Actions %>
-      <div class="hidden md:flex items-center gap-4">
+      <div class="hidden lg:flex items-center gap-4">
         <% if user_signed_in? %>
           <% if current_user.admin? %>
             <%= link_to "Admin Panel", admin_dashboard_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-brand-plum bg-brand-plum/10 rounded-badge hover:bg-brand-plum/20 transition-all border border-brand-plum/20" %>
           <% elsif current_user.organizer? %>
+            <%= link_to "Mis Eventos", organizer_events_path, class: "px-4 py-2 text-xs font-bold text-body-tertiary hover:text-heading transition-colors" %>
             <%= link_to "Crear Evento", new_organizer_event_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-link bg-primary/10 rounded-badge hover:bg-primary/20 transition-all border border-primary/20" %>
+          <% elsif current_user.dev? %>
+            <%= link_to "Portal API", developers_portal_path, class: "px-4 py-2 text-xs font-black uppercase tracking-widest text-purple-600 bg-purple-100 rounded-badge hover:bg-purple-200 transition-all border border-purple-200" %>
+          <% else %>
+            <%= link_to "Mis Entradas", bookings_path, class: "px-4 py-2 text-sm font-bold text-body-tertiary hover:text-heading transition-colors" %>
           <% end %>
 
-          <div class="flex items-center gap-3 ml-2 pl-6 border-l border-border-light">
+          <div class="flex items-center gap-3 ml-2 pl-4 border-l border-border-light">
             <%= link_to profile_path, class: "flex items-center gap-3 group" do %>
               <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-body-tertiary font-bold border-2 border-white shadow-raised group-hover:shadow-md transition-all">
                 <%= current_user.name[0].upcase %>

@@ -17,8 +17,19 @@ class ApplicationController < ActionController::Base
   protected
 
   def after_sign_in_path_for(resource)
-    if resource.is_a?(User) && resource.dev?
-      developers_portal_path
+    stored_location = stored_location_for(resource)
+    return stored_location if stored_location.present?
+
+    if resource.is_a?(User)
+      if resource.admin?
+        admin_dashboard_path
+      elsif resource.organizer?
+        organizer_events_path
+      elsif resource.dev?
+        developers_portal_path
+      else
+        root_path
+      end
     else
       super
     end
@@ -31,19 +42,6 @@ class ApplicationController < ActionController::Base
 
   def after_sign_up_path_for(resource)
     new_confirmation_path
-  end
-
-  def after_sign_in_path_for(resource)
-    stored_location = stored_location_for(resource)
-    return stored_location if stored_location.present?
-
-    if resource.admin?
-      admin_dashboard_path
-    elsif resource.organizer?
-      organizer_events_path
-    else
-      root_path
-    end
   end
 
   private

@@ -446,7 +446,7 @@ SMTP_PASSWORD=tu_app_password
 MAILER_SENDER=SGE <noreply@tudominio.com>
 
 # App
-APP_HOST=localhost:3000
+APP_HOST=actify.qd.je
 APP_PROTOCOL=http
 
 # Pagos (Culqi)
@@ -517,11 +517,11 @@ rails server
 rails s
 ```
 
-Abrir en navegador: `http://localhost:3000`
+Abrir en navegador: `https://actify.qd.je`
 
 ### Verificar que el servidor está corriendo
 ```bash
-curl http://localhost:3000/up
+curl https://actify.qd.je/up
 # Debe retornar: OK
 ```
 
