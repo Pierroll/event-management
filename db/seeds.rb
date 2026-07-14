@@ -376,6 +376,9 @@ events_data.each do |e_data|
       Comment.create!(event: event, user: user, content: content, rating: rand(4..5))
     end
   end
+
+  # Pausa para respetar el Rate Limit de Nominatim (Geocoder)
+  sleep(1.2)
 end
 
 # ──────────────────────────────────────────────
@@ -465,6 +468,9 @@ tingo_titles.each_with_index do |title, index|
   tt2 = event.ticket_types.find_or_initialize_by(name: "Pase VIP")
   tt2.assign_attributes(price: 80.00, quantity_total: 100, max_per_order: 2, position: 1)
   tt2.save! if tt2.new_record? || tt2.changed?
+
+  # Pausa para respetar el Rate Limit de Nominatim (Geocoder)
+  sleep(1.2)
 end
 
 puts "\n═" * 60
