@@ -13,7 +13,8 @@ class Event < ApplicationRecord
   # GEOCODING
   # =========================
   geocoded_by :address
-  after_validation :geocode, if: ->(obj) { obj.address.present? && obj.address_changed? && obj.latitude.blank? && obj.longitude.blank? }
+  after_validation :safe_geocode, if: ->(obj) { obj.address.present? && obj.address_changed? && obj.latitude.blank? && obj.longitude.blank? }
+
 
   # =========================
   # RELATIONS
@@ -165,5 +166,14 @@ class Event < ApplicationRecord
     if end_date <= start_date
       errors.add(:end_date, :after_start_date)
     end
+  end
+
+  private
+
+  def safe_geocode
+    geocode
+  rescue Timeout::Error, SocketError => e
+    Rails.logger.error "[Geocoder] Error conectando al servicio: #{e.message}"
+    errors.add(:address, "no pudo ser geolocalizada debido a un error de red. Intenta más tarde.")
   end
 end

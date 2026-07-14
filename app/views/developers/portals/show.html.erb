@@ -10,6 +10,7 @@
 
       <h3 class="text-[10px] font-black uppercase tracking-widest text-muted mb-4">ENDPOINTS B2B</h3>
       <nav class="space-y-1">
+        <a href="#video-tutorial" class="block px-3 py-2.5 text-sm font-bold text-body-tertiary hover:bg-surface-secondary hover:text-body rounded-lg transition-colors">Video Tutorial</a>
         <a href="#consulta-eventos" class="block px-3 py-2.5 text-sm font-bold text-link bg-primary/5 rounded-lg transition-colors">Consulta Eventos</a>
         <a href="#aforo" class="block px-3 py-2.5 text-sm font-bold text-body-tertiary hover:bg-surface-secondary hover:text-body rounded-lg transition-colors">Disponibilidad y Aforo</a>
         <a href="#" class="block px-3 py-2.5 text-sm font-bold text-muted cursor-not-allowed rounded-lg opacity-70">Directorio Organizadores (Próximamente)</a>
@@ -56,6 +57,23 @@
         <li>La API implementa <strong>Rate Limiting</strong> restringido a 100 peticiones por minuto por dirección IP.</li>
         <li>Los eventos devueltos corresponden al catálogo global público, excluyendo borradores o eventos cancelados.</li>
       </ul>
+    </section>
+
+    <%# Video Tutorial %>
+    <section id="video-tutorial" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Video Tutorial Rápido</h2>
+      <p class="text-body mb-6">Aprende paso a paso cómo obtener tus credenciales (API Key) y realizar tu primera petición a la API de Actify en este breve tutorial.</p>
+      
+      <div class="relative w-full overflow-hidden rounded-2xl border border-border-light bg-surface-sunken shadow-sm" style="padding-top: 56.25%;">
+        <%# Reemplaza 'TU_ID_DE_YOUTUBE' con el ID real de tu video (por ejemplo, dQw4w9WgXcQ) %>
+        <iframe class="absolute top-0 left-0 w-full h-full" 
+                src="https://www.youtube.com/embed/Kgbik-Nn83Q" 
+                title="Tutorial de API Actify" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+        </iframe>
+      </div>
     </section>
 
     <%# 3. Consulta Eventos %>

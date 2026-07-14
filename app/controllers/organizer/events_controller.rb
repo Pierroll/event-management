@@ -21,6 +21,27 @@ module Organizer
       @tickets = @event.tickets
                        .includes(:booking => [:user, :ticket_type])
                        .order("tickets.created_at DESC")
+
+      respond_to do |format|
+        format.html
+        format.csv do
+          require 'csv'
+          csv_data = CSV.generate(headers: true) do |csv|
+            csv << ["ID", "Nombre", "Email", "Tipo de Ticket", "Estado", "Código"]
+            @tickets.each do |ticket|
+              csv << [
+                ticket.id,
+                ticket.booking.user.name,
+                ticket.booking.user.email,
+                ticket.booking.ticket_type.name,
+                ticket.status,
+                ticket.code
+              ]
+            end
+          end
+          send_data csv_data, filename: "asistentes_#{@event.slug || @event.id}.csv", type: "text/csv"
+        end
+      end
     end
 
     def cancel

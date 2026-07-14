@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  rescue_from ActiveRecord::StatementInvalid, ActiveRecord::ConnectionTimeoutError, with: :database_error
 
   after_action :verify_authorized, unless: :pundit_skippable?
 
@@ -74,5 +75,11 @@ class ApplicationController < ActionController::Base
 
     flash[:alert] = t("pundit.errors.not_authorized")
     redirect_to(request.referrer || root_path)
+  end
+
+  def database_error(exception)
+    Rails.logger.error "[Base de Datos] Error de conexión o timeout: #{exception.message}"
+    flash[:alert] = "El servicio está temporalmente no disponible debido a alta demanda. Por favor, intenta de nuevo en unos minutos."
+    redirect_to(request.referer || root_path)
   end
 end

@@ -47,6 +47,28 @@ class EventsController < ApplicationController
     authorize @event
     @comments = @event.comments.includes(:user).order(created_at: :desc)
     @comment = Comment.new
+
+    respond_to do |format|
+      format.html
+      format.ics do
+        ics_content = <<~ICS
+          BEGIN:VCALENDAR
+          VERSION:2.0
+          PRODID:-//SGE//Event Management//ES
+          BEGIN:VEVENT
+          UID:#{@event.id}@sge
+          DTSTAMP:#{Time.now.utc.strftime("%Y%m%dT%H%M%SZ")}
+          DTSTART:#{@event.start_date.utc.strftime("%Y%m%dT%H%M%SZ")}
+          DTEND:#{@event.end_date.utc.strftime("%Y%m%dT%H%M%SZ")}
+          SUMMARY:#{@event.name}
+          DESCRIPTION:#{@event.description.to_s.gsub(/\r\n|\n/, '\\n')}
+          LOCATION:#{@event.address}
+          END:VEVENT
+          END:VCALENDAR
+        ICS
+        send_data ics_content, filename: "evento_#{@event.slug || @event.id}.ics", type: "text/calendar"
+      end
+    end
   end
 
   def favorite
