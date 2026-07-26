@@ -22,17 +22,17 @@
   <main class="flex-1 px-4 sm:px-8 lg:px-16 xl:px-24 py-10 pb-32 overflow-x-hidden max-w-4xl mx-auto md:mx-0 md:max-w-none">
     
     <div class="mb-12">
-      <h1 class="text-3xl lg:text-4xl font-display font-black text-heading tracking-tight">Documentación de la API</h1>
+      <h1 class="text-3xl lg:text-4xl font-display font-black text-heading tracking-tight">API Reference</h1>
       <p class="text-body-secondary mt-3 text-lg max-w-2xl">Integra el catálogo global de eventos de Actify en tu sistema mediante nuestra API RESTful pública, segura y rápida.</p>
     </div>
     
     <%# 1. API Key Section %>
     <section id="api-key" class="mb-16 scroll-mt-24">
-      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Autenticación (API Key)</h2>
-      <p class="text-body mb-6">Tu llave maestra para acceder a los endpoints. Debes enviarla en el header <code class="bg-surface-secondary px-1.5 py-0.5 rounded text-xs font-mono">Authorization</code> en cada petición.</p>
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Autenticación y Límites</h2>
+      <p class="text-body mb-6">Actify utiliza tokens al portador (Bearer Tokens) para autenticar las solicitudes. Debes enviar tu API Key en el header <code class="bg-surface-secondary px-1.5 py-0.5 rounded text-xs font-mono">Authorization</code> en cada petición.</p>
       
-      <div class="bg-surface border border-border-light rounded-2xl p-6 shadow-sm">
-        <label class="block text-sm font-bold text-heading mb-3">Tu Llave de Acceso Única</label>
+      <div class="bg-surface border border-border-light rounded-2xl p-6 shadow-sm mb-8">
+        <label class="block text-sm font-bold text-heading mb-3">Tu API Key (Bearer Token)</label>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div class="relative flex-1">
             <input type="text" readonly value="<%= current_user.api_token || 'Token no generado aún' %>" 
@@ -42,44 +42,32 @@
               data: { turbo_confirm: "¡ATENCIÓN! Cualquier aplicación que use tu llave actual dejará de funcionar inmediatamente. ¿Estás seguro de continuar?" },
               class: "btn-secondary py-3 flex-shrink-0 whitespace-nowrap" %>
         </div>
-        <p class="text-xs text-error font-medium mt-3 flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          Mantén esta llave en secreto. No la compartas públicamente.
-        </p>
+      </div>
+
+      <h3 class="text-lg font-bold text-heading mb-4">Límites de Uso (Rate Limiting)</h3>
+      <p class="text-body mb-4">La API implementa límites de peticiones para garantizar la estabilidad de la plataforma.</p>
+      <div class="overflow-x-auto border border-border-light rounded-xl">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-secondary border-b border-border-light">
+            <tr>
+              <th class="px-4 py-3 font-black text-body-secondary">Límite</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Descripción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-light">
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">100 peticiones / min</td>
+              <td class="px-4 py-3 text-body">Si superas este límite, recibirás un error <code class="text-xs font-mono">429 Too Many Requests</code>.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <%# 2. Consideraciones Generales %>
-    <section id="consideraciones" class="mb-16 scroll-mt-24">
-      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Consideraciones</h2>
-      <ul class="space-y-3 list-disc list-inside text-body marker:text-primary">
-        <li>Todos los endpoints retornan respuestas en formato <code class="bg-surface-secondary px-1.5 py-0.5 rounded text-xs font-mono">application/json</code>.</li>
-        <li>La API implementa <strong>Rate Limiting</strong> restringido a 100 peticiones por minuto por dirección IP.</li>
-        <li>Los eventos devueltos corresponden al catálogo global público, excluyendo borradores o eventos cancelados.</li>
-      </ul>
-    </section>
-
-    <%# Video Tutorial %>
-    <section id="video-tutorial" class="mb-16 scroll-mt-24">
-      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Video Tutorial Rápido</h2>
-      <p class="text-body mb-6">Aprende paso a paso cómo obtener tus credenciales (API Key) y realizar tu primera petición a la API de Actify en este breve tutorial.</p>
-      
-      <div class="relative w-full overflow-hidden rounded-2xl border border-border-light bg-surface-sunken shadow-sm" style="padding-top: 56.25%;">
-        <%# Reemplaza 'TU_ID_DE_YOUTUBE' con el ID real de tu video (por ejemplo, dQw4w9WgXcQ) %>
-        <iframe class="absolute top-0 left-0 w-full h-full" 
-                src="https://www.youtube.com/embed/Kgbik-Nn83Q" 
-                title="Tutorial de API Actify" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen>
-        </iframe>
-      </div>
-    </section>
-
-    <%# 3. Consulta Eventos %>
-    <section id="consulta-eventos" class="mb-16 scroll-mt-24">
-      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Consulta Eventos</h2>
-      <p class="text-body mb-6">Obtén el listado completo y paginado de eventos de la plataforma.</p>
+    <%# 2. List Events %>
+    <section id="list-events" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Listar Eventos</h2>
+      <p class="text-body mb-6">Obtén el catálogo global de eventos publicados, con soporte para paginación y filtros.</p>
       
       <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
         <span class="px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-100 rounded-md inline-flex self-start">GET</span>
@@ -91,112 +79,125 @@
         </div>
       </div>
 
-      <h3 id="headers" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Headers Requeridos</h3>
+      <h3 class="text-lg font-bold text-heading mb-4">Query Parameters</h3>
       <div class="overflow-x-auto border border-border-light rounded-xl mb-8">
         <table class="w-full text-left text-sm">
           <thead class="bg-surface-secondary border-b border-border-light">
             <tr>
-              <th class="px-4 py-3 font-black text-body-secondary">Name</th>
-              <th class="px-4 py-3 font-black text-body-secondary">Type</th>
-              <th class="px-4 py-3 font-black text-body-secondary">Description</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Parámetro</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Tipo</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Descripción</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border-light">
             <tr class="hover:bg-surface-secondary/30 transition-colors">
-              <td class="px-4 py-3 font-mono text-body-secondary">Accept</td>
-              <td class="px-4 py-3 text-body-tertiary">String</td>
-              <td class="px-4 py-3 text-body">application/json</td>
+              <td class="px-4 py-3 font-mono text-body-secondary">page</td>
+              <td class="px-4 py-3 text-body-tertiary">integer</td>
+              <td class="px-4 py-3 text-body">Número de página para la paginación.</td>
             </tr>
             <tr class="hover:bg-surface-secondary/30 transition-colors">
-              <td class="px-4 py-3 font-mono text-body-secondary">Authorization</td>
-              <td class="px-4 py-3 text-body-tertiary">String</td>
-              <td class="px-4 py-3 text-body">Bearer &lt;tu_api_key&gt;</td>
+              <td class="px-4 py-3 font-mono text-body-secondary">category_id</td>
+              <td class="px-4 py-3 text-body-tertiary">integer</td>
+              <td class="px-4 py-3 text-body">Filtra eventos por categoría específica.</td>
+            </tr>
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">location</td>
+              <td class="px-4 py-3 text-body-tertiary">string</td>
+              <td class="px-4 py-3 text-body">Busca eventos cerca de esta ciudad o dirección.</td>
+            </tr>
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">radius</td>
+              <td class="px-4 py-3 text-body-tertiary">integer</td>
+              <td class="px-4 py-3 text-body">Radio en km para la búsqueda por location (por defecto 50).</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3 id="aforo" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Respuesta: Datos de Aforo</h3>
-      <p class="text-body mb-4 text-sm">La respuesta JSON incluye un bloque especial para consultar la disponibilidad en tiempo real, lo que responde a las necesidades de saber entradas confirmadas vs libres:</p>
+      <h3 class="text-lg font-bold text-heading mb-4">Respuesta de Ejemplo</h3>
+      <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50 mb-12">
+        <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700/50 bg-[#181825]">
+          <span class="text-xs font-mono font-bold text-gray-400">Response (200 OK)</span>
+        </div>
+        <div class="p-4 overflow-x-auto custom-scrollbar">
+          <pre class="text-xs font-mono leading-relaxed"><code>[
+  {
+    <span class="text-[#89ddff]">"id"</span>: <span class="text-[#f78c6c]">1</span>,
+    <span class="text-[#89ddff]">"name"</span>: <span class="text-[#c3e88d]">"Congreso de Turismo Sostenible"</span>,
+    <span class="text-[#89ddff]">"status"</span>: <span class="text-[#c3e88d]">"published"</span>,
+    <span class="text-[#89ddff]">"capacity"</span>: {
+      <span class="text-[#89ddff]">"max_capacity"</span>: <span class="text-[#f78c6c]">500</span>,
+      <span class="text-[#89ddff]">"is_sold_out"</span>: <span class="text-[#89ddff]">false</span>
+    },
+    <span class="text-[#89ddff]">"location"</span>: {
+      <span class="text-[#89ddff]">"city"</span>: <span class="text-[#c3e88d]">"Tingo María"</span>
+    },
+    <span class="text-[#89ddff]">"image_url"</span>: <span class="text-[#c3e88d]">"/rails/active_storage/blobs/redirect/.../imagen.jpg"</span>
+  }
+]</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <%# 3. Retrieve Event %>
+    <section id="retrieve-event" class="mb-16 scroll-mt-24">
+      <h2 class="text-2xl font-black text-heading mb-4 pb-2 border-b border-border-light">Obtener un Evento</h2>
+      <p class="text-body mb-6">Recupera los detalles completos de un evento específico, incluyendo aforo en vivo y tipos de entrada.</p>
       
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
+        <span class="px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-100 rounded-md inline-flex self-start">GET</span>
+        <div class="bg-surface-sunken border border-border/50 px-3 py-1.5 rounded-lg flex-1 overflow-x-auto flex items-center justify-between group">
+          <code class="text-sm font-mono text-body-secondary"><span class="text-muted">https://actify.qd.je</span>/api/v1/events/:id</code>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-heading mb-4">Path Parameters</h3>
+      <div class="overflow-x-auto border border-border-light rounded-xl mb-8">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-surface-secondary border-b border-border-light">
+            <tr>
+              <th class="px-4 py-3 font-black text-body-secondary">Parámetro</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Tipo</th>
+              <th class="px-4 py-3 font-black text-body-secondary">Descripción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border-light">
+            <tr class="hover:bg-surface-secondary/30 transition-colors">
+              <td class="px-4 py-3 font-mono text-body-secondary">id</td>
+              <td class="px-4 py-3 text-body-tertiary">integer</td>
+              <td class="px-4 py-3 text-body">El identificador único del evento.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="text-lg font-bold text-heading mb-4">Respuesta de Ejemplo</h3>
       <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50 mb-12">
         <div class="flex items-center justify-between px-4 py-2 border-b border-gray-700/50 bg-[#181825]">
           <span class="text-xs font-mono font-bold text-gray-400">Response (200 OK)</span>
         </div>
         <div class="p-4 overflow-x-auto custom-scrollbar">
           <pre class="text-xs font-mono leading-relaxed"><code>{
+  <span class="text-[#89ddff]">"id"</span>: <span class="text-[#f78c6c]">1</span>,
+  <span class="text-[#89ddff]">"name"</span>: <span class="text-[#c3e88d]">"Congreso de Turismo Sostenible"</span>,
+  <span class="text-[#89ddff]">"description"</span>: <span class="text-[#c3e88d]">"Un congreso mundial sobre sustentabilidad..."</span>,
   <span class="text-[#89ddff]">"capacity"</span>: {
     <span class="text-[#89ddff]">"max_capacity"</span>: <span class="text-[#f78c6c]">2500</span>,
     <span class="text-[#89ddff]">"sold_tickets"</span>: <span class="text-[#f78c6c]">1840</span>,
     <span class="text-[#89ddff]">"available_spots"</span>: <span class="text-[#f78c6c]">660</span>,
     <span class="text-[#89ddff]">"is_sold_out"</span>: <span class="text-[#89ddff]">false</span>
-  }
+  },
+  <span class="text-[#89ddff]">"ticket_types"</span>: [
+    {
+      <span class="text-[#89ddff]">"name"</span>: <span class="text-[#c3e88d]">"Entrada VIP"</span>,
+      <span class="text-[#89ddff]">"price"</span>: <span class="text-[#f78c6c]">150.0</span>,
+      <span class="text-[#89ddff]">"currency"</span>: <span class="text-[#c3e88d]">"PEN"</span>
+    }
+  ],
+  <span class="text-[#89ddff]">"image_url"</span>: <span class="text-[#c3e88d]">"/rails/active_storage/blobs/redirect/.../evento.jpg"</span>
 }</code></pre>
         </div>
       </div>
-
-      <h3 id="ejemplos" class="text-lg font-bold text-heading mb-4 scroll-mt-24">Ejemplos de Integración (cURL)</h3>
-      
-      <%# Caso 1: Catálogo Principal %>
-      <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">1. Obtener Catálogo Principal (Carga Inicial)</p>
-        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
-          <div class="p-4 overflow-x-auto custom-scrollbar">
-            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET https://actify.qd.je/api/v1/events \
-  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span> \
-  -H <span class="text-[#c3e88d]">"Accept: application/json"</span></code></pre>
-          </div>
-        </div>
-      </div>
-
-      <%# Caso 2: Filtro por Categoría %>
-      <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">2. Filtrar por Categoría (Ej. ID 2)</p>
-        <p class="text-xs text-body-tertiary mb-3">Ideal cuando tu app tiene pestañas por temática (Conciertos, Teatro, etc).</p>
-        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
-          <div class="p-4 overflow-x-auto custom-scrollbar">
-            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET <span class="text-[#c3e88d]">"https://actify.qd.je/api/v1/events?category_id=2"</span> \
-  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span></code></pre>
-          </div>
-        </div>
-      </div>
-
-      <%# Caso 3: Filtro por Ubicación (Geolocalización) %>
-      <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">3. Filtrar por Ubicación (Ej. Eventos cerca de Madrid)</p>
-        <p class="text-xs text-body-tertiary mb-3">Busca eventos en un radio específico (por defecto 50km). Puedes usar <code>city</code> para coincidencia de texto, o <code>location</code> + <code>radius</code> para coordenadas/dirección exacta.</p>
-        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
-          <div class="p-4 overflow-x-auto custom-scrollbar">
-            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET <span class="text-[#c3e88d]">"https://actify.qd.je/api/v1/events?location=Madrid&radius=25"</span> \
-  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span></code></pre>
-          </div>
-        </div>
-      </div>
-
-      <%# Caso 4: Paginación %>
-      <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">4. Paginación Dinámica (Infinite Scroll)</p>
-        <p class="text-xs text-body-tertiary mb-3">Solicita eventos en lotes para no saturar la memoria de dispositivos móviles.</p>
-        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
-          <div class="p-4 overflow-x-auto custom-scrollbar">
-            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET <span class="text-[#c3e88d]">"https://actify.qd.je/api/v1/events?page=2&per_page=10"</span> \
-  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span></code></pre>
-          </div>
-        </div>
-      </div>
-
-      <%# Caso 5: Detalle de Evento %>
-      <div class="mb-6">
-        <p class="text-sm font-bold text-body-secondary mb-2">5. Consultar Aforo en Vivo (Detalle de Evento)</p>
-        <p class="text-xs text-body-tertiary mb-3">Úsalo cuando el usuario entra a ver los detalles de un evento para saber si hay entradas (sold_out).</p>
-        <div class="bg-[#1e1e2e] text-[#a6accd] rounded-xl overflow-hidden shadow-lg border border-gray-800/50">
-          <div class="p-4 overflow-x-auto custom-scrollbar">
-            <pre class="text-xs font-mono leading-relaxed"><code><span class="text-[#c792ea]">curl</span> -X GET https://actify.qd.je/api/v1/events/1 \
-  -H <span class="text-[#c3e88d]">"Authorization: Bearer <%= current_user.api_token || 'TU_TOKEN' %>"</span></code></pre>
-          </div>
-        </div>
-      </div>
-
     </section>
   </main>
 
@@ -208,12 +209,9 @@
         EN ESTA PÁGINA
       </h4>
       <nav class="space-y-3 text-sm font-bold">
-        <a href="#api-key" class="block text-body-tertiary hover:text-link transition-colors">Autenticación (API Key)</a>
-        <a href="#consideraciones" class="block text-body-tertiary hover:text-link transition-colors">Consideraciones Generales</a>
-        <a href="#consulta-eventos" class="block text-body-tertiary hover:text-link transition-colors">Consulta Eventos</a>
-        <a href="#headers" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Headers Requeridos</a>
-        <a href="#aforo" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Datos de Aforo</a>
-        <a href="#ejemplos" class="block text-body-tertiary hover:text-link transition-colors pl-3 border-l-2 border-border-light">Ejemplos de Uso</a>
+        <a href="#api-key" class="block text-body-tertiary hover:text-link transition-colors">Autenticación y Límites</a>
+        <a href="#list-events" class="block text-body-tertiary hover:text-link transition-colors">Listar Eventos</a>
+        <a href="#retrieve-event" class="block text-body-tertiary hover:text-link transition-colors">Obtener un Evento</a>
       </nav>
     </div>
   </aside>
