@@ -48,6 +48,13 @@ class EventsController < ApplicationController
     @comments = @event.comments.includes(:user).order(created_at: :desc)
     @comment = Comment.new
 
+    @tourism_data = fetch_tourism_data if @event.city == "Tingo María"
+    # Only fetch ecosystem data if event has coordinates
+    if @event.latitude.present? && @event.longitude.present?
+      @nearby_hotels = fetch_hospy_accommodations(@event.latitude, @event.longitude)
+      @nearby_restaurants = fetch_nearby_restaurants(@event.latitude, @event.longitude)
+    end
+
     respond_to do |format|
       format.html
       format.ics do
@@ -191,5 +198,102 @@ class EventsController < ApplicationController
       end
     end
     d[m][n]
+  end
+
+  def fetch_tourism_data
+    Rails.cache.fetch("conecta_tingo_data", expires_in: 10.minutes) do
+      require 'net/http'
+      api_key = ENV['CONECTATINGO_API_KEY']
+      url = URI("https://conectatingo.com/api/integracion/datos?api_key=#{api_key}")
+      response = Net::HTTP.get_response(url)
+      
+      if response.is_a?(Net::HTTPSuccess)
+        JSON.parse(response.body)
+      else
+        nil
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "ConectaTingo API Error: #{e.message}"
+    nil
+  end
+
+  def fetch_hospy_accommodations(lat, lng)
+    cache_key = "hospy_hotels_#{lat.to_f.round(4)}_#{lng.to_f.round(4)}"
+    Rails.cache.fetch(cache_key, expires_in: 2.hours) do
+      require 'net/http'
+      api_key = ENV['HOSPY_API_KEY']
+      base_url = ENV['HOSPY_API_BASE']
+      return nil unless api_key && base_url
+
+      url = URI("#{base_url}/integracion/hospedajes/cercanos/?lat=#{lat}&lng=#{lng}&radio_km=5")
+      
+      request = Net::HTTP::Get.new(url)
+      request["X-Hospy-Integration-Key"] = api_key
+      request["Accept"] = "application/json"
+
+      response = Net::HTTP.start(url.hostname, url.port, use_ssl: url.scheme == 'https') do |http|
+        http.request(request)
+      end
+      
+      if response.is_a?(Net::HTTPSuccess)
+        JSON.parse(response.body)
+      else
+        nil
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "Hospy API Error: #{e.message}"
+    nil
+  end
+
+  def fetch_nearby_restaurants(lat, lng)
+    cache_key = "restaurants_#{lat.to_f.round(4)}_#{lng.to_f.round(4)}"
+    Rails.cache.fetch(cache_key, expires_in: 4.hours) do
+      require 'net/http'
+      api_key = ENV['RESTAURANTS_API_KEY']
+      url = URI("#{ENV['RESTAURANTS_API_BASE']}/restaurants?page=0&size=50")
+      req = Net::HTTP::Get.new(url)
+      req['X-API-Key'] = api_key
+      req['Accept'] = 'application/json'
+
+      res = Net::HTTP.start(url.hostname, url.port, use_ssl: url.scheme == 'https') do |http|
+        http.request(req)
+      end
+
+      if res.is_a?(Net::HTTPSuccess)
+        data = JSON.parse(res.body)
+        restaurants = data.dig('data', 'content') || []
+        
+        # Calculate Haversine distance and filter < 3km
+        restaurants.filter_map do |r|
+          r_lat = r['latitude'].to_f
+          r_lng = r['longitude'].to_f
+          
+          # Haversine calculation
+          rad_per_deg = Math::PI / 180
+          rkm = 6371 # Earth radius in km
+          dlon_rad = (r_lng - lng.to_f) * rad_per_deg
+          dlat_rad = (r_lat - lat.to_f) * rad_per_deg
+          lat1_rad = lat.to_f * rad_per_deg
+          lat2_rad = r_lat * rad_per_deg
+
+          a = Math.sin(dlat_rad / 2)**2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin(dlon_rad / 2)**2
+          c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+          distance = (rkm * c).round(2)
+
+          if distance <= 3.0
+            r.merge('distance_km' => distance)
+          else
+            nil
+          end
+        end.sort_by { |r| r['distance_km'] }.first(4)
+      else
+        nil
+      end
+    end
+  rescue StandardError => e
+    Rails.logger.error "Error fetching from Restaurants API: #{e.message}"
+    nil
   end
 end

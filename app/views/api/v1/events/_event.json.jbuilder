@@ -44,3 +44,8 @@ if defined?(event.ticket_types) && event.ticket_types.any?
     json.currency event.currency
   end
 end
+
+# Imagen Principal
+if event.primary_image.present?
+  json.image_url event.primary_image.image_url
+end

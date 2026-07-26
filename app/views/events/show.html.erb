@@ -295,6 +295,148 @@
         <hr class="border-border/60">
       <% end %>
 
+      <%# Travel Assistant (ConectaTingo Integration) %>
+      <% if @tourism_data.present? && @tourism_data['data'].present? %>
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-3xl border border-emerald-200/60 p-6 md:p-8 space-y-6 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-emerald-950">Aprovecha tu viaje a Tingo María</h2>
+              <p class="text-sm font-semibold text-emerald-800/80">Recomendaciones exclusivas impulsadas por ConectaTingo</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <%# Route Recommendation %>
+            <% route = @tourism_data.dig('data', 'movilidad', 'metricas')&.first %>
+            <% if route %>
+              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex flex-col justify-center group relative">
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Ruta Sugerida</p>
+                <a href="https://conectatingo.com" target="_blank" rel="noopener noreferrer" class="font-bold text-heading text-base hover:text-emerald-600 transition-colors inline-flex items-center gap-1.5">
+                  <%= route['circuito'] %>
+                  <svg class="w-4 h-4 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+                <p class="text-xs text-body-secondary mt-1"><%= route['descripcion'] %> · <span class="font-bold text-emerald-700"><%= route['duracion'] %></span></p>
+              </div>
+            <% end %>
+
+            <%# Hotspots %>
+            <% hotspots = @tourism_data.dig('data', 'hoteles', 'metricas')&.first(3) %>
+            <% if hotspots.present? %>
+              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">Imperdibles cerca del evento</p>
+                <ul class="space-y-3">
+                  <% hotspots.each do |spot| %>
+                    <% price_info = @tourism_data.dig('data', 'eventos', 'metricas')&.find { |e| e['lugar'] == spot['destino'] } %>
+                    <li class="flex justify-between items-center border-b border-border-light/50 pb-2 last:border-0 last:pb-0 group">
+                      <a href="https://conectatingo.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 font-bold text-heading text-sm hover:text-emerald-600 transition-colors">
+                        <%= spot['destino'] %>
+                        <svg class="w-3.5 h-3.5 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                      </a>
+                      <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg whitespace-nowrap"><%= price_info ? price_info['precio_entrada'] : "Consultar" %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <hr class="border-border/60 my-6">
+      <% end %>
+
+      <%# Hospy Nearby Accommodations %>
+      <% hospy_results = @nearby_hotels.is_a?(Array) ? @nearby_hotels : @nearby_hotels.to_h['results'] %>
+      <% if hospy_results.present? %>
+        <div class="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-3xl border border-indigo-200/60 p-6 md:p-8 space-y-6 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-indigo-950">Alojamientos Cercanos</h2>
+              <p class="text-sm font-semibold text-indigo-800/80">Recomendaciones impulsadas por Hospy</p>
+            </div>
+          </div>
+          
+          <div class="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+            <% hospy_results.take(4).each do |hotel| %>
+              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-indigo-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group">
+                <div class="h-32 bg-indigo-100 relative overflow-hidden">
+                  <% if hotel['foto_principal'] %>
+                    <img src="<%= hotel['foto_principal'] %>" alt="<%= hotel['name'] %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                  <% else %>
+                    <div class="w-full h-full flex items-center justify-center text-indigo-300">
+                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                  <% end %>
+                  <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-heading flex items-center gap-1 shadow-sm">
+                    <span class="text-yellow-500">★</span> <%= hotel['average_rating'] || "Nuevo" %>
+                  </div>
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1"><%= hotel['type'] %></p>
+                  <h3 class="font-bold text-heading text-sm line-clamp-1 mb-2"><%= hotel['name'] %></h3>
+                  <div class="mt-auto flex items-end justify-between">
+                    <div>
+                      <p class="text-[10px] font-semibold text-body-tertiary">Desde</p>
+                      <p class="font-bold text-indigo-700 leading-none"><%= number_to_currency(hotel['precio_desde'], unit: "S/ ") %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <hr class="border-border/60 my-6">
+      <% end %>
+
+      <%# Nearby Restaurants (API) %>
+      <% if @nearby_restaurants.present? %>
+        <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-3xl border border-orange-200/60 p-6 md:p-8 space-y-6 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-orange-950">Gastronomía Local</h2>
+              <p class="text-sm font-semibold text-orange-800/80">Restaurantes recomendados a menos de 3 km</p>
+            </div>
+          </div>
+          
+          <div class="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+            <% @nearby_restaurants.each do |restaurant| %>
+              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-orange-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group">
+                <div class="h-32 bg-orange-100 relative overflow-hidden">
+                  <div class="w-full h-full flex items-center justify-center text-orange-300">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                  </div>
+                  <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-heading flex items-center gap-1 shadow-sm">
+                    <span class="text-yellow-500">★</span> <%= restaurant['avgRating'] || "Nuevo" %>
+                  </div>
+                </div>
+                <div class="p-4 flex-1 flex flex-col">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1">A <%= restaurant['distance_km'] %> km</p>
+                  <h3 class="font-bold text-heading text-sm line-clamp-1 mb-1"><%= restaurant['name'] %></h3>
+                  <p class="text-xs text-body-tertiary mb-3 line-clamp-1"><%= restaurant['address'] %></p>
+                  <div class="mt-auto">
+                    <a href="https://www.google.com/maps?q=<%= restaurant['latitude'] %>,<%= restaurant['longitude'] %>" target="_blank" rel="noopener noreferrer" class="w-full py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 text-center font-bold text-xs uppercase tracking-wider rounded-xl transition-colors block">
+                      Cómo llegar ↗
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <hr class="border-border/60 my-6">
+      <% end %>
+
       <%# Comments Section %>
       <div class="bg-surface-secondary/35 rounded-3xl border border-border/60 p-6 md:p-8 space-y-6">
         <h2 class="text-xl font-bold text-heading">
@@ -444,7 +586,7 @@
         </div>
         <div class="relative z-10">
           <h4 class="text-white font-bold mb-1">Arma tu viaje completo</h4>
-          <p class="text-indigo-100 text-xs mb-4">Descubre hoteles y autos cerca del evento con Actify Travel.</p>
+          <p class="text-indigo-100 text-xs mb-4">Descubre opciones de transporte cerca del evento.</p>
           <a href="#ecosystem_mocks" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded-lg backdrop-blur-sm transition-colors border border-white/20">
             Ver 5 opciones de viaje
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
@@ -459,7 +601,7 @@
   <div class="mt-16 pt-16 border-t border-border w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-heading">Planifica tu Viaje (Integraciones)</h2>
-      <p class="text-body-secondary mt-2">Prueba de Concepto: Mocks de Plataformas del Ecosistema Turístico (Hoteles, Autos, Restaurantes)</p>
+      <p class="text-body-secondary mt-2">Prueba de Concepto: Mocks de Plataformas del Ecosistema Turístico (Autos)</p>
     </div>
     
     <turbo-frame id="ecosystem_mocks" src="<%= event_ecosystem_mocks_path(@event) %>" loading="lazy">
