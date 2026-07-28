@@ -48,12 +48,22 @@ class EventsController < ApplicationController
     @comments = @event.comments.includes(:user).order(created_at: :desc)
     @comment = Comment.new
 
-    @tourism_data = fetch_tourism_data if @event.city == "Tingo María"
-    # Only fetch ecosystem data if event has coordinates
-    if @event.latitude.present? && @event.longitude.present?
-      @nearby_hotels = fetch_hospy_accommodations(@event.latitude, @event.longitude)
-      @nearby_restaurants = fetch_nearby_restaurants(@event.latitude, @event.longitude)
+    # Fetch external API data in parallel to avoid sequential blocking
+    threads = []
+    @tourism_data = nil
+    @nearby_hotels = nil
+    @nearby_restaurants = nil
+
+    if @event.city == "Tingo María"
+      threads << Thread.new { @tourism_data = fetch_tourism_data }
     end
+
+    if @event.latitude.present? && @event.longitude.present?
+      threads << Thread.new { @nearby_hotels = fetch_hospy_accommodations(@event.latitude, @event.longitude) }
+      threads << Thread.new { @nearby_restaurants = fetch_nearby_restaurants(@event.latitude, @event.longitude) }
+    end
+
+    threads.each(&:join)
 
     respond_to do |format|
       format.html
@@ -205,8 +215,12 @@ class EventsController < ApplicationController
       require 'net/http'
       api_key = ENV['CONECTATINGO_API_KEY']
       url = URI("https://conectatingo.com/api/integracion/datos?api_key=#{api_key}")
-      response = Net::HTTP.get_response(url)
-      
+      http = Net::HTTP.new(url.hostname, url.port)
+      http.use_ssl = url.scheme == 'https'
+      http.open_timeout = 4
+      http.read_timeout = 5
+      response = http.get(url.request_uri)
+
       if response.is_a?(Net::HTTPSuccess)
         JSON.parse(response.body)
       else
@@ -227,15 +241,19 @@ class EventsController < ApplicationController
       return nil unless api_key && base_url
 
       url = URI("#{base_url}/integracion/hospedajes/cercanos/?lat=#{lat}&lng=#{lng}&radio_km=5")
-      
+
       request = Net::HTTP::Get.new(url)
       request["X-Hospy-Integration-Key"] = api_key
       request["Accept"] = "application/json"
 
-      response = Net::HTTP.start(url.hostname, url.port, use_ssl: url.scheme == 'https') do |http|
+      response = Net::HTTP.start(url.hostname, url.port,
+        use_ssl: url.scheme == 'https',
+        open_timeout: 4,
+        read_timeout: 5
+      ) do |http|
         http.request(request)
       end
-      
+
       if response.is_a?(Net::HTTPSuccess)
         JSON.parse(response.body)
       else
@@ -257,22 +275,25 @@ class EventsController < ApplicationController
       req['X-API-Key'] = api_key
       req['Accept'] = 'application/json'
 
-      res = Net::HTTP.start(url.hostname, url.port, use_ssl: url.scheme == 'https') do |http|
+      res = Net::HTTP.start(url.hostname, url.port,
+        use_ssl: url.scheme == 'https',
+        open_timeout: 4,
+        read_timeout: 5
+      ) do |http|
         http.request(req)
       end
 
       if res.is_a?(Net::HTTPSuccess)
         data = JSON.parse(res.body)
         restaurants = data.dig('data', 'content') || []
-        
-        # Calculate Haversine distance and filter < 3km
+
+        # Calculate Haversine distance and filter < 5km
         restaurants.filter_map do |r|
           r_lat = r['latitude'].to_f
           r_lng = r['longitude'].to_f
-          
-          # Haversine calculation
+
           rad_per_deg = Math::PI / 180
-          rkm = 6371 # Earth radius in km
+          rkm = 6371
           dlon_rad = (r_lng - lng.to_f) * rad_per_deg
           dlat_rad = (r_lat - lat.to_f) * rad_per_deg
           lat1_rad = lat.to_f * rad_per_deg
@@ -282,11 +303,7 @@ class EventsController < ApplicationController
           c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
           distance = (rkm * c).round(2)
 
-          if distance <= 3.0
-            r.merge('distance_km' => distance)
-          else
-            nil
-          end
+          r.merge('distance_km' => distance) if distance <= 5.0
         end.sort_by { |r| r['distance_km'] }.first(4)
       else
         nil

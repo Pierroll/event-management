@@ -128,13 +128,13 @@
       <%= render partial: "events/event_card", collection: @upcoming_events, as: :event %>
     </div>
     
-    <%= turbo_frame_tag "home_load_more_button" do %>
+    <div id="home_load_more_button">
       <% if @upcoming_events.next_page %>
         <div class="mt-10 flex justify-center">
-          <%= link_to "Ver más", root_path(page: @upcoming_events.next_page, format: :turbo_stream), class: "btn-secondary bg-surface border border-border text-heading px-6 py-2 rounded-full hover:bg-surface-secondary transition-colors font-medium", data: { turbo_stream: true } %>
+          <%= link_to "Ver más", root_path(page: @upcoming_events.next_page, format: :turbo_stream), class: "btn-secondary bg-surface border border-border text-heading px-6 py-2 rounded-full hover:bg-surface-secondary transition-colors font-medium" %>
         </div>
       <% end %>
-    <% end %>
+    </div>
   <% else %>
     <div class="text-center py-12 bg-white rounded-badge border border-border">
       <p class="text-body-tertiary">No hay eventos próximos disponibles.</p>

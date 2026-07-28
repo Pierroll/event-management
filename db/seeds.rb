@@ -473,6 +473,62 @@ tingo_titles.each_with_index do |title, index|
   sleep(1.2)
 end
 
+# ──────────────────────────────────────────────
+# 6. EVENTOS CERCA DE LA ALAMEDA PERU (GEOLOCALIZADOS)
+# ──────────────────────────────────────────────
+puts "\n→ Generando eventos cerca de Alameda Peru, Tingo María..."
+
+alameda_lat = -9.297
+alameda_lng = -76.000
+
+alameda_events = [
+  { name: "Feria de Emprendimiento Alameda", slug: "tecnologia", img: :workshop },
+  { name: "Tarde Cultural Tingalesa", slug: "arte-y-cultura", img: :art },
+  { name: "Concierto Acústico al Aire Libre", slug: "musica", img: :concert },
+  { name: "Exposición de Fotografía Local", slug: "arte-y-cultura", img: :art },
+  { name: "Festival de la Hoja de Coca", slug: "gastronomia", img: :food },
+  { name: "Carrera 5K Alameda", slug: "deportes", img: :sports }
+]
+
+alameda_events.each_with_index do |ev_data, index|
+  event = Event.find_or_initialize_by(name: ev_data[:name])
+  
+  # Distribución aleatoria en un radio de ~0.05km a 0.5km (offset de hasta 0.004 grados)
+  lat_offset = rand(-0.0040..0.0040)
+  lng_offset = rand(-0.0040..0.0040)
+  
+  event.assign_attributes(
+    description: "Evento especial en las cercanías de la Alameda Perú. ¡No te lo pierdas!",
+    city: "Tingo María",
+    address: "Alameda Perú, Tingo María, Huánuco",
+    latitude: alameda_lat + lat_offset,
+    longitude: alameda_lng + lng_offset,
+    start_date: (index + 2).days.from_now,
+    end_date: (index + 2).days.from_now + 4.hours,
+    currency: "PEN",
+    max_capacity: 300,
+    status: :published,
+    category: Category.find_by(slug: ev_data[:slug]),
+    organizer: tingo_organizer
+  )
+  
+  images = IMAGES[ev_data[:img]]
+  if event.new_record?
+    images.each_with_index { |img, idx| event.event_images.build(image: img, display_order: idx) }
+    event.save!
+    puts "  + Creado Evento Alameda: #{event.name}"
+  else
+    event.save! if event.changed?
+    images.each_with_index do |img, idx|
+      event.event_images.create!(image: img, display_order: idx) unless event.event_images.exists?(image: img)
+    end
+  end
+
+  tt = event.ticket_types.find_or_initialize_by(name: "Ingreso General")
+  tt.assign_attributes(price: 15.00, quantity_total: 300, max_per_order: 4, position: 0)
+  tt.save! if tt.new_record? || tt.changed?
+end
+
 puts "\n═" * 60
 puts "SEMILLAS COMPLETADAS EXITOSAMENTE"
 puts "═" * 60

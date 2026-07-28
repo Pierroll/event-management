@@ -50,39 +50,146 @@ export default class extends Controller {
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(this.mapInstance)
 
-    L.marker(coords).addTo(this.mapInstance)
+    // Grupos para controlar capas
+    this.eventLayer = L.featureGroup().addTo(this.mapInstance)
+    this.hotelsLayer = L.featureGroup()
+    this.restaurantsLayer = L.featureGroup()
+    this.markers = {} // Almacena marcadores para interacciones de hover
 
-    // Force map to recalculate container bounds
+    // Pin principal del evento (Rojo)
+    const eventIcon = L.divIcon({ html: '<div class="bg-red-600 text-white rounded-full w-9 h-9 flex items-center justify-center shadow-lg border-[3px] border-white text-base">📍</div>', className: '', iconSize: [36, 36], iconAnchor: [18, 18] })
+    const eventMarker = L.marker(coords, { icon: eventIcon }).bindPopup(`
+      <div class="text-center min-w-[120px]">
+        <p class="text-[10px] uppercase font-bold text-red-500 tracking-wider mb-1">Sede Central</p>
+        <b class="text-gray-900 text-sm block">El Evento</b>
+      </div>
+    `)
+    this.eventLayer.addLayer(eventMarker)
+
+    // Pines de Restaurantes (Naranjas)
+    const restaurantsRaw = this.element.dataset.restaurants
+    if (restaurantsRaw) {
+      try {
+        const foodIcon = L.divIcon({ html: '<div class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white text-sm">🍽️</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+        const restaurants = JSON.parse(restaurantsRaw)
+        restaurants.forEach((r, index) => {
+          if (r.latitude && r.longitude) {
+            const url = `https://restaurants-seven-tan.vercel.app/restaurants/${r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+            const popupHtml = `
+              <div class="min-w-[150px]">
+                <p class="text-[9px] uppercase font-bold text-orange-500 tracking-wider mb-0.5">Restaurante</p>
+                <b class="text-gray-900 text-sm block mb-1 leading-tight">${r.name}</b>
+                <div class="flex items-center gap-1 mb-2 text-xs text-gray-600 font-medium">
+                  <span class="text-yellow-500">★</span> ${r.avgRating || 'Nuevo'}
+                </div>
+                <a href="${url}" target="_blank" class="block w-full text-center bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold text-[10px] uppercase py-1.5 rounded-lg transition-colors border border-orange-100">Visitar RestoPoint</a>
+              </div>
+            `
+            const m = L.marker([parseFloat(r.latitude), parseFloat(r.longitude)], { icon: foodIcon }).bindPopup(popupHtml)
+            this.restaurantsLayer.addLayer(m)
+            this.markers[`restaurant-${index}`] = m
+          }
+        })
+      } catch (e) {
+        console.error("Error parsing restaurants JSON", e)
+      }
+    }
+
+    // Pines de Hoteles (Azules) - Preparado para cuando Hospy envíe coordenadas
+    const hotelsRaw = this.element.dataset.hotels
+    if (hotelsRaw) {
+      try {
+        const hotelIcon = L.divIcon({ html: '<div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white text-sm">🏨</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+        const hotels = JSON.parse(hotelsRaw)
+        
+        // Setup dates for URL if data-event-start exists (mocking it here since we can't pass erb directly into JS without dataset, but we can just fallback)
+        hotels.forEach((h, index) => {
+          if (h.latitude && h.longitude) {
+            const url = `https://hospy.pages.dev/hospedajes/${h.id}`
+            const popupHtml = `
+              <div class="min-w-[150px]">
+                <p class="text-[9px] uppercase font-bold text-indigo-500 tracking-wider mb-0.5">${h.type ? h.type.replace('_', ' ') : 'Hospedaje'}</p>
+                <b class="text-gray-900 text-sm block mb-1 leading-tight">${h.name}</b>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs text-gray-600 font-medium"><span class="text-yellow-500">★</span> ${h.average_rating || 'Nuevo'}</span>
+                  ${h.precio_desde ? `<span class="text-indigo-600 font-bold text-xs">S/ ${h.precio_desde}</span>` : ''}
+                </div>
+                <a href="${url}" target="_blank" class="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-[10px] uppercase py-1.5 rounded-lg transition-colors border border-indigo-100">Visitar Hospy</a>
+              </div>
+            `
+            const m = L.marker([parseFloat(h.latitude), parseFloat(h.longitude)], { icon: hotelIcon }).bindPopup(popupHtml)
+            this.hotelsLayer.addLayer(m)
+            this.markers[`hotel-${index}`] = m
+          }
+        })
+      } catch (e) {
+        console.error("Error parsing hotels JSON", e)
+      }
+    }
+
+    // Force map to recalculate container bounds and set view to event
     setTimeout(() => {
       if (this.mapInstance) {
         this.mapInstance.invalidateSize()
+        this.mapInstance.setView(coords, 15)
       }
     }, 200)
   }
 
-  // PoC: Integración Ecosistema (Mocks de Pines)
-  showEcosystem() {
+  toggleHotels(e) {
     if (!this.mapInstance) return
-    const lat = parseFloat(this.element.dataset.lat)
-    const lng = parseFloat(this.element.dataset.lng)
-    
-    // Custom Icons (Using Emojis for simplicity in PoC)
-    const hotelIcon = L.divIcon({ html: '<div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">🏨</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
-    const foodIcon = L.divIcon({ html: '<div class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-white">🍽️</div>', className: '', iconSize: [32, 32], iconAnchor: [16, 16] })
+    if (this.mapInstance.hasLayer(this.hotelsLayer)) {
+      this.mapInstance.removeLayer(this.hotelsLayer)
+      e.currentTarget.classList.add('opacity-50')
+      e.currentTarget.classList.remove('bg-indigo-50')
+    } else {
+      this.mapInstance.addLayer(this.hotelsLayer)
+      e.currentTarget.classList.remove('opacity-50')
+      e.currentTarget.classList.add('bg-indigo-50')
+      const lat = parseFloat(this.element.dataset.lat)
+      const lng = parseFloat(this.element.dataset.lng)
+      if (this.hotelsLayer.getLayers().length > 0) {
+        this.mapInstance.fitBounds(this.hotelsLayer.getBounds().extend(L.latLng(lat, lng)).pad(0.1))
+      }
+    }
+  }
 
-    // Hoteles simulados
-    L.marker([lat + 0.003, lng + 0.002], { icon: hotelIcon }).bindPopup('<b class="text-indigo-600">Grand Hotel</b><br>S/ 120 / noche<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Ver ofertas</a>').addTo(this.mapInstance)
-    L.marker([lat - 0.004, lng - 0.003], { icon: hotelIcon }).bindPopup('<b class="text-indigo-600">Boutique Stay</b><br>S/ 85 / noche<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Ver ofertas</a>').addTo(this.mapInstance)
-    
-    // Restaurantes simulados
-    L.marker([lat + 0.002, lng - 0.004], { icon: foodIcon }).bindPopup('<b class="text-orange-600">La Trattoria</b><br>Italiana - 4.9⭐<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Reservar mesa</a>').addTo(this.mapInstance)
-    L.marker([lat - 0.002, lng + 0.003], { icon: foodIcon }).bindPopup('<b class="text-orange-600">Sushi Central</b><br>Japonesa - 4.7⭐<br><a href="#ecosystem_mocks" class="text-xs text-blue-500 underline">Reservar mesa</a>').addTo(this.mapInstance)
+  toggleRestaurants(e) {
+    if (!this.mapInstance) return
+    if (this.mapInstance.hasLayer(this.restaurantsLayer)) {
+      this.mapInstance.removeLayer(this.restaurantsLayer)
+      e.currentTarget.classList.add('opacity-50')
+      e.currentTarget.classList.remove('bg-orange-50')
+    } else {
+      this.mapInstance.addLayer(this.restaurantsLayer)
+      e.currentTarget.classList.remove('opacity-50')
+      e.currentTarget.classList.add('bg-orange-50')
+      const lat = parseFloat(this.element.dataset.lat)
+      const lng = parseFloat(this.element.dataset.lng)
+      if (this.restaurantsLayer.getLayers().length > 0) {
+        this.mapInstance.fitBounds(this.restaurantsLayer.getBounds().extend(L.latLng(lat, lng)).pad(0.1))
+      }
+    }
+  }
 
-    // Ajustar zoom para ver los pines
-    this.mapInstance.setView([lat, lng], 14, { animate: true })
-    
-    // Alerta explicativa de la PoC
-    alert("PoC Arquitectura: Event Management consumió las APIs de Restaurantes y Hoteles (filtrando por coordenadas) e inyectó los resultados nativamente en el mapa del usuario.")
+  highlightPin(e) {
+    if (!this.mapInstance) return
+    const id = e.currentTarget.dataset.markerId
+    const marker = this.markers[id]
+    if (marker) {
+      marker.openPopup()
+      // Center map gently to show user exactly where it is
+      this.mapInstance.panTo(marker.getLatLng())
+    }
+  }
+
+  resetPin(e) {
+    if (!this.mapInstance) return
+    const id = e.currentTarget.dataset.markerId
+    const marker = this.markers[id]
+    if (marker) {
+      marker.closePopup()
+    }
   }
 
   // Trazado de ruta geolocalizada
@@ -140,14 +247,14 @@ export default class extends Controller {
 
     if (isFullscreen) {
       // Exit fullscreen
-      container.className = "relative w-full h-[300px] rounded-2xl border border-border overflow-hidden shadow-sm"
+      container.className = "relative w-full h-[300px] rounded-2xl border border-border overflow-hidden shadow-sm transition-all duration-300"
       if (this.hasFullscreenIconTarget) {
         this.fullscreenIconTarget.setAttribute("d", "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4")
       }
       document.body.style.overflow = ""
     } else {
-      // Enter fullscreen
-      container.className = "fixed inset-0 z-[250] w-screen h-screen bg-gray-950/90 backdrop-blur-md p-4 sm:p-10 flex items-center justify-center"
+      // Enter fullscreen (Modal Style)
+      container.className = "fixed inset-4 md:inset-12 z-[9999] bg-white rounded-3xl shadow-[0_0_0_9999px_rgba(0,0,0,0.8)] border border-border overflow-hidden transition-all duration-300"
       if (this.hasFullscreenIconTarget) {
         this.fullscreenIconTarget.setAttribute("d", "M6 18L18 6M6 6l12 12")
       }

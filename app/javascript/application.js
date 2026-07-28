@@ -1,7 +1,6 @@
 // Entry point for SGE Event Management
 // Configure Stimulus and Turbo
 import { Turbo } from "@hotwired/turbo-rails"
-import "leaflet"
 import "controllers"
 
 // Acelerar la barra de progreso de Turbo para que aparezca casi instantáneamente (100ms)

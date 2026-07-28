@@ -1,10 +1,7 @@
-// Automatically register all Stimulus controllers from this directory
+// Stimulus controllers index
 import { application } from "controllers/application"
 
-// Manual registration to avoid MIME type issues with dynamic loading
-import FlashController from "controllers/flash_controller"
-application.register("flash", FlashController)
-
+// Manual registration for controllers needed before lazy loading
 import ConfirmController from "controllers/confirm_controller"
 application.register("confirm", ConfirmController)
 

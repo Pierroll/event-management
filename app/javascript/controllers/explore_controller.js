@@ -180,7 +180,20 @@ export default class extends Controller {
       const eventId = card.dataset.eventId || ""
       const date = card.dataset.eventDate || ""
 
-      const marker = L.marker(coords)
+      const customIcon = L.divIcon({
+        className: 'custom-event-marker',
+        html: `
+          <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white relative group transition-transform duration-300 hover:scale-110 cursor-pointer">
+            <span class="text-lg">📍</span>
+            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary rotate-45"></div>
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+      })
+
+      const marker = L.marker(coords, { icon: customIcon })
       const popupContent = `
         <div class="p-2 select-none">
           <h4 class="font-semibold text-heading">${name}</h4>

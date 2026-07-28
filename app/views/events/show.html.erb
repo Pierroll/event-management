@@ -268,7 +268,11 @@
 
       <%# Leaflet Map %>
       <% if @event.latitude.present? && @event.longitude.present? %>
-        <div class="space-y-4" data-controller="event-detail" data-lat="<%= @event.latitude %>" data-lng="<%= @event.longitude %>">
+        <div class="space-y-4" data-controller="event-detail" 
+             data-lat="<%= @event.latitude %>" 
+             data-lng="<%= @event.longitude %>"
+             data-restaurants="<%= @nearby_restaurants.to_json %>"
+             data-hotels="<%= (@nearby_hotels.is_a?(Array) ? @nearby_hotels : @nearby_hotels.to_h['results']).to_json %>">
           <h2 class="text-xl font-bold text-heading">Ubicación en mapa</h2>
           <div data-event-detail-target="mapContainer" class="relative w-full h-[300px] rounded-2xl border border-border overflow-hidden shadow-sm transition-all duration-300">
             <div id="event-map" data-event-detail-target="mapElement" class="w-full h-full"></div>
@@ -278,6 +282,19 @@
                 <path data-event-detail-target="fullscreenIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
               </svg>
             </button>
+            
+            <%# Leyenda Flotante del Ecosistema %>
+            <div class="absolute bottom-3 left-3 z-[1000] bg-white/95 backdrop-blur-md p-2.5 rounded-xl shadow-lg border border-border/50 text-[10px] sm:text-xs font-bold text-heading flex flex-col gap-2">
+              <button data-action="click->event-detail#centerMap" class="flex items-center gap-2 hover:bg-gray-100 p-1 -m-1 rounded-lg transition-colors text-left cursor-pointer w-full">
+                <span class="flex items-center justify-center w-5 h-5 rounded-full bg-red-600 shadow-sm border-2 border-white text-white text-[10px]">📍</span> <span>Sede del Evento</span>
+              </button>
+              <button data-action="click->event-detail#toggleHotels" data-event-detail-target="hotelBtn" class="flex items-center gap-2 hover:bg-gray-100 p-1 -m-1 rounded-lg transition-colors text-left cursor-pointer w-full opacity-50">
+                <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 shadow-sm border-2 border-white text-white text-[10px]">🏨</span> <span>Hospedajes (Hospy)</span>
+              </button>
+              <button data-action="click->event-detail#toggleRestaurants" data-event-detail-target="restaurantBtn" class="flex items-center gap-2 hover:bg-gray-100 p-1 -m-1 rounded-lg transition-colors text-left cursor-pointer w-full opacity-50">
+                <span class="flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 shadow-sm border-2 border-white text-white text-[10px]">🍽️</span> <span>Restaurantes (RestoPoint)</span>
+              </button>
+            </div>
           </div>
           <% if user_signed_in? %>
             <div class="flex flex-col sm:flex-row gap-3 mt-3">
@@ -295,60 +312,49 @@
         <hr class="border-border/60">
       <% end %>
 
-      <%# Travel Assistant (ConectaTingo Integration) %>
-      <% if @tourism_data.present? && @tourism_data['data'].present? %>
-        <div class="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-3xl border border-emerald-200/60 p-6 md:p-8 space-y-6 shadow-sm">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <div>
-              <h2 class="text-xl font-black text-emerald-950">Aprovecha tu viaje a Tingo María</h2>
-              <p class="text-sm font-semibold text-emerald-800/80">Recomendaciones exclusivas impulsadas por ConectaTingo</p>
-            </div>
-          </div>
+      <hr class="border-border/60 my-10">
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <%# Route Recommendation %>
-            <% route = @tourism_data.dig('data', 'movilidad', 'metricas')&.first %>
-            <% if route %>
-              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex flex-col justify-center group relative">
-                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Ruta Sugerida</p>
-                <a href="https://conectatingo.com" target="_blank" rel="noopener noreferrer" class="font-bold text-heading text-base hover:text-emerald-600 transition-colors inline-flex items-center gap-1.5">
-                  <%= route['circuito'] %>
-                  <svg class="w-4 h-4 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                </a>
-                <p class="text-xs text-body-secondary mt-1"><%= route['descripcion'] %> · <span class="font-bold text-emerald-700"><%= route['duracion'] %></span></p>
-              </div>
-            <% end %>
+      <div class="mb-8" id="planifica-tu-viaje">
+        <h2 class="text-2xl font-bold text-heading">Planifica tu Viaje</h2>
+        <p class="text-body-secondary mt-2">Prueba de Concepto: Mocks de Plataformas del Ecosistema Turístico (Movilidad / Praxis)</p>
+      </div>
 
-            <%# Hotspots %>
-            <% hotspots = @tourism_data.dig('data', 'hoteles', 'metricas')&.first(3) %>
-            <% if hotspots.present? %>
-              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm">
-                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">Imperdibles cerca del evento</p>
-                <ul class="space-y-3">
-                  <% hotspots.each do |spot| %>
-                    <% price_info = @tourism_data.dig('data', 'eventos', 'metricas')&.find { |e| e['lugar'] == spot['destino'] } %>
-                    <li class="flex justify-between items-center border-b border-border-light/50 pb-2 last:border-0 last:pb-0 group">
-                      <a href="https://conectatingo.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 font-bold text-heading text-sm hover:text-emerald-600 transition-colors">
-                        <%= spot['destino'] %>
-                        <svg class="w-3.5 h-3.5 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                      </a>
-                      <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg whitespace-nowrap"><%= price_info ? price_info['precio_entrada'] : "Consultar" %></span>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
+      <%# Ecosystem Tabs %>
+      <div class="mt-8 mb-12" data-controller="ecosystem-tabs" 
+           data-ecosystem-tabs-active-tab-class="border-indigo-600 text-indigo-600 bg-indigo-50" 
+           data-ecosystem-tabs-inactive-tab-class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+           data-ecosystem-tabs-active-panel-class="block" 
+           data-ecosystem-tabs-inactive-panel-class="hidden">
+        
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8 overflow-x-auto hide-scrollbar" aria-label="Tabs">
+            <% if @nearby_hotels.present? %>
+            <button data-ecosystem-tabs-target="tab" data-action="click->ecosystem-tabs#select" data-tab-id="hospy" class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-black transition-colors flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z"/></svg> Hospedajes
+            </button>
             <% end %>
-          </div>
+            <% if @nearby_restaurants.present? %>
+            <button data-ecosystem-tabs-target="tab" data-action="click->ecosystem-tabs#select" data-tab-id="restopoint" class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-black transition-colors flex items-center gap-2">
+              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Dónde Comer
+            </button>
+            <% end %>
+            <% if @tourism_data.present? && @tourism_data['data'].present? %>
+            <button data-ecosystem-tabs-target="tab" data-action="click->ecosystem-tabs#select" data-tab-id="conectatingo" class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-black transition-colors flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Turismo
+            </button>
+            <% end %>
+            <button data-ecosystem-tabs-target="tab" data-action="click->ecosystem-tabs#select" data-tab-id="vehiculos" class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-black transition-colors flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Movilidad (Mocks)
+            </button>
+          </nav>
         </div>
-        <hr class="border-border/60 my-6">
-      <% end %>
+
+        <div class="mt-6">
 
       <%# Hospy Nearby Accommodations %>
       <% hospy_results = @nearby_hotels.is_a?(Array) ? @nearby_hotels : @nearby_hotels.to_h['results'] %>
       <% if hospy_results.present? %>
+        <div data-ecosystem-tabs-target="panel" data-tab-id="hospy">
         <div class="bg-gradient-to-br from-indigo-50 to-blue-100 rounded-3xl border border-indigo-200/60 p-6 md:p-8 space-y-6 shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
@@ -363,8 +369,10 @@
           </div>
           
           <div class="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
-            <% hospy_results.take(4).each do |hotel| %>
-              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-indigo-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group">
+            <% hospy_results.take(4).each_with_index do |hotel, index| %>
+              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-indigo-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group transition-transform duration-300 hover:-translate-y-1"
+                   data-action="mouseenter->event-detail#highlightPin mouseleave->event-detail#resetPin" 
+                   data-marker-id="hotel-<%= index %>">
                 <div class="h-32 bg-indigo-100 relative overflow-hidden">
                   <% if hotel['foto_principal'] %>
                     <img src="<%= hotel['foto_principal'] %>" alt="<%= hotel['name'] %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -386,16 +394,27 @@
                       <p class="font-bold text-indigo-700 leading-none"><%= number_to_currency(hotel['precio_desde'], unit: "S/ ") %></p>
                     </div>
                   </div>
+                  <div class="mt-3 space-y-1.5">
+                    <% 
+                      entrada = @event.start_date.strftime('%Y-%m-%d')
+                      salida = (@event.end_date || @event.start_date + 2.days).strftime('%Y-%m-%d')
+                    %>
+                    <a href="https://hospy.pages.dev/hospedajes/<%= hotel['id'] %>?entrada=<%= entrada %>&salida=<%= salida %>" target="_blank" rel="noopener noreferrer" class="w-full py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center gap-1.5 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">
+                      Visitar Hospy
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             <% end %>
           </div>
         </div>
-        <hr class="border-border/60 my-6">
+        </div>
       <% end %>
 
       <%# Nearby Restaurants (API) %>
       <% if @nearby_restaurants.present? %>
+        <div data-ecosystem-tabs-target="panel" data-tab-id="restopoint" class="hidden">
         <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-3xl border border-orange-200/60 p-6 md:p-8 space-y-6 shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
@@ -404,14 +423,16 @@
               </svg>
             </div>
             <div>
-              <h2 class="text-xl font-black text-orange-950">Gastronomía Local</h2>
+              <h2 class="text-xl font-black text-orange-950">Dónde comer</h2>
               <p class="text-sm font-semibold text-orange-800/80">Restaurantes recomendados a menos de 3 km</p>
             </div>
           </div>
           
           <div class="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
-            <% @nearby_restaurants.each do |restaurant| %>
-              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-orange-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group">
+            <% @nearby_restaurants.each_with_index do |restaurant, index| %>
+              <div class="min-w-[240px] max-w-[240px] bg-white rounded-2xl border border-orange-100 shadow-sm shrink-0 snap-start overflow-hidden flex flex-col group transition-transform duration-300 hover:-translate-y-1"
+                   data-action="mouseenter->event-detail#highlightPin mouseleave->event-detail#resetPin" 
+                   data-marker-id="restaurant-<%= index %>">
                 <div class="h-32 bg-orange-100 relative overflow-hidden">
                   <div class="w-full h-full flex items-center justify-center text-orange-300">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -421,12 +442,14 @@
                   </div>
                 </div>
                 <div class="p-4 flex-1 flex flex-col">
-                  <p class="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1">A <%= restaurant['distance_km'] %> km</p>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-1 flex items-center gap-1">
+                    🚶 A <%= (restaurant['distance_km'].to_f * 12).round %> min caminando
+                  </p>
                   <h3 class="font-bold text-heading text-sm line-clamp-1 mb-1"><%= restaurant['name'] %></h3>
-                  <p class="text-xs text-body-tertiary mb-3 line-clamp-1"><%= restaurant['address'] %></p>
-                  <div class="mt-auto">
-                    <a href="https://www.google.com/maps?q=<%= restaurant['latitude'] %>,<%= restaurant['longitude'] %>" target="_blank" rel="noopener noreferrer" class="w-full py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 text-center font-bold text-xs uppercase tracking-wider rounded-xl transition-colors block">
-                      Cómo llegar ↗
+                  <div class="mt-auto pt-3 space-y-1.5">
+                    <a href="https://restaurants-seven-tan.vercel.app/restaurants/<%= restaurant['name'].parameterize %>" target="_blank" rel="noopener noreferrer" class="w-full py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 flex items-center justify-center gap-1.5 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">
+                      Visitar RestoPoint
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </a>
                   </div>
                 </div>
@@ -434,8 +457,78 @@
             <% end %>
           </div>
         </div>
-        <hr class="border-border/60 my-6">
+        </div>
       <% end %>
+
+      <%# Travel Assistant (ConectaTingo Integration) %>
+      <% if @tourism_data.present? && @tourism_data['data'].present? %>
+        <div data-ecosystem-tabs-target="panel" data-tab-id="conectatingo" class="hidden">
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-3xl border border-emerald-200/60 p-6 md:p-8 space-y-6 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-black text-emerald-950">Aprovecha tu viaje a Tingo María</h2>
+              <p class="text-sm font-semibold text-emerald-800/80">Recomendaciones exclusivas impulsadas por ConectaTingo</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <%# Route Recommendation %>
+            <% route = @tourism_data.dig('data', 'movilidad', 'metricas')&.first %>
+            <% if route %>
+              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm flex flex-col justify-center group relative">
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">Ruta Sugerida</p>
+                <a href="<%= route['url_detalle'] || 'https://conectatingo.com' %>" target="_blank" rel="noopener noreferrer" class="font-bold text-heading text-base hover:text-emerald-600 transition-colors inline-flex items-center gap-1.5">
+                  <%= route['circuito'] %>
+                  <svg class="w-4 h-4 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+                <p class="text-xs text-body-secondary mt-1"><%= route['descripcion'] %> · <span class="font-bold text-emerald-700"><%= route['duracion'] %></span></p>
+              </div>
+            <% end %>
+
+            <%# Hotspots %>
+            <% hotspots = @tourism_data.dig('data', 'hoteles', 'metricas')&.first(3) %>
+            <% if hotspots.present? %>
+              <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-3">Imperdibles cerca del evento</p>
+                <ul class="space-y-3">
+                  <% hotspots.each do |spot| %>
+                    <% price_info = @tourism_data.dig('data', 'eventos', 'metricas')&.find { |e| e['lugar'] == spot['destino'] } %>
+                    <li class="flex justify-between items-center border-b border-border-light/50 pb-2 last:border-0 last:pb-0 group">
+                      <a href="<%= spot['url_detalle'] || 'https://conectatingo.com' %>" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 font-bold text-heading text-sm hover:text-emerald-600 transition-colors">
+                        <%= spot['destino'] %>
+                        <svg class="w-3.5 h-3.5 text-emerald-500/0 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                      </a>
+                      <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg whitespace-nowrap"><%= price_info ? price_info['precio_entrada'] : "Consultar" %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        </div>
+      <% end %>
+
+      <%# Ecosistema (Mocks PoC) %>
+      <div data-ecosystem-tabs-target="panel" data-tab-id="vehiculos" class="hidden">
+        <div class="mb-12">
+        
+        <turbo-frame id="ecosystem_mocks" src="<%= event_ecosystem_mocks_path(@event) %>" loading="lazy">
+          <div class="animate-pulse flex gap-4 overflow-x-auto pb-4">
+            <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+            <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+            <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
+          </div>
+        </turbo-frame>
+      </div>
+      </div> <!-- end mock panel div -->
+
+        </div> <!-- end tabs content wrapper -->
+      </div> <!-- end tabs controller wrapper -->
+      <hr class="border-border/60 my-6">
 
       <%# Comments Section %>
       <div class="bg-surface-secondary/35 rounded-3xl border border-border/60 p-6 md:p-8 space-y-6">
@@ -446,12 +539,12 @@
         <%# Comment Form %>
         <% if user_signed_in? %>
           <% if @comments.none? { |c| c.user_id == current_user.id } %>
-            <div data-controller="event-detail" data-event-detail-target="commentForm">
+            <div data-event-detail-target="commentForm">
               <%= form_with model: [@event, @comment], local: true, class: "p-5 bg-white rounded-2xl border border-border space-y-4 shadow-sm" do |f| %>
                 <h3 class="font-bold text-heading text-sm">Dejá tu opinión del evento</h3>
 
                 <%# Star Rating %>
-                <div data-controller="event-detail" data-event-detail-target="starsContainer" class="space-y-1.5">
+                <div data-event-detail-target="starsContainer" class="space-y-1.5">
                   <p class="text-xs font-bold text-body-tertiary uppercase tracking-wider">Tu valoración</p>
                   <div class="flex gap-1">
                     <% 5.times do |i| %>
@@ -585,10 +678,10 @@
           <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
         <div class="relative z-10">
-          <h4 class="text-white font-bold mb-1">Arma tu viaje completo</h4>
-          <p class="text-indigo-100 text-xs mb-4">Descubre opciones de transporte cerca del evento.</p>
-          <a href="#ecosystem_mocks" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded-lg backdrop-blur-sm transition-colors border border-white/20">
-            Ver 5 opciones de viaje
+          <h4 class="text-white font-bold mb-1">Planifica tu Viaje</h4>
+          <p class="text-indigo-100 text-xs mb-4">Descubre opciones de transporte, hospedaje y turismo cerca del evento.</p>
+          <a href="#planifica-tu-viaje" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded-lg backdrop-blur-sm transition-colors border border-white/20">
+            Explorar el Ecosistema
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
           </a>
         </div>
@@ -597,21 +690,7 @@
 
   </div>
 
-  <%# Ecosistema (Mocks PoC) %>
-  <div class="mt-16 pt-16 border-t border-border w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold text-heading">Planifica tu Viaje (Integraciones)</h2>
-      <p class="text-body-secondary mt-2">Prueba de Concepto: Mocks de Plataformas del Ecosistema Turístico (Autos)</p>
-    </div>
-    
-    <turbo-frame id="ecosystem_mocks" src="<%= event_ecosystem_mocks_path(@event) %>" loading="lazy">
-      <div class="animate-pulse flex gap-4 overflow-x-auto pb-4">
-        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
-        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
-        <div class="w-72 h-40 bg-surface-secondary rounded-2xl shrink-0"></div>
-      </div>
-    </turbo-frame>
-  </div>
+
 
   <%# Share Modal Fallback %>
   <div data-share-target="modal" 
