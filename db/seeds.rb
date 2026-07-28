@@ -156,6 +156,8 @@ events_data = [
     description: "La conferencia mundial más grande de Ruby on Rails, reuniendo a creadores y profesionales de todo el mundo. Charlas técnicas, workshops y networking con los líderes de la comunidad Rails.",
     city: "Lima",
     address: "Centro de Convenciones de Lima, Av. La Marina 1234",
+    latitude: -12.078,
+    longitude: -77.086,
     start_date: 2.months.from_now,
     end_date: 2.months.from_now + 2.days,
     currency: "USD",
@@ -176,6 +178,8 @@ events_data = [
     description: "Los mejores exponentes del rock en español en un solo escenario durante 12 horas seguidas. Bandas de toda Latinoamérica, food trucks y zona de camping habilitada.",
     city: "Arequipa",
     address: "Jardín de la Cerveza, Av. Ejército 567",
+    latitude: -16.409,
+    longitude: -71.537,
     start_date: 1.month.from_now,
     end_date: 1.month.from_now + 12.hours,
     currency: "PEN",
@@ -195,6 +199,8 @@ events_data = [
     description: "Desafío de desarrollo de 48 horas para crear soluciones innovadoras en la gestión de eventos corporativos. Equipos de hasta 4 personas. Premios para los 3 primeros lugares.",
     city: "Lima",
     address: "Avenida Larco 890, Miraflores, Lima, Perú",
+    latitude: -12.122,
+    longitude: -77.031,
     start_date: 3.days.from_now,
     end_date: 5.days.from_now,
     currency: "PEN",
@@ -213,6 +219,8 @@ events_data = [
     description: "Taller básico e intermedio dictado por renombrados artistas locales. Materiales incluidos. Ideal para principiantes y nivel intermedio. Cupos limitados.",
     city: "Cusco",
     address: "Galería de Arte Contemporáneo, Calle San Agustín 234",
+    latitude: -13.516,
+    longitude: -71.977,
     start_date: 5.months.from_now,
     end_date: 5.months.from_now + 3.days,
     currency: "PEN",
@@ -230,6 +238,8 @@ events_data = [
     description: "42K, 21K y 10K por las calles más emblemáticas de Lima. Recorrido certificado internacionalmente. Hidratación, medallas y poleras para todos los participantes.",
     city: "Lima",
     address: "Parque Kennedy, Miraflores",
+    latitude: -12.121,
+    longitude: -77.029,
     start_date: 3.months.from_now,
     end_date: 3.months.from_now + 6.hours,
     currency: "PEN",
@@ -250,6 +260,8 @@ events_data = [
     description: "Lo mejor de la cocina peruana en un solo lugar. Ceviches, anticuchos, lomo saltado y postres tradicionales. Shows de cocina en vivo con chefs premiados.",
     city: "Cusco",
     address: "Plaza de Armas de Cusco",
+    latitude: -13.516,
+    longitude: -71.978,
     start_date: 6.weeks.from_now,
     end_date: 6.weeks.from_now + 3.days,
     currency: "PEN",
@@ -269,6 +281,8 @@ events_data = [
     description: "El festival de música electrónica más grande del sur del Perú. DJs internacionales, shows de luces, láser y pirotecnia. 3 escenarios simultáneos.",
     city: "Arequipa",
     address: "Campiña de Yanahuara",
+    latitude: -16.393,
+    longitude: -71.542,
     start_date: 45.days.from_now,
     end_date: 45.days.from_now + 2.days,
     currency: "PEN",
@@ -289,6 +303,8 @@ events_data = [
     description: "Taller intensivo de metodologías ágiles para equipos de tecnología. Scrum, Kanban, OKRs y Lean Startup. Certificación incluida al completar el taller.",
     city: "Lima",
     address: "La Molina, Lima, Perú",
+    latitude: -12.076,
+    longitude: -76.938,
     start_date: 14.days.from_now,
     end_date: 14.days.from_now + 8.hours,
     currency: "PEN",
@@ -376,9 +392,6 @@ events_data.each do |e_data|
       Comment.create!(event: event, user: user, content: content, rating: rand(4..5))
     end
   end
-
-  # Pausa para respetar el Rate Limit de Nominatim (Geocoder)
-  sleep(1.2)
 end
 
 # ──────────────────────────────────────────────
@@ -431,10 +444,16 @@ tingo_titles.each_with_index do |title, index|
   cat_info = category_map[title] || { slug: "arte-y-cultura", img: :festival }
   days_offset = (index + 1) * 3 # Desde 3 hasta 72 días en el futuro
   
+  # Distribución aleatoria para que se vean dispersos en Tingo María
+  lat_offset = rand(-0.0150..0.0150)
+  lng_offset = rand(-0.0150..0.0150)
+  
   event.assign_attributes(
     description: "Únete a nosotros en Tingo María para '#{title}'. Una experiencia inolvidable en la Puerta de la Amazonía Peruana. ¡Descubre la magia de la selva con nosotros!",
     city: "Tingo María",
     address: "Tingo María, Huánuco, Perú",
+    latitude: -9.297 + lat_offset,
+    longitude: -76.000 + lng_offset,
     start_date: days_offset.days.from_now,
     end_date: days_offset.days.from_now + 1.day,
     currency: "PEN",
@@ -468,9 +487,6 @@ tingo_titles.each_with_index do |title, index|
   tt2 = event.ticket_types.find_or_initialize_by(name: "Pase VIP")
   tt2.assign_attributes(price: 80.00, quantity_total: 100, max_per_order: 2, position: 1)
   tt2.save! if tt2.new_record? || tt2.changed?
-
-  # Pausa para respetar el Rate Limit de Nominatim (Geocoder)
-  sleep(1.2)
 end
 
 # ──────────────────────────────────────────────
